@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+// @ts-ignore
+import aboutUsImage from "@/assets/Capture.PNG";
 
 const AboutUsSection = () => {
   const [isReadMore, setIsReadMore] = useState(false);
@@ -14,7 +16,7 @@ const AboutUsSection = () => {
       {/* Single Image */}
       <div className={`relative overflow-hidden group ${height}`}>
         <img
-          src="/src/assets/Capture.PNG"
+          src={aboutUsImage}
           alt="About us"
           className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
         />
