@@ -129,18 +129,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       };
       const res = await api('/api/orders', { method: 'POST', body: JSON.stringify(orderPayload) });
       if (res.ok && res.json?.ok) return { ok: true, data: res.json.data };
-      // backend didn't accept — fallback to local order
-      const localId = 'local_order_' + Date.now();
-      try {
-        const raw = localStorage.getItem('uni_orders_v1');
-        const arr = raw ? (JSON.parse(raw) as any[]) : [];
-        const order = { _id: localId, ...orderPayload, createdAt: new Date().toISOString() };
-        localStorage.setItem('uni_orders_v1', JSON.stringify([order, ...arr]));
-        localStorage.setItem('uni_last_order_id', localId);
-      } catch (e) {
-        console.error('Failed to persist local order', e);
-      }
-      return { ok: true, data: { id: localId } };
+      
+      // Don't create local orders - just return the error
+      return { ok: false, message: res.json?.message || 'Failed to create order' };
     } catch (error) {
       return { ok: false, error };
     }

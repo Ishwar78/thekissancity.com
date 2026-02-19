@@ -96,7 +96,23 @@ const MyOrders = () => {
       const { ok, json } = await api('/api/orders/mine');
 
       if (ok && json?.data) {
-        setOrders(Array.isArray(json.data) ? json.data : []);
+        const apiOrders = Array.isArray(json.data) ? json.data : [];
+        setOrders(apiOrders);
+        
+        // Clear stale localStorage orders if API returns empty but localStorage has data
+        try {
+          const localOrdersRaw = localStorage.getItem('uni_orders_v1');
+          if (localOrdersRaw) {
+            const localOrders = JSON.parse(localOrdersRaw);
+            if (localOrders.length > 0 && apiOrders.length === 0) {
+              console.log('🧹 Clearing stale localStorage orders - API returned empty but localStorage has data');
+              localStorage.removeItem('uni_orders_v1');
+              localStorage.removeItem('uni_last_order_id');
+            }
+          }
+        } catch (e) {
+          console.error('Failed to check localStorage orders:', e);
+        }
       } else {
         toast.error('Failed to load orders');
       }
