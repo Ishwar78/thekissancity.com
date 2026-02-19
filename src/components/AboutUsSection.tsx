@@ -55,10 +55,8 @@ const AboutUsSection = () => {
 
             <div className="space-y-5" style={{ color: '#cccccc' }}>
               <p className="text-base lg:text-lg leading-relaxed">
-                UNI10 is all about modern, on-the-move must-haves. We aim to merge
-                high-fashion minimalism with the uniqueness and comfort of athleisure.
-                Our collections are crafted with the best of fabric and premium cotton
-                and our silhouettes are high on the trend quotient.
+               Kissan City is all about bringing you the purity of the pahad in its most natural form. We specialize in authentic pahaadi goods like pure desi ghee, raw honey, and premium dry fruits sourced directly from the hills.
+   Our products are carefully collected from trusted local farmers, preserving traditional methods and natural goodness.
               </p>
 
               {!isReadMore && (
@@ -79,16 +77,13 @@ const AboutUsSection = () => {
               {isReadMore && (
                 <>
                   <p className="text-sm lg:text-base leading-relaxed opacity-90">
-                    We source luxe, sustainable fabrics—from buttery-soft premium cottons and breathable
-                    linens to innovative technical blends that offer stretch and structure. Our silhouettes
-                    are meticulously cut to flatter the form, offering a modern, trend-aware fit that
-                    prioritizes freedom of movement without sacrificing a polished aesthetic.
+                    From rich, aromatic ghee to unprocessed honey and handpicked dry fruits, every item reflects quality, freshness, and the true taste of the mountains.
+
+At Kissan City, we aim to deliver health, purity, and tradition straight from the hills to your home.
                   </p>
 
                   <p className="text-sm lg:text-base leading-relaxed opacity-90">
-                    UNI10 is more than apparel; it's an enabler of experience. We outfit you for the
-                    fluidity of contemporary life, ensuring you are prepared, confident, and impeccably
-                    styled for any scenario.
+                    At Kissan City, our mission is to deliver health, purity, and tradition straight from the hills to your home. We believe in bringing you food that is not only delicious but also wholesome, natural, and crafted with care — just the way nature intended.
                   </p>
 
                   {/* Mobile Image — shown only when Read More expanded */}

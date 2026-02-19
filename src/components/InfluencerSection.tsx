@@ -573,6 +573,7 @@ export default function InfluencerSection() {
                               to="/videos"
                               className="inline-flex items-center text-sm font-medium text-primary hover:text-gray-900 transition-colors group"
                             >
+                             
                               View All Videos
                               <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                             </Link>

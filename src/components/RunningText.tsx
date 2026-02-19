@@ -27,9 +27,10 @@ export const RunningText = () => {
   }, []);
 
   const messages = [
-    "UNI10 - is Live Now",
-    "For the First 50 Unique Personalities ....",
-    "UNI10 - The Ultimate Shopping Experience",
+    "Kissan City – Pure Pahaadi Goodness",
+  "Authentic Desi Ghee, Raw Honey & Premium Dry Fruits",
+  "From the Hills to Your Home",
+  "Natural. Fresh. Traditional.",
   ];
 
   // Create extended message array with spacing for seamless loop

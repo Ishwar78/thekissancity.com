@@ -54,22 +54,21 @@ export const Footer = () => {
               aria-label="UNI10 Home"
             >
               <img
-                src="/uni10-logo.png" 
+                src="/logo.jpeg" 
                 alt="UNI10 Logo"
                 className="h-8 md:h-10 w-auto object-contain"
               />
-              <span className="sr-only">UNI10</span>
+              <span className="sr-only">Kissan City</span>
             </Link>
 
             <p className="text-xs md:text-sm text-gray-300 leading-relaxed mb-4 md:mb-6 max-w-xs">
-              Premium streetwear and lifestyle products for those who dare to be
-              different. Define your universe with uni10.
+              Kissan City is all about bringing you the purity of the pahad in its most natural form.
             </p>
             <div className="space-y-2 md:space-y-3">
               <div className="flex items-center gap-2 md:gap-3 text-xs md:text-sm text-gray-300 hover:text-yellow-400 transition-colors">
                 <Mail className="h-3 w-3 md:h-4 md:w-4 text-white flex-shrink-0" />
                 <a href="mailto:support@uni10.in">
-                  support@uni10.in
+                  support@kissancity.in
                 </a>
               </div>
               
@@ -216,7 +215,7 @@ export const Footer = () => {
         {/* Bottom Footer */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6">
           <p className="text-xs md:text-sm text-gray-300 text-center md:text-left">
-            &copy; {currentYear} <span className="font-semibold text-white">uni10</span>. All
+            &copy; {currentYear} <span className="font-semibold text-white">Kissan City</span>. All
             rights reserved.
           </p>
 
