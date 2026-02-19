@@ -80,7 +80,7 @@ const faqsRoutes = require('./routes/faqs');
 const regionsRoutes = require('./routes/regions');
 
 const app = express();
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 10000;
 
 /* --------------------------- LOG EACH REQUEST --------------------------- */
 app.use((req, _res, next) => {

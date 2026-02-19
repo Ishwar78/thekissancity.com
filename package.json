@@ -5,11 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "concurrently \"nodemon server/index.js\" \"vite --port 8080\"",
-    "build": "NODE_OPTIONS='--max-old-space-size=4096' vite build",
-    "build:dev": "NODE_OPTIONS='--max-old-space-size=4096' vite build --mode development",
+    "build": "NODE_OPTIONS='--max-old-space-size=1024' vite build",
+    "build:dev": "NODE_OPTIONS='--max-old-space-size=1024' vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
-    "start": "NODE_OPTIONS='--max-old-space-size=4096' npm run build && node server/index.js"
+    "start": "node server/index.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
