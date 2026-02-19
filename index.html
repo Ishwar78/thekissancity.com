@@ -12,22 +12,22 @@
     <meta name="author" content="Kissan City" />
 
     <!-- PWA -->
-    <meta name="theme-color" content="#FFFFFF" />
+    <meta name="theme-color" content="#000000" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Kissan City" />
     <link rel="manifest" href="/manifest.json?v=8" />
 
-    <!-- Favicons (use logo as favicon) -->
+    <!-- Favicons (use PWA icons for browser tab icon as well) -->
     <!-- Main favicon for most browsers -->
-    <link rel="icon" type="image/jpeg" sizes="192x192" href="/logo.jpeg" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=9" />
     <!-- High-res icon (some browsers pick this) -->
-    <link rel="icon" type="image/jpeg" sizes="512x512" href="/logo.jpeg" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png?v=9" />
     <!-- Fallback / shortcut icon -->
-    <link rel="shortcut icon" href="/logo.jpeg" />
+    <link rel="shortcut icon" href="/icon-192.png?v=9" />
     <!-- Apple touch icon (iOS home screen) -->
-    <link rel="apple-touch-icon" sizes="192x192" href="/logo.jpeg" />
+    <link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png?v=9" />
 
     <!-- Preload navbar logo (optional) -->
     <link rel="preload" as="image" href="/logo.jpeg" />
@@ -57,7 +57,7 @@
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker
-            .register('/sw.js?v=7')
+            .register('/sw.js?v=9')
             .then(() => console.log('SW registered'))
             .catch(() => console.log('SW registration failed'));
         });

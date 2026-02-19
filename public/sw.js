@@ -1,9 +1,9 @@
-// sw.js (uni10) — v8
-const CACHE_NAME = 'uni10-v8';
+// sw.js (Kissan City) — v9
+const CACHE_NAME = 'kissancity-v9';
 const PRECACHE_URLS = [
   '/',               // HTML shell
   '/index.html',
-  '/manifest.json?v=8'
+  '/manifest.json?v=9'
 ];
 
 // Files we NEVER want cached (always network-first)
@@ -14,7 +14,7 @@ const BYPASS_PATHS = [
   '/apple-touch-icon.png',
   '/icon-192.png',
   '/icon-512.png',
-  '/uni10-logo.jpg',
+  '/logo.jpeg',
   '/manifest.json'
 ];
 
@@ -47,7 +47,7 @@ function shouldBypass(url) {
   if (/\/favicon\.(ico|png)$/.test(p)) return true;
   if (/\/icon-(192|512)\.png$/.test(p)) return true;
   if (/\/apple-touch-icon\.png$/.test(p)) return true;
-  if (/\/uni10-logo\.(png|jpg|jpeg|webp)$/.test(p)) return true;
+  if (/\/logo\.(png|jpg|jpeg|webp)$/.test(p)) return true;
   return false;
 }
 
