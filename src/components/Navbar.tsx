@@ -119,7 +119,7 @@ export const Navbar = ({ cartItemCount = 0 }: NavbarProps) => {
             aria-label="UNI10 Home"
           >
             <img
-              src="/src/assets/logo.jpeg"
+              src="/logo.jpeg"
               alt="UNI10 CREATE YOUR IDENTITY"
               className="h-14 md:h-16 lg:h-[60px] w-auto select-none max-w-[260px]"
               loading="eager"
