@@ -1,0 +1,758 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    --background: 0 0% 100%; /* Pure white for input fields */
+    --foreground: 220 10% 3%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 10% 3%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 10% 3%;
+
+    --primary: 210 20% 25%;
+    --primary-foreground: 210 20% 98%;
+
+    --secondary: 210 20% 90%;
+    --secondary-foreground: 210 20% 10%;
+
+    --muted: 210 20% 95%;
+    --muted-foreground: 210 20% 50%;
+
+    --accent: 210 20% 90%;
+    --accent-foreground: 210 20% 10%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 210 20% 85%;
+    --input: 210 20% 85%;
+    --ring: 210 20% 25%;
+    
+    /* Logo specific color */
+    --logo-yellow: 43 96% 56%;
+
+    --radius: 0.5rem;
+
+    /* Cosmic gradients */
+    --gradient-cosmic: linear-gradient(135deg, hsl(240 40% 8%), hsl(280 40% 12%));
+    --gradient-hero: linear-gradient(180deg, hsl(0 0% 7% / 0.8), hsl(0 0% 7%));
+    --gradient-card: linear-gradient(135deg, hsl(0 0% 10% / 0.6), hsl(0 0% 8% / 0.8));
+    
+    /* Shadows */
+    --shadow-glow: 0 0 40px hsl(0 84% 60% / 0.15);
+    --shadow-elegant: 0 10px 40px hsl(0 0% 0% / 0.5);
+    
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+  will-change: transform;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html, body {
+    @apply bg-background text-foreground;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  #root {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Fix for browser autofill background color */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0px 1000px hsl(var(--card)) inset !important;
+    -webkit-text-fill-color: hsl(var(--foreground)) !important;
+    background-color: hsl(var(--card)) !important;
+  }
+}
+
+/* Hide scrollbar utility */
+.hide-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* Fix for mobile button active states in all carousel navigation */
+@media (max-width: 640px) {
+  /* Universal button reset - catch all BUT EXCLUDE NAVBAR */
+  button:not(nav button):not(nav a button):not(nav div button):not(nav div a button) {
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+    user-select: none !important;
+    outline: none !important;
+  }
+  
+  /* Specific carousel button targeting */
+  button[data-slot="carousel-previous"],
+  button[data-slot="carousel-next"],
+  .carousel-previous,
+  .carousel-next,
+  button[class*="carousel"],
+  button[class*="CarouselPrevious"],
+  button[class*="CarouselNext"],
+  /* Additional universal selectors */
+  button.rounded-full,
+  button[class*="border-2"],
+  button[class*="h-10"],
+  button[class*="w-10"] {
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+    user-select: none !important;
+    outline: none !important;
+    transition: all 0.1s ease !important;
+    border-color: #d1d5db !important;
+    background-color: white !important;
+  }
+  
+  button[data-slot="carousel-previous"]:hover,
+  button[data-slot="carousel-next"]:hover,
+  .carousel-previous:hover,
+  .carousel-next:hover,
+  button[class*="carousel"]:hover,
+  button[class*="CarouselPrevious"]:hover,
+  button[class*="CarouselNext"]:hover,
+  button.rounded-full:hover,
+  button[class*="border-2"]:hover,
+  button[class*="h-10"]:hover,
+  button[class*="w-10"]:hover {
+    border-color: #d1d5db !important;
+    background-color: white !important;
+  }
+  
+  button[data-slot="carousel-previous"]:active,
+  button[data-slot="carousel-next"]:active,
+  .carousel-previous:active,
+  .carousel-next:active,
+  button[class*="carousel"]:active,
+  button[class*="CarouselPrevious"]:active,
+  button[class*="CarouselNext"]:active,
+  button.rounded-full:active,
+  button[class*="border-2"]:active,
+  button[class*="h-10"]:active,
+  button[class*="w-10"]:active {
+    background-color: white !important;
+    border-color: #d1d5db !important;
+    color: #374151 !important;
+    transform: scale(1) !important;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1) !important;
+  }
+  
+  button[data-slot="carousel-previous"]:focus,
+  button[data-slot="carousel-next"]:focus,
+  .carousel-previous:focus,
+  .carousel-next:focus,
+  button[class*="carousel"]:focus,
+  button[class*="CarouselPrevious"]:focus,
+  button[class*="CarouselNext"]:focus,
+  button.rounded-full:focus,
+  button[class*="border-2"]:focus,
+  button[class*="h-10"]:focus,
+  button[class*="w-10"]:focus {
+    outline: none !important;
+    box-shadow: none !important;
+    border-color: #d1d5db !important;
+    background-color: white !important;
+  }
+  
+  /* Remove any stuck active states after touch */
+  button[data-slot="carousel-previous"].focus-visible,
+  button[data-slot="carousel-next"].focus-visible,
+  .carousel-previous.focus-visible,
+  .carousel-next.focus-visible,
+  button[class*="carousel"].focus-visible,
+  button[class*="CarouselPrevious"].focus-visible,
+  button[class*="CarouselNext"].focus-visible,
+  button.rounded-full.focus-visible,
+  button[class*="border-2"].focus-visible,
+  button[class*="h-10"].focus-visible,
+  button[class*="w-10"].focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+    border-color: #d1d5db !important;
+    background-color: white !important;
+  }
+  
+  /* Force reset any stuck states */
+  button[data-slot="carousel-previous"]:not(:hover):not(:active):not(:focus),
+  button[data-slot="carousel-next"]:not(:hover):not(:active):not(:focus),
+  .carousel-previous:not(:hover):not(:active):not(:focus),
+  .carousel-next:not(:hover):not(:active):not(:focus),
+  button[class*="carousel"]:not(:hover):not(:active):not(:focus),
+  button[class*="CarouselPrevious"]:not(:hover):not(:active):not(:focus),
+  button[class*="CarouselNext"]:not(:hover):not(:active):not(:focus),
+  button.rounded-full:not(:hover):not(:active):not(:focus),
+  button[class*="border-2"]:not(:hover):not(:active):not(:focus),
+  button[class*="h-10"]:not(:hover):not(:active):not(:focus),
+  button[class*="w-10"]:not(:hover):not(:active):not(:focus) {
+    background-color: white !important;
+    border-color: #d1d5db !important;
+    color: #374151 !important;
+    transform: none !important;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1) !important;
+  }
+  
+  /* Specific fix for brown border stuck state */
+  button[data-slot="carousel-previous"][style*="border-color"],
+  button[data-slot="carousel-next"][style*="border-color"],
+  .carousel-previous[style*="border-color"],
+  .carousel-next[style*="border-color"],
+  button[class*="carousel"][style*="border-color"],
+  button[class*="CarouselPrevious"][style*="border-color"],
+  button[class*="CarouselNext"][style*="border-color"],
+  button.rounded-full[style*="border-color"],
+  button[class*="border-2"][style*="border-color"],
+  button[class*="h-10"][style*="border-color"],
+  button[class*="w-10"][style*="border-color"] {
+    border-color: #d1d5db !important;
+  }
+  
+  /* Override any inline styles that might cause stuck states */
+  button[data-slot="carousel-previous"][style],
+  button[data-slot="carousel-next"][style],
+  .carousel-previous[style],
+  .carousel-next[style],
+  button[class*="carousel"][style],
+  button[class*="CarouselPrevious"][style],
+  button[class*="CarouselNext"][style],
+  button.rounded-full[style],
+  button[class*="border-2"][style],
+  button[class*="h-10"][style],
+  button[class*="w-10"][style] {
+    border-color: #d1d5db !important;
+    background-color: white !important;
+  }
+  
+  /* Aggressive universal reset for any button with inline styles - REMOVED for mobile navbar */
+  /* button[style] {
+    border-color: #d1d5db !important;
+    background-color: white !important;
+  } */
+  
+  /* Mobile click/tap effect - EXCLUDE NAVBAR BUTTONS */
+  button:not(nav button):not(nav a button):not(nav div button):not(nav div a button):active {
+    transform: scale(0.95) !important;
+    transition: transform 0.1s ease !important;
+    background-color: #f3f4f6 !important;
+    border-color: #9ca3af !important;
+  }
+  
+  /* Ensure tap effect is visible on mobile - EXCLUDE NAVBAR BUTTONS */
+  @media (max-width: 640px) {
+    button:not(nav button):not(nav a button):not(nav div button):not(nav div a button):active {
+      transform: scale(0.9) !important;
+      transition: transform 0.05s ease !important;
+      background-color: #e5e7eb !important;
+      border-color: #6b7280 !important;
+      box-shadow: inset 0 2px 4px 0 rgb(0 0 0 / 0.1) !important;
+    }
+  }
+}
+
+/* Enhanced hover effects for InfluencerSection carousel buttons */
+button[class*="p-2"][class*="bg-white"]:hover {
+  transform: scale(1.1) !important;
+  box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.2), 0 4px 8px -2px rgba(0, 0, 0, 0.15) !important;
+  background-color: #f8fafc !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Specific hover for left chevron button */
+button[class*="p-2"][class*="bg-white"]:hover:nth-of-type(1) {
+  transform: scale(1.1) translateX(-1px) !important;
+  background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%) !important;
+  box-shadow: 0 6px 12px -3px rgba(59, 130, 246, 0.3), 0 3px 6px -2px rgba(59, 130, 246, 0.2) !important;
+}
+
+/* Specific hover for right chevron button */
+button[class*="p-2"][class*="bg-white"]:hover:nth-of-type(2) {
+  transform: scale(1.1) translateX(1px) !important;
+  background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%) !important;
+  box-shadow: 0 6px 12px -3px rgba(59, 130, 246, 0.3), 0 3px 6px -2px rgba(59, 130, 246, 0.2) !important;
+}
+
+/* Active states for carousel buttons */
+button[class*="p-2"][class*="bg-white"]:active {
+  transform: scale(0.95) !important;
+  box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1) !important;
+  background-color: #e5e7eb !important;
+  transition: all 0.1s ease !important;
+}
+
+/* Mobile effects for carousel buttons */
+@media (max-width: 640px) {
+  button[class*="p-2"][class*="bg-white"]:hover {
+    transform: scale(1.05) !important;
+    box-shadow: 0 4px 8px -2px rgba(59, 130, 246, 0.2), 0 2px 4px -1px rgba(59, 130, 246, 0.15) !important;
+  }
+  
+  button[class*="p-2"][class*="bg-white"]:active {
+    transform: scale(0.9) !important;
+    background-color: #d1d5db !important;
+  }
+}
+
+/* FINAL MOBILE NAVBAR OVERRIDE - Must come after all other button rules */
+@media (max-width: 768px) {
+  nav button,
+  nav button:hover,
+  nav button:active,
+  nav button:focus,
+  button[class*="text-white/90"],
+  button[class*="text-white/90"]:hover,
+  button[class*="text-white/90"]:active,
+  button[class*="text-white/90"]:focus,
+  button[class*="md:hidden"],
+  button[class*="md:hidden"]:hover,
+  button[class*="md:hidden"]:active,
+  button[class*="md:hidden"]:focus {
+    background-color: transparent !important;
+    background: transparent !important;
+  }
+}
+
+/* ULTRA HIGH SPECIFICITY OVERRIDE */
+@media (max-width: 768px) {
+  body nav div button,
+  body nav div button:hover,
+  body nav div button:active,
+  body nav div button:focus,
+  body nav div a button,
+  body nav div a button:hover,
+  body nav div a button:active,
+  body nav div a button:focus {
+    background-color: transparent !important;
+    background: transparent !important;
+    background-image: none !important;
+    box-shadow: none !important;
+  }
+}
+
+/* Mobile specific effects for Show All buttons */
+@media (max-width: 640px) {
+  a[href="/videos"] button:hover,
+  a[href="/all-influencers"] button:hover {
+    transform: translateY(-1px) scale(1.01) !important;
+    box-shadow: 0 6px 12px -3px rgba(0, 0, 0, 0.15), 0 3px 6px -2px rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  a[href="/videos"] button:active,
+  a[href="/all-influencers"] button:active {
+    transform: translateY(0) scale(0.95) !important;
+    box-shadow: 0 1px 2px -1px rgb(0 0 0 / 0.1) !important;
+  }
+}
+
+/* Override white background for navbar buttons specifically in mobile */
+@media (max-width: 768px) {
+  nav button {
+    background-color: transparent !important;
+  }
+
+  nav button:hover {
+    background-color: transparent !important;
+  }
+
+  nav button:active {
+    background-color: transparent !important;
+  }
+
+  /* More specific targeting for mobile navbar buttons */
+  button[class*="text-white/90"],
+  button[class*="md:hidden"] {
+    background-color: transparent !important;
+  }
+
+  button[class*="text-white/90"]:hover,
+  button[class*="md:hidden"]:hover {
+    background-color: transparent !important;
+  }
+
+  button[class*="text-white/90"]:active,
+  button[class*="md:hidden"]:active {
+    background-color: transparent !important;
+  }
+
+  /* Force transparent background on all navbar buttons in mobile */
+  @media (max-width: 768px) {
+    nav button,
+    button[class*="text-white/90"],
+    button[class*="md:hidden"] {
+      background-color: transparent !important;
+    }
+  }
+}
+
+/* Ultra-specific override for mobile navbar buttons */
+@media (max-width: 768px) {
+  button[style*="backgroundColor"],
+  button[style*="background-color"] {
+    background-color: transparent !important;
+  }
+  
+  nav > div > button,
+  nav > div > a > button {
+    background-color: transparent !important;
+  }
+  
+  nav > div > button:hover,
+  nav > div > a > button:hover {
+    background-color: transparent !important;
+  }
+  
+  nav > div > button:active,
+  nav > div > a > button:active {
+    background-color: transparent !important;
+  }
+}
+
+/* Final override - most specific selector possible */
+@media (max-width: 768px) {
+  nav button[style],
+  nav button[style*="transparent"],
+  nav button[style*="backgroundColor"] {
+    background-color: transparent !important;
+    background: transparent !important;
+  }
+  
+  nav button[style]:hover,
+  nav button[style*="transparent"]:hover,
+  nav button[style*="backgroundColor"]:hover {
+    background-color: transparent !important;
+    background: transparent !important;
+  }
+}
+
+
+/* FINAL NAVBAR BUTTON FIX - Must be last rule */
+@media (max-width: 768px) {
+  /* Target navbar buttons specifically with highest specificity */
+  nav.fixed button,
+  nav.fixed button:hover,
+  nav.fixed button:active,
+  nav.fixed button:focus,
+  nav.fixed button:focus-visible,
+  nav.fixed a button,
+  nav.fixed a button:hover,
+  nav.fixed a button:active,
+  nav.fixed a button:focus,
+  nav.fixed a button:focus-visible {
+    background-color: transparent !important;
+    background: transparent !important;
+    background-image: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    transform: none !important;
+  }
+  
+  /* Allow only subtle hover effect */
+  nav.fixed button:hover,
+  nav.fixed a button:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+  }
+  
+  /* Remove active state background */
+  nav.fixed button:active,
+  nav.fixed a button:active {
+    background-color: transparent !important;
+    transform: scale(0.95) !important;
+  }
+}
+
+/* ADDITIONAL FIX FOR SMALLER SCREENS - 518px and below */
+@media (max-width: 550px) {
+  nav button,
+  nav button:hover,
+  nav button:active,
+  nav button:focus,
+  nav a button,
+  nav a button:hover,
+  nav a button:active,
+  nav a button:focus {
+    background-color: transparent !important;
+    background: transparent !important;
+    background-image: none !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+  
+  nav button:hover,
+  nav a button:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+  }
+}
+
+/* ULTRA SPECIFIC FIX FOR 518px WIDTH */
+@media (max-width: 520px) {
+  html body nav button,
+  html body nav button:hover,
+  html body nav button:active,
+  html body nav button:focus,
+  html body nav a button,
+  html body nav a button:hover,
+  html body nav a button:active,
+  html body nav a button:focus {
+    background-color: transparent !important;
+    background: transparent !important;
+    background-image: none !important;
+    background-size: auto !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+  }
+  
+  html body nav button:hover,
+  html body nav a button:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+  }
+}
+
+/* ABSOLUTE FINAL OVERRIDE - Highest possible specificity */
+@media (max-width: 768px) {
+  html body nav.fixed div div button,
+  html body nav.fixed div div button:hover,
+  html body nav.fixed div div button:active,
+  html body nav.fixed div div button:focus,
+  html body nav.fixed div div a button,
+  html body nav.fixed div div a button:hover,
+  html body nav.fixed div div a button:active,
+  html body nav.fixed div div a button:focus {
+    background-color: transparent !important;
+    background: transparent !important;
+    background-image: none !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+}
+
+/* Override accent color for mobile navbar buttons */
+@media (max-width: 768px) {
+  nav button:hover,
+  nav a button:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+  }
+}
+
+/* Override inputs.css white background for buttons */
+@media (max-width: 768px) {
+  nav button,
+  nav a button {
+    background-color: transparent !important;
+  }
+}
+
+/* FINAL ATTEMPT - Most specific rule possible */
+@media (max-width: 768px) {
+  html body nav.fixed div div button,
+  html body nav.fixed div div button:hover,
+  html body nav.fixed div div button:active,
+  html body nav.fixed div div button:focus,
+  html body nav.fixed div div a button,
+  html body nav.fixed div div a button:hover,
+  html body nav.fixed div div a button:active,
+  html body nav.fixed div div a button:focus {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    background-size: auto !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    box-shadow: none !important;
+    border: none !important;
+    outline: none !important;
+  }
+}
+
+/* FINAL ULTRA SPECIFIC RULE - Must be absolute last */
+@media (max-width: 520px) {
+  html body nav.fixed div div button[style*="transparent"],
+  html body nav.fixed div div button[style*="transparent"]:hover,
+  html body nav.fixed div div button[style*="transparent"]:active,
+  html body nav.fixed div div button[style*="transparent"]:focus,
+  html body nav.fixed div div a button[style*="transparent"],
+  html body nav.fixed div div a button[style*="transparent"]:hover,
+  html body nav.fixed div div a button[style*="transparent"]:active,
+  html body nav.fixed div div a button[style*="transparent"]:focus {
+    background-color: transparent !important;
+    background: transparent !important;
+    background-image: none !important;
+    background-size: auto !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+  }
+}
+
+/* AGGRESSIVE MOBILE OVERRIDE - All mobile breakpoints */
+@media (max-width: 768px) {
+  /* Target ALL buttons with any inline styles */
+  html body nav button[style],
+  html body nav button[style]:hover,
+  html body nav button[style]:active,
+  html body nav button[style]:focus,
+  html body nav a button[style],
+  html body nav a button[style]:hover,
+  html body nav a button[style]:active,
+  html body nav a button[style]:focus {
+    background-color: transparent !important;
+    background: transparent !important;
+    background-image: none !important;
+    background-size: auto !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+  }
+  
+  /* Also target buttons without inline styles but with mobile classes */
+  html body nav button[class*="md:hidden"],
+  html body nav button[class*="text-white/90"],
+  html body nav a button[class*="md:hidden"],
+  html body nav a button[class*="text-white/90"] {
+    background-color: transparent !important;
+    background: transparent !important;
+    background-image: none !important;
+  }
+}
+
+/* NUCLEAR OPTION - Override ghost variant completely for navbar */
+@media (max-width: 768px) {
+  /* Target all navbar buttons - override ghost variant */
+  nav button,
+  nav a button {
+    background-color: transparent !important;
+    background-image: none !important;
+    border: none !important;
+  }
+  
+  nav button:hover,
+  nav a button:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+  }
+  
+  nav button:active,
+  nav a button:active {
+    background-color: transparent !important;
+  }
+  
+  /* Override ANY Tailwind utility classes */
+  nav button[class],
+  nav a button[class] {
+    background-color: transparent !important;
+    background-image: none !important;
+  }
+  
+  nav button[class]:hover,
+  nav a button[class]:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+  }
+}
+
+/* Maximum specificity for all mobile sizes */
+@media (max-width: 768px) {
+  html body div#root nav.fixed button,
+  html body div#root nav.fixed a button {
+    background-color: transparent !important;
+    background-image: none !important;
+    background: transparent !important;
+  }
+  
+  html body div#root nav.fixed button:hover,
+  html body div#root nav.fixed a button:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+  }
+  
+  html body div#root nav.fixed button:active,
+  html body div#root nav.fixed a button:active {
+    background-color: transparent !important;
+    background: transparent !important;
+  }
+}
+
+/* Force navbar icon buttons to inherit text color */
+@media (max-width: 768px) {
+  nav button[class*="variant-link"] svg,
+  nav a button[class*="variant-link"] svg {
+    color: inherit !important;
+  }
+}
+
+/* Fix specific navbar icons - mobile white, desktop hover black */
+@media (max-width: 768px) {
+  nav button svg,
+  nav a button svg {
+    color: white !important;
+  }
+}
+
+@media (min-width: 769px) {
+  nav button:hover svg,
+  nav a button:hover svg {
+    color: black !important;
+  }
+}
+
+/* Fix desktop search bar text visibility */
+@media (min-width: 769px) {
+  nav input[type="text"],
+  nav input::placeholder {
+    color: white !important;
+  }
+  
+  nav input[type="text"]:focus {
+    color: white !important;
+  }
+  
+  /* Remove underline from Support button on hover */
+  nav a button:hover {
+    text-decoration: none !important;
+  }
+}
+
