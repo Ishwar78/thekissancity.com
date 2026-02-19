@@ -8,7 +8,7 @@ import { api } from '@/lib/api';
 import { Phone, Mail, MapPin, Copy, Clock, MessageCircle } from 'lucide-react';
 
 export default function Contact() {
-  const emails: string[] = ['support@uni10.in'];
+  const emails: string[] = ['support@kissancity.in'];
   const address = { line1: 'Dwarka, Delhi', line2: '', city: 'Delhi', state: 'Delhi', pincode: '110001' };
 
   const copyToClipboard = async (email: string) => {
