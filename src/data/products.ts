@@ -19,9 +19,9 @@ import finalkvImg from "@/assets/Final_KV__banner_desk_01.webp";
 import activewearImg from "@/assets/ACTIVEWEAR_HOMEPAGE_BANNER.webp";
 import homepage5 from"@/assets/5.webp";
 import homepage6 from"@/assets/6.webp";
-import O2Img from "@/assets/O2.jpg.jpeg";
-import KisanImg from "@/assets/CM-Kisan-Samman-Yojana.avif";
-import s1Img from "@/assets/s1.webp";
+import O2Img from "@/assets/t1.jpeg";
+import KisanImg from "@/assets/t2.jpeg";
+import s1Img from "@/assets/t3.jpeg";
 export interface Product {
   id: string;
   name: string;

@@ -941,10 +941,10 @@ const Index = () => {
     
 
       {/* Featured Products */}
-      <section className="bg-[#faf3eb] py-8 sm:py-16 lg:py-12 mt-16">
+      <section className="bg-[#faf3eb]  py-8 sm:py-16 lg:py-10">
   <div className="container mx-auto px-4 sm:px-6">
     {/* Header */}
-    <div className="flex items-center mb-12 justify-center">
+    <div className="flex items-center justify-center">
       <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-center">
         <span className="text-black">Collection</span>
       </h2>
