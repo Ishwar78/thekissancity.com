@@ -45,7 +45,6 @@ import { useCouponRefresh } from "@/hooks/useCouponRefresh";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import { useWishlist } from "@/hooks/useWishlist";
 import { Heart } from "lucide-react";
-import { ProductQuantitySelector, QuantityOption } from "@/components/ProductQuantitySelector";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "";
 const resolveImage = (src?: string) => {
@@ -100,21 +99,9 @@ type P = {
   specs?: Array<{ key: string; value: string }>;
   createdAt?: string;
   updatedAt?: string;
-  
-  // New quantity/pack/unit structure
-  quantityOptions?: Array<{
-    id: string;
-    quantity: number;
-    unit: 'gm' | 'ml' | 'l' | 'pcs';
-    packSize: number;
-    displayLabel: string;
-    price: number;
-    originalPrice?: number;
-    stock: number;
-    isActive: boolean;
-    sortOrder: number;
-  }>;
-  
+  sizes?: string[];
+  trackInventoryBySize?: boolean;
+  sizeInventory?: Array<{ code: string; label: string; qty: number }>;
   sizeChartUrl?: string;
   sizeChartTitle?: string;
   sizeChart?: {
@@ -124,7 +111,6 @@ type P = {
     diagramUrl?: string;
     fieldLabels?: Record<string, string>;
   };
-  
   colors?: string[];
   colorImages?: Record<string, string[]>;
   colorVariants?: Array<{
@@ -165,7 +151,7 @@ const ProductDetail = () => {
   const [product, setProduct] = useState<P | null>(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
-  const [selectedQuantityOption, setSelectedQuantityOption] = useState<string>("");
+  const [selectedSize, setSelectedSize] = useState<string>("");
   // ✅ NEW: selected colors (array for multi-selection)
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [descriptionExpanded, setDescriptionExpanded] = useState(false);
@@ -207,7 +193,7 @@ const ProductDetail = () => {
           const productData = json?.data as P;
 
         setProduct(productData);
-        setSelectedQuantityOption(""); // product change pe quantity option reset
+        setSelectedSize(""); // product change pe size reset
         console.log("Product data loaded:", productData);
 
         // Add to recently viewed (localStorage)
@@ -419,16 +405,8 @@ const ProductDetail = () => {
     [product]
   );
 
-  // Get stock based on quantity options, per-size inventory, color inventory, or general stock
+  // Get stock based on per-size inventory, color inventory, or general stock
   const getCurrentStock = useCallback(() => {
-    // Check quantity options first (new structure)
-    if (selectedQuantityOption && Array.isArray(product?.quantityOptions)) {
-      const selectedOption = product.quantityOptions.find(
-        (option) => option.id === selectedQuantityOption
-      );
-      return selectedOption?.stock ?? 0;
-    }
-
     // Check color inventory if color-wise stock tracking is enabled
     if (selectedColors.length > 0 && Array.isArray(product?.colorInventory)) {
       // For multi-color selection, return the minimum stock among selected colors
@@ -441,21 +419,32 @@ const ProductDetail = () => {
       return Math.min(...selectedColorStocks);
     }
 
-    // Return general stock if no quantity option selected
+    if (
+      product?.trackInventoryBySize &&
+      Array.isArray(product?.sizeInventory) &&
+      selectedSize
+    ) {
+      const sizeInfo = product.sizeInventory.find(
+        (s) => s.code === selectedSize
+      );
+      return sizeInfo?.qty ?? 0;
+    }
     return Number(product?.stock ?? 0);
-  }, [product, selectedColors, selectedQuantityOption]);
+  }, [product, selectedSize, selectedColors]);
 
   const stockNum = useMemo(() => getCurrentStock(), [getCurrentStock]);
   const outOfStock = stockNum === 0;
 
-  const selectedQuantityOptionInfo = useMemo(() => {
-    if (selectedQuantityOption && Array.isArray(product?.quantityOptions)) {
-      return product.quantityOptions.find(
-        (option) => option.id === selectedQuantityOption
-      );
+  const selectedSizeInfo = useMemo(() => {
+    if (
+      product?.trackInventoryBySize &&
+      Array.isArray(product?.sizeInventory) &&
+      selectedSize
+    ) {
+      return product.sizeInventory.find((s) => s.code === selectedSize);
     }
     return null;
-  }, [product, selectedQuantityOption]);
+  }, [product, selectedSize]);
 
   const refetchProduct = useCallback(async () => {
     try {
@@ -500,20 +489,22 @@ const ProductDetail = () => {
       return;
     }
 
-    // Check if product uses new quantity options
-    const usingQuantityOptions = Array.isArray(product?.quantityOptions) && product.quantityOptions.length > 0;
-    
-    console.log('Inventory check:', {
-      usingQuantityOptions,
-      selectedQuantityOption
+    const usingSizeInventory =
+      product?.trackInventoryBySize &&
+      Array.isArray(product?.sizeInventory);
+
+    console.log('Size inventory check:', {
+      usingSizeInventory,
+      trackInventoryBySize: product?.trackInventoryBySize,
+      hasSizeInventory: Array.isArray(product?.sizeInventory),
+      selectedSize
     });
 
-    // Validation for quantity options
-    if (usingQuantityOptions && !selectedQuantityOption) {
-      console.log('Quantity option required but not selected, showing toast');
+    if (usingSizeInventory && !selectedSize) {
+      console.log('Size required but not selected, showing toast');
       toast({
-        title: "Select a quantity",
-        description: "Please choose a quantity option before adding to cart.",
+        title: "Select a size",
+        description: "Please choose a size before adding to cart.",
         variant: "destructive",
       });
       return;
@@ -539,28 +530,29 @@ const ProductDetail = () => {
     console.log('Proceeding with add to cart...');
     // Rest of the function continues...
 
-    // Get current stock based on the inventory type
-    let currentStock = 0;
-    let stockErrorMsg = "Out of stock";
-    
-    if (usingQuantityOptions && selectedQuantityOption) {
-      const selectedOption = product.quantityOptions?.find(
-        (option) => option.id === selectedQuantityOption
-      );
-      currentStock = selectedOption?.stock ?? 0;
-      stockErrorMsg = `Selected quantity is out of stock`;
-    } else {
-      currentStock = product.stock ?? 0;
-    }
+    const currentStock =
+      usingSizeInventory && selectedSize
+        ? product.sizeInventory?.find(
+            (s) => s.code === selectedSize
+          )?.qty ?? 0
+        : product.stock ?? 0;
 
     if (currentStock === 0) {
-      setSizeStockError(stockErrorMsg);
+      const errorMsg =
+        usingSizeInventory && selectedSize
+          ? `Size ${selectedSize} is out of stock`
+          : "Out of stock";
+      setSizeStockError(errorMsg);
       toast({ title: "Out of stock", variant: "destructive" });
       return;
     }
 
     if (quantity > currentStock) {
-      const errorMsg = `Only ${currentStock} available`;
+      const errorMsg = `Only ${currentStock} available${
+        usingSizeInventory && selectedSize
+          ? ` for size ${selectedSize}`
+          : ""
+      }`;
       setSizeStockError(errorMsg);
       toast({
         title: "Insufficient stock",
@@ -572,15 +564,6 @@ const ProductDetail = () => {
 
     setSizeStockError("");
     
-    // Determine price based on quantity option or base price
-    let itemPrice = Number(product.price || 0);
-    if (usingQuantityOptions && selectedQuantityOption) {
-      const selectedOption = product.quantityOptions?.find(
-        (option) => option.id === selectedQuantityOption
-      );
-      itemPrice = selectedOption?.price ?? itemPrice;
-    }
-    
     // Create items for each selected color
     const itemsToAdd: any[] = [];
     
@@ -590,12 +573,11 @@ const ProductDetail = () => {
         const item: any = {
           id: String(product._id || product.id),
           title,
-          price: itemPrice,
+          price: Number(product.price || 0),
           image: img,
           meta: {} as any,
         };
         if (selectedSize) item.meta.size = selectedSize;
-        if (selectedQuantityOption) item.meta.quantityOption = selectedQuantityOption;
         item.meta.color = color;
         itemsToAdd.push(item);
       });
@@ -604,11 +586,11 @@ const ProductDetail = () => {
       const item: any = {
         id: String(product._id || product.id),
         title,
-        price: itemPrice,
+        price: Number(product.price || 0),
         image: img,
         meta: {} as any,
       };
-      if (selectedQuantityOption) item.meta.quantityOption = selectedQuantityOption;
+      if (selectedSize) item.meta.size = selectedSize;
       itemsToAdd.push(item);
     }
 
@@ -640,20 +622,15 @@ const ProductDetail = () => {
   const handleBuyNow = () => {
     if (!product) return;
 
-    // Check if product uses new quantity options
-    const usingQuantityOptions = Array.isArray(product?.quantityOptions) && product.quantityOptions.length > 0;
-    
-    // Check legacy size inventory
     const usingSizeInventory =
       product?.trackInventoryBySize &&
       Array.isArray(product?.sizeInventory);
 
-    // Validation for quantity options
-    if (usingQuantityOptions && !selectedQuantityOption) {
-      console.log('Quantity option required but not selected, showing toast');
+    if (usingSizeInventory && !selectedSize) {
       toast({
-        title: "Select a quantity",
-        description: "Please choose a quantity option before proceeding to checkout.",
+        title: "Select a size",
+        description:
+          "Please choose a size before proceeding to checkout.",
         variant: "destructive",
       });
       return;
@@ -668,33 +645,21 @@ const ProductDetail = () => {
       return;
     }
 
-    // Get current stock based on the inventory type
-    let currentStock = 0;
-    let stockErrorMsg = "Out of stock";
-    
-    if (usingQuantityOptions && selectedQuantityOption) {
-      const selectedOption = product.quantityOptions?.find(
-        (option) => option.id === selectedQuantityOption
-      );
-      currentStock = selectedOption?.stock ?? 0;
-      stockErrorMsg = `Selected quantity is out of stock`;
-    } else {
-      currentStock = product.stock ?? 0;
-    }
+    const currentStock =
+      usingSizeInventory && selectedSize
+        ? product.sizeInventory?.find(
+            (s) => s.code === selectedSize
+          )?.qty ?? 0
+        : product.stock ?? 0;
 
     if (currentStock === 0) {
-      setSizeStockError(stockErrorMsg);
+      const errorMsg =
+        usingSizeInventory && selectedSize
+          ? `Size ${selectedSize} is out of stock`
+          : "Out of stock";
+      setSizeStockError(errorMsg);
       toast({ title: "Out of stock", variant: "destructive" });
       return;
-    }
-
-    // Determine price based on quantity option or base price
-    let itemPrice = Number(product.price || 0);
-    if (usingQuantityOptions && selectedQuantityOption) {
-      const selectedOption = product.quantityOptions?.find(
-        (option) => option.id === selectedQuantityOption
-      );
-      itemPrice = selectedOption?.price ?? itemPrice;
     }
 
     // Create items for each selected color
@@ -706,12 +671,11 @@ const ProductDetail = () => {
         const item: any = {
           id: String(product._id || product.id),
           title,
-          price: itemPrice,
+          price: Number(product.price || 0),
           image: img,
           meta: {} as any,
         };
         if (selectedSize) item.meta.size = selectedSize;
-        if (selectedQuantityOption) item.meta.quantityOption = selectedQuantityOption;
         item.meta.color = color;
         itemsToAdd.push(item);
       });
@@ -720,11 +684,11 @@ const ProductDetail = () => {
       const item: any = {
         id: String(product._id || product.id),
         title,
-        price: itemPrice,
+        price: Number(product.price || 0),
         image: img,
         meta: {} as any,
       };
-      if (selectedQuantityOption) item.meta.quantityOption = selectedQuantityOption;
+      if (selectedSize) item.meta.size = selectedSize;
       itemsToAdd.push(item);
     }
 
@@ -803,13 +767,7 @@ const ProductDetail = () => {
   return (
     <>
       <style>{`
-        /* Global border removal for description section */
-        * {
-          border: none !important;
-          outline: none !important;
-          box-shadow: none !important;
-        }
-        
+        /* Remove borders only from specific elements, not all elements */
         div[class*="text-gray-700"] {
           border: none !important;
           outline: none !important;
@@ -843,7 +801,7 @@ const ProductDetail = () => {
       
       {/* Page Header */}
      
-      <section className="w-full px-3 sm:px-4 pt-24 pb-4 sm:pt-24 sm:pb-8 md:pt-28 md:pb-12">
+      <section className="w-full px-3 sm:px-4 pt-24 pb-4 sm:pt-24 sm:pb-8 md:pt-28 md:pb-12 border-2 border-gray-200">
         <div className="max-w-7xl mx-auto w-full">
           <Link
             to="/shop"
@@ -853,7 +811,7 @@ const ProductDetail = () => {
             Back to Shop
           </Link>
 
-          <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr] gap-6 sm:gap-8 md:gap-12 w-full bg-white p-4 sm:p-6 md:p-12 rounded-lg shadow-md">
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr] gap-6 sm:gap-8 md:gap-12 w-full bg-white p-4 sm:p-6 md:p-12 ">
             {/* Mobile: show images first, then description */}
             <div className="min-w-0 order-1 md:order-1">
               <ProductImageGallery
@@ -900,64 +858,49 @@ const ProductDetail = () => {
                 </h1>
               </div>
             <div className="flex items-baseline gap-2 mb-3 sm:mb-4 justify-between">
-  {(() => {
-    // Determine which price to show
-    let displayPrice = Number(product?.price || 0);
-    let originalPrice = Number(product?.price || 0);
-    let showDiscount = false;
-    
-    // If quantity option is selected, use its price
-    if (selectedQuantityOptionInfo) {
-      displayPrice = selectedQuantityOptionInfo.price;
-      originalPrice = selectedQuantityOptionInfo.originalPrice || selectedQuantityOptionInfo.price;
-      showDiscount = selectedQuantityOptionInfo.originalPrice && selectedQuantityOptionInfo.originalPrice > selectedQuantityOptionInfo.price;
-    } else if (product?.discount?.value > 0) {
-      // Apply product-level discount if no quantity option selected
-      if (product.discount.type === "percentage") {
-        displayPrice = originalPrice - (originalPrice * product.discount.value) / 100;
-      } else if (product.discount.type === "flat") {
-        displayPrice = Math.max(0, originalPrice - product.discount.value);
-      }
-      showDiscount = product.discount.value > 0;
-    }
+  {Number(product?.price) > 0 && (
+    <>
+      <p className="text-lg sm:text-xl md:text-3xl font-bold text-gray-800">
+        ₹{(() => {
+          const basePrice = Number(product.price);
+          let finalPrice = basePrice;
 
-    return displayPrice > 0 ? (
-      <>
-        <div className="flex items-baseline gap-2">
-          <p className="text-lg sm:text-xl md:text-3xl font-bold text-gray-800">
-            ₹{Math.round(displayPrice).toLocaleString("en-IN")}
-          </p>
-          {showDiscount && originalPrice > displayPrice && (
-            <>
-              <span className="text-sm text-gray-500 line-through">
-                ₹{Math.round(originalPrice).toLocaleString("en-IN")}
-              </span>
-              <span className="text-xs font-medium text-red-600">
-                {selectedQuantityOptionInfo 
-                  ? `${Math.round(((originalPrice - displayPrice) / originalPrice) * 100)}% OFF`
-                  : product.discount.type === "percentage"
-                    ? `${product.discount.value}% OFF`
-                    : `₹${product.discount.value} OFF`
-                }
-              </span>
-            </>
-          )}
-        </div>
+          if (product?.discount?.value > 0 && product.discount.type === "percentage") {
+            finalPrice = basePrice - (basePrice * product.discount.value) / 100;
+          } else if (product?.discount?.value > 0 && product.discount.type === "flat") {
+            finalPrice = Math.max(0, basePrice - product.discount.value);
+          }
 
-        {(product?.averageRating || 4.2) && (
-          <div className="flex flex-col items-start">
-            <div className="flex items-center bg-green-50 px-2 py-1 rounded-md border border-green-100">
-              <span className="text-sm font-bold text-gray-900 leading-none">{product?.averageRating || 4.2}</span>
-              <span className="text-green-600 ml-1" style={{fontSize: '11px'}}>★</span>
-            </div>
-            <span className="text-xs text-gray-500 mt-1">{(product?.reviewCount || 4500) >= 1000 ? `${((product?.reviewCount || 4500) / 1000).toFixed(1)}k` : product?.reviewCount || 4500} Ratings</span>
+          return Math.round(finalPrice).toLocaleString("en-IN");
+        })()}
+      </p>
+
+      {(product?.averageRating || 4.2) && (
+        <div className="flex flex-col items-start">
+          <div className="flex items-center bg-green-50 px-2 py-1 rounded-md border border-green-100">
+            <span className="text-sm font-bold text-gray-900 leading-none">{product?.averageRating || 4.2}</span>
+            <span className="text-green-600 ml-1" style={{fontSize: '11px'}}>★</span>
           </div>
-        )}
-      </>
-    ) : null;
-  })()}
+          <span className="text-xs text-gray-500 mt-1">{(product?.reviewCount || 4500) >= 1000 ? `${((product?.reviewCount || 4500) / 1000).toFixed(1)}k` : product?.reviewCount || 4500} Ratings</span>
+        </div>
+      )}
+    </>
+  )}
+
+  {/* {Number(product?.price) > 0 && product?.discount?.value > 0 && (
+    <div className="flex items-baseline">
+      <span className="text-xs sm:text-sm text-gray-500 line-through mr-1">
+        ₹{Number(product.price).toLocaleString("en-IN")}
+      </span>
+      <span className="text-xs font-medium text-red-600">
+        {product.discount.type === "percentage"
+          ? `${product.discount.value}% OFF`
+          : `₹${product.discount.value} OFF`}
+      </span>
+    </div>
+  )} */}
 </div>
-       {product.paragraph1 && (
+       {/* {product.paragraph1 && (
                     <div className="flex items-center gap-1 text-xs">
                       <span className="text-red-800 mt-0.5">
                         <svg width="13" height="13" viewBox="0 0 15 15" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -966,12 +909,12 @@ const ProductDetail = () => {
                       </span>
                       <p className="text-red-800 font-medium">{product.paragraph1}</p>
                     </div>
-                  )}
+                  )} */}
               <div className="flex items-center justify-between gap-4 mb-2">
                 <div className="flex flex-col gap-1 flex-1">
                  
 
-                  {product.paragraph2 && (
+                  {/* {product.paragraph2 && (
                     <div className="flex items-center gap-1 text-xs">
                       <span className="text-gray-900 flex items-center">
                         <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -980,7 +923,7 @@ const ProductDetail = () => {
                       </span>
                       <p className="text-gray-900 font-medium">{product.paragraph2}</p>
                     </div>
-                  )} 
+                  )} */}
                 </div>
                 {/* <ShareButton
                   productName={title}
@@ -1065,23 +1008,148 @@ const ProductDetail = () => {
                 ) : null;
               })()}
 
-              {(() => {
-                // New Quantity Options Selector
-                if (product?.quantityOptions && product.quantityOptions.length > 0) {
-                  return (
-                    <ProductQuantitySelector
-                      options={product.quantityOptions}
-                      selectedOption={selectedQuantityOption}
-                      onSelectionChange={(optionId) => {
-                        setSelectedQuantityOption(optionId);
-                        setSizeStockError("");
-                      }}
-                      disabled={outOfStock}
-                    />
-                  );
-                }
-                return null;
-              })()}
+              {/* Per-size inventory display */}
+              {product?.trackInventoryBySize &&
+                Array.isArray(product?.sizeInventory) &&
+                product.sizeInventory.length > 0 && (
+                  <div className="mb-2 sm:mb-3">
+                    <div className="flex items-center justify-between mb-1 sm:mb-2 gap-2">
+                      <label className="block text-xs font-semibold">
+                        Size
+                      </label>
+                      {product.sizeChart ? (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setShowSizeChartTable(true)}
+                          className="text-[10px] h-auto p-0.5"
+                        >
+                          <Ruler className="h-3 w-3 mr-1" />
+                          Size Chart
+                        </Button>
+                      ) : (
+                        product.sizeChartUrl && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setShowSizeChart(true)}
+                            className="text-[10px] h-auto p-0.5"
+                          >
+                            <Ruler className="h-3 w-3 mr-1" />
+                            Size Chart
+                          </Button>
+                        )
+                      )}
+                    </div>
+                    <div className="flex flex-wrap gap-2 pb-2 sm:pb-3">
+                      {product.sizeInventory.map((sizeItem) => {
+                        const isOutOfStock = sizeItem.qty === 0;
+                        const isLowStock =
+                          sizeItem.qty > 0 && sizeItem.qty <= 3;
+                        return (
+                          <div key={sizeItem.code} className="relative pb-2 sm:pb-3">
+                            <div className="relative">
+                              <button
+                                type="button"
+                                disabled={isOutOfStock}
+                                onClick={() => {
+                                  setSelectedSize(sizeItem.code);
+                                  setSizeStockError("");
+                                }}
+                                className={cn(
+                                  "px-2.5 sm:px-3 py-1 sm:py-1.5 rounded border text-xs font-medium transition-colors relative",
+                                  isOutOfStock
+                                    ? "opacity-50 cursor-not-allowed bg-muted border-border text-muted-foreground"
+                                    : selectedSize === sizeItem.code
+                                    ? "bg-primary text-primary-foreground border-primary"
+                                    : "bg-transparent border-border hover:border-primary"
+                                )}
+                              >
+                                {sizeItem.label}
+                              </button>
+                              {/* Strikethrough line for out of stock */}
+                              {isOutOfStock && (
+                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                  <div className="w-full h-0.5 bg-gray-400"></div>
+                                </div>
+                              )}
+                            </div>
+                            {isLowStock && !isOutOfStock && (
+                              <span className="text-[10px] text-orange-600 font-medium whitespace-nowrap mt-1 block">
+                                 {sizeItem.qty} left
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                    {sizeStockError && (
+                      <p className="text-xs text-destructive mt-3">
+                        {sizeStockError}
+                      </p>
+                    )}
+                  </div>
+                )}
+
+              {/* Simple sizes (non-inventory tracked) */}
+              {!product?.trackInventoryBySize &&
+                Array.isArray(product?.sizes) &&
+                product.sizes.length > 0 && (
+                  <div className="mb-2 sm:mb-3">
+                    <div className="flex items-center justify-between mb-1 sm:mb-2 gap-2">
+                      <label className="block text-xs font-semibold">
+                        Size
+                      </label>
+                      {product.sizeChart ? (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setShowSizeChartTable(true)}
+                          className="text-[10px] h-auto p-0.5"
+                        >
+                          <Ruler className="h-3 w-3 mr-1" />
+                          Size Chart
+                        </Button>
+                      ) : (
+                        product.sizeChartUrl && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setShowSizeChart(true)}
+                            className="text-[10px] h-auto p-0.5"
+                          >
+                            <Ruler className="h-3 w-3 mr-1" />
+                            Size Chart
+                          </Button>
+                        )
+                      )}
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {product.sizes.map((sz) => (
+                        <button
+                          key={sz}
+                          type="button"
+                          onClick={() => {
+                            setSelectedSize(sz);
+                            setSizeStockError("");
+                          }}
+                          className={cn(
+                            "px-2 py-1 rounded border text-xs",
+                            selectedSize === sz
+                              ? "bg-primary text-primary-foreground border-primary"
+                              : "bg-transparent border-border"
+                          )}
+                        >
+                          {sz}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
               <div className="mb-3 sm:mb-4">
                 <label className="block text-xs font-semibold mb-2">
@@ -1117,6 +1185,7 @@ const ProductDetail = () => {
   {(() => {
     console.log('=== Add to Cart Button Render ===', {
       outOfStock,
+      selectedSize,
       selectedColors,
       productColors: product?.colors,
       trackInventoryBySize: product?.trackInventoryBySize
@@ -1171,6 +1240,7 @@ const ProductDetail = () => {
         onClick={(e) => {
           console.log('=== Add to Cart Button Clicked ===', {
             outOfStock,
+            selectedSize,
             selectedColors,
             productColors: product?.colors,
             trackInventoryBySize: product?.trackInventoryBySize
@@ -1241,11 +1311,11 @@ const ProductDetail = () => {
 
        
 
-        <div className="max-w-7xl mx-auto w-full mt-6 sm:mt-8">
+        <div className="max-w-7xl mx-auto w-full mt-6 sm:mt-8 border-2 border-gray-200 rounded-lg">
           {/* Mobile Accordion Layout */}
           <div className="md:hidden bg-white rounded-lg shadow">
             {/* Description Accordion */}
-            <div>
+            <div  className="border-b border-gray-200">
               <button
                 type="button"
                 onClick={() => setActiveTab(activeTab === "description" ? "" : "description")}
@@ -1280,7 +1350,7 @@ const ProductDetail = () => {
 
             {/* Product Details Accordion */}
             {(product?.highlights?.length || product?.specs?.length) > 0 && (
-              <div>
+              <div  className="border-b border-gray-200" >
                 <button
                   type="button"
                   onClick={() => setActiveTab(activeTab === "additional" ? "" : "additional")}
@@ -1290,7 +1360,7 @@ const ProductDetail = () => {
                   <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${activeTab === "additional" ? "rotate-180" : ""}`} />
                 </button>
                 {activeTab === "additional" && (
-                  <div className="px-4 pb-4 animate-in fade-in duration-300">
+                  <div className="px-4 pb-4 animate-in fade-in duration-300 border-2 border-gray-200 rounded-lg">
                     {product?.highlights && product.highlights.length > 0 && (
                       <div className="min-w-0 mb-6">
                         <h4 className="text-base font-bold mb-3 text-gray-900 flex items-center gap-1.5">
@@ -1330,7 +1400,7 @@ const ProductDetail = () => {
 
             {/* FAQ Accordion */}
             {product?.faq && product.faq.length > 0 && (
-              <div>
+              <div   className="border-b border-gray-200">
                 <button
                   type="button"
                   onClick={() => setActiveTab(activeTab === "faq" ? "" : "faq")}
@@ -1376,7 +1446,7 @@ const ProductDetail = () => {
                 <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${activeTab === "reviews" ? "rotate-180" : ""}`} />
               </button>
               {activeTab === "reviews" && (
-                <div className="px-4 pb-4 animate-in fade-in duration-300">
+                <div className="px-4 pb-4 animate-in fade-in duration-300 border-2 border-gray-200 rounded-lg">
                   <ReviewsList
                     productId={String(product?._id || product?.id)}
                     reviewKey={reviewKey}

@@ -81,7 +81,7 @@ async function sendOTP(phone, otp) {
         console.log('📱 [SMS SERVICE] Formatted phone with country code:', formattedPhone);
       }
 
-      const messageBody = `Your UNI10 verification code is: ${otp}. This code will expire in 10 minutes.`;
+      const messageBody = `Your Kissan City verification code is: ${otp}. This code will expire in 10 minutes.`;
       console.log('📱 [SMS SERVICE] Message body:', messageBody);
       console.log('📱 [SMS SERVICE] Sending to:', formattedPhone);
       console.log('📱 [SMS SERVICE] From (raw):', twilioPhoneNumber);
@@ -209,16 +209,15 @@ async function sendOTP(phone, otp) {
     }
   } else {
     console.log('⚠️  [SMS SERVICE] Twilio not configured, using development mode');
-  }
 
   // Fallback: Log OTP to console (for development)
   console.log('========================================');
-  console.log('📱 [SMS SERVICE] OTP SMS (Development Mode)');
-  console.log('📱 Phone Number:', phone);
-  console.log('🔢 OTP Code:', otp);
-  console.log('⏰ Timestamp:', new Date().toISOString());
+  console.log('📱 [Kissaan City SMS SERVICE] OTP SMS (Development Mode)');
+  console.log(`📱 Phone Number: ${phone}`);
+  console.log(`🔢 OTP Code: ${otp}`);
+  console.log(`⏰ Timestamp: ${new Date().toISOString()}`);
   console.log('========================================');
-  console.log('\n⚠️  SMS service not configured. OTP logged above.');
+  console.log('\n⚠️  Kissan City SMS service not configured. OTP logged above.');
   console.log('To enable SMS, set the following in .env:');
   console.log('  - TWILIO_ACCOUNT_SID');
   console.log('  - TWILIO_AUTH_TOKEN');
@@ -226,6 +225,7 @@ async function sendOTP(phone, otp) {
   console.log('========================================\n');
 
   return { ok: true, messageId: 'console-log', devMode: true };
+}
 }
 
 module.exports = {
