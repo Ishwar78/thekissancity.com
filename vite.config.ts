@@ -13,24 +13,38 @@ export default defineConfig(({ mode }) => ({
     },
     proxy: {
       "/api": {
-        target: "http://localhost:5055",
+        target: "http://localhost:5000",
         changeOrigin: true,
         secure: false,
       },
       "/uploads": {
-        target: "http://localhost:5055",
+        target: "http://localhost:5000",
         changeOrigin: true,
         secure: false,
       },
     },
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
-    optimizeDeps: {
-      exclude: ["lovable-tagger"]
-    },
-    resolve: {
+  optimizeDeps: {
+    exclude: ["lovable-tagger"]
+  },
+  resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          radix: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-select'],
+          router: ['react-router-dom'],
+          ui: ['@radix-ui/react-slot', 'class-variance-authority', 'clsx', 'tailwind-merge'],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 1000,
+    target: 'es2015',
   },
 }));
