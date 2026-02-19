@@ -112,7 +112,17 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
 
 /* -------------------------- SERVE CLIENT-SIDE BUILD ------------------------- */
 // Serve static files from the client-side build directory
-app.use(express.static(path.join(__dirname, '..', 'dist')));
+app.use(express.static(path.join(__dirname, '..', 'dist'), {
+  setHeaders: (res, path) => {
+    if (path.endsWith('.html')) {
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.set('Pragma', 'no-cache');
+      res.set('Expires', '0');
+    } else if (path.endsWith('.js') || path.endsWith('.css')) {
+      res.set('Cache-Control', 'public, max-age=0, must-revalidate');
+    }
+  }
+}));
 
 // API routes (or other specific routes) should go here
 

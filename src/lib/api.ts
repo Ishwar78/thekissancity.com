@@ -19,7 +19,13 @@ function joinUrl(base: string, p: string) {
  
 
 export async function api(path: string, options: RequestInit = {}) {
+  // Add cache-busting timestamp for GET requests
   const url = path.startsWith("http") ? path : joinUrl(API_BASE, path);
+  const timestampedUrl = url.includes('?') 
+    ? `${url}&_t=${Date.now()}` 
+    : `${url}?_t=${Date.now()}`;
+
+  const finalUrl = path.startsWith("http") ? timestampedUrl : timestampedUrl;
 
   if (
     API_BASE &&
@@ -31,6 +37,11 @@ export async function api(path: string, options: RequestInit = {}) {
       ? path
       : (path.startsWith("/api") ? path : `/api${path.startsWith("/") ? path : `/${path}`}`);
 
+    // Add cache-busting timestamp for GET requests
+    const cacheBustUrl = relUrl.includes('?') 
+      ? `${relUrl}&_t=${Date.now()}` 
+      : `${relUrl}?_t=${Date.now()}`;
+
     try {
       const token = (typeof window !== 'undefined') ? localStorage.getItem('token') : null;
       const relHeaders = options.body instanceof FormData
@@ -39,7 +50,7 @@ export async function api(path: string, options: RequestInit = {}) {
       if (token) relHeaders['Authorization'] = `Bearer ${token}`;
 
       const { headers: _, ...optionsWithoutHeaders } = options;
-      const relRes = await fetch(relUrl, {
+      const relRes = await fetch(cacheBustUrl, {
         credentials: "include",
         headers: relHeaders,
         cache: "no-store",
@@ -54,6 +65,11 @@ export async function api(path: string, options: RequestInit = {}) {
     }
   }
 
+  // Add cache-busting timestamp for GET requests
+  const cacheBustUrl = finalUrl.includes('?') 
+    ? `${finalUrl}&_t=${Date.now()}` 
+    : `${finalUrl}?_t=${Date.now()}`;
+
   try {
     const token = (typeof window !== 'undefined') ? localStorage.getItem('token') : null;
     const headers = options.body instanceof FormData
@@ -62,7 +78,7 @@ export async function api(path: string, options: RequestInit = {}) {
     if (token) headers['Authorization'] = `Bearer ${token}`;
 
     const { headers: _, ...optionsWithoutHeaders } = options;
-    const res = await fetch(url, {
+    const res = await fetch(cacheBustUrl, {
       credentials: "include",
       headers,
       cache: "no-store",

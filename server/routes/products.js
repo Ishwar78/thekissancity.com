@@ -13,6 +13,8 @@ router.get('/', authOptional, async (req, res) => {
   res.set('Pragma', 'no-cache');
   res.set('Expires', '0');
   
+  console.log('[PRODUCTS API] Query params:', req.query);
+  
   try {
     const {
       active,

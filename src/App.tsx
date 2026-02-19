@@ -48,7 +48,17 @@ import { ReturnPolicyPage } from "./pages/ReturnPolicyPage";
 import BestSellerProducts from "./pages/BestSellerProducts";
 import RegionProducts from "./pages/RegionProducts";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 0, // Data is stale immediately
+      cacheTime: 0, // Don't cache data
+      refetchOnWindowFocus: true, // Refetch when window gains focus
+      refetchOnReconnect: true, // Refetch when reconnecting
+      retry: 1, // Only retry once
+    },
+  },
+});
 
 /**
  * Robust scroll control on navigation:
