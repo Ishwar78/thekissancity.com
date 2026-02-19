@@ -937,7 +937,7 @@ const Index = () => {
       {/* Ticker line – header ke niche */}
 
       {/* Product Slider Section */}
-      {/* <ProductSlider className="pt-24" /> */}
+      <ProductSlider className="pt-24" />
     
 
       {/* Featured Products */}
@@ -1250,7 +1250,7 @@ const Index = () => {
 
       <Footer />
       <PWAInstallPrompt />
-      <WhatsAppButton phoneNumber="+91 7355818140" />
+      <WhatsAppButton phoneNumber="+91 12345678" />
     </div>
   );
 };

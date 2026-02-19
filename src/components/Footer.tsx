@@ -182,7 +182,7 @@ export const Footer = () => {
             </p>
             <div className="flex gap-3 md:gap-4">
               <a
-                href="https://www.instagram.com/uni10.in?igsh=MXU1cjdkMmp3emVrMQ%3D%3D&utm_source=qr"
+                href="/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/10 flex items-center justify-center text-yellow-400 hover:bg-yellow-400 hover:text-black transition-all duration-200"
@@ -190,7 +190,7 @@ export const Footer = () => {
                 <Instagram className="h-4 w-4 md:h-5 md:w-5" />
               </a>
               <a
-                href="https://twitter.com"
+                href="/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/10 flex items-center justify-center text-yellow-400 hover:bg-yellow-400 hover:text-black transition-all duration-200"
@@ -198,7 +198,7 @@ export const Footer = () => {
                 <Twitter className="h-4 w-4 md:h-5 md:w-5" />
               </a>
               <a
-                href="https://www.facebook.com/share/1DHeCmuRjB/?mibextid=wwXIfr"
+                href="/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/10 flex items-center justify-center text-yellow-400 hover:bg-yellow-400 hover:text-black transition-all duration-200"
