@@ -37,7 +37,9 @@ export const RunningText = () => {
   const extendedMessages = [...messages, ...messages];
 
   return (
-    <div className={`fixed top-16 left-0 right-0 z-50 bg-black border-b border-gray-800 overflow-hidden h-8 transition-all duration-300 ease-in-out ${
+    <div 
+    style={{ backgroundColor: '#6b4423' }}
+    className={`fixed top-16 left-0 right-0 z-50  border-b border-gray-800 overflow-hidden h-8 transition-all duration-300 ease-in-out ${
       isVisible ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-full'
     }`}>
       <div className="relative flex items-center h-full w-full">

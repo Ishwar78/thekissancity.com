@@ -45,12 +45,13 @@ export default function InfluencerImageGrid() {
   }, [fetchInfluencerImages]);
 
   return (
-    <section className="w-full bg-white py-8 sm:py-10 lg:py-12">
+    <section className="w-full py-8 sm:py-10 lg:py-12" style={{ backgroundColor: '#faf3eb' }}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12 md:mb-16">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
             <div className="flex-1"></div>
-            <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-foreground">
+            <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-foreground"
+            style={{ color: '#6b4423' }}>
               Featured Collections
             </h2>
             <div className="flex-1"></div>

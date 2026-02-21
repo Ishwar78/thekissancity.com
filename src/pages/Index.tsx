@@ -937,16 +937,16 @@ const Index = () => {
       {/* Ticker line – header ke niche */}
 
       {/* Product Slider Section */}
-      <ProductSlider className="pt-24" />
+      <ProductSlider className="-mb-4" />
     
 
       {/* Featured Products */}
-      <section className="bg-[#faf3eb]  py-8 sm:py-16 lg:py-10">
+      <section style={{ backgroundColor: '#faf3eb' }}   className="py-12">
   <div className="container mx-auto px-4 sm:px-6">
     {/* Header */}
-    <div className="flex items-center justify-center">
+    <div className="flex items-center justify-center mb-10">
       <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-center">
-        <span className="text-black">Collection</span>
+        <span style={{ color: '#6b4423' }}>Collection</span>
       </h2>
     </div>
 
@@ -1020,9 +1020,10 @@ const Index = () => {
 </section>
 
       {/* Categories grid with product showcase */}
-        <section className="bg-[#FFF8E1] mx-auto px-2 sm:px-4 pb-6 sm:pb-12 pt-6 sm:pt-10">
+        <section style={{ backgroundColor: '#faf3eb' }} className="mx-auto px-2 sm:px-4 pb-6 sm:pb-12 pt-6 sm:pt-10">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-foreground">
+          <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-foreground"
+          style={{ color: '#6b4423' }}>
             Shop By Categories
           </h2>
         </div>
@@ -1071,84 +1072,111 @@ const Index = () => {
       </section>
 
       {/* Shop By Region */}
-      <section className="bg-[#faf3eb] mx-auto px-2 sm:px-4 pb-6 sm:pb-12 pt-6 sm:pt-10">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-foreground">
-            Shop By Region
-          </h2>
-        </div>
+      <section style={{ backgroundColor: '#faf3eb' }} className="mx-auto px-2 sm:px-4 pb-6 sm:pb-12 pt-6 sm:pt-10">
+  <div className="text-center mb-12">
+    <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-foreground"
+    style={{ color: '#6b4423' }}>
+      Shop By Region
+    </h2>
+  </div>
 
-        {regionsLoading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6 mb-8 sm:mb-12 mt-6">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div
-                key={i}
-                className="aspect-square rounded-lg bg-muted/40 animate-pulse"
-              />
-            ))}
-          </div>
-        ) : regionsError ? (
-          <div className="text-center text-sm text-muted-foreground mb-12">
-            {regionsError}
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6">
-            {regions.slice(0, 6).map((region) => {
-              const to = `/collection/region/${region.slug || slugify(region.name || "")}`;
+  {regionsLoading ? (
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6 mb-8 sm:mb-12 mt-6">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div
+          key={i}
+          className="aspect-square rounded-lg bg-muted/40 animate-pulse"
+        />
+      ))}
+    </div>
+  ) : regionsError ? (
+    <div className="text-center text-sm text-muted-foreground mb-12">
+      {regionsError}
+    </div>
+  ) : (
+    <div className="relative">
+      <Carousel opts={{ align: "start", loop: true }} className="w-full">
+        <CarouselContent className="-ml-4 sm:-ml-6">
+          {regions.map((region) => {
+            const to = `/collection/region/${
+              region.slug || slugify(region.name || "")
+            }`;
 
-              return (
+            return (
+              <CarouselItem
+                key={String(
+                  region._id || region.id || region.slug || region.name
+                )}
+                className="pl-4 sm:pl-6 basis-1/2 md:basis-1/3 lg:basis-1/4"
+              >
                 <Link
-                  key={String(region._id || region.id || region.slug || region.name)}
                   to={to}
-                  className="group"
+                  className="group block h-full"
                 >
-                  <div className="relative overflow-hidden rounded-lg bg-gradient-to-br from-amber-50 to-orange-50 p-4 transition-all duration-300 hover:scale-105 hover:shadow-lg">
-                    {/* Torn edge effect using clip-path */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-amber-100 to-orange-100 opacity-40"></div>
-                    
-                    {/* Decorative torn edges */}
-                    <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-transparent via-amber-200 to-transparent opacity-60"></div>
-                    <div className="absolute bottom-0 left-0 w-full h-2 bg-gradient-to-r from-transparent via-orange-200 to-transparent opacity-60"></div>
-                    <div className="absolute left-0 top-0 w-2 h-full bg-gradient-to-b from-transparent via-amber-200 to-transparent opacity-60"></div>
-                    <div className="absolute right-0 top-0 w-2 h-full bg-gradient-to-b from-transparent via-orange-200 to-transparent opacity-60"></div>
-                    
-                    {/* Circular stamp in corner */}
-                    <div className="absolute top-2 right-2 w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-red-500 bg-red-50 flex items-center justify-center opacity-80">
-                      <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full border border-red-600 flex items-center justify-center">
-                        <span className="text-xs font-bold text-red-600">✓</span>
-                      </div>
+                  <div className="relative z-10 flex flex-col items-center justify-center h-32">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white/80 flex items-center justify-center mb-3 border-2 border-amber-300 shadow-sm">
+                      <img
+                        src={resolveImage(
+                          region.imageUrl || "/placeholder.svg"
+                        )}
+                        alt={region.name}
+                        className="w-12 h-12 sm:w-16 sm:h-16 object-contain"
+                      />
                     </div>
-                    
-                    {/* Postmark style cancellation lines */}
-                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-0.5 bg-red-300 opacity-30 rotate-45"></div>
-                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-0.5 bg-red-300 opacity-30 -rotate-45"></div>
-                    
-                    <div className="relative z-10 flex flex-col items-center justify-center h-32">
-                      <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white/80 flex items-center justify-center mb-3 border-2 border-amber-300 shadow-sm">
-                        <img
-                          src={resolveImage(region.imageUrl || "/placeholder.svg")}
-                          alt={region.name}
-                          className="w-12 h-12 sm:w-16 sm:h-16 object-contain"
-                        />
-                      </div>
-                      <h3 className="text-sm sm:text-base font-bold text-center text-gray-800 group-hover:text-red-600 transition-colors">
-                        {region.name}
-                      </h3>
-                      <p className="text-xs text-gray-600 text-center mt-1 font-medium">Authentic</p>
-                      <p className="text-xs text-gray-500 text-center">Products</p>
-                    </div>
-                    
-                    {/* Vintage postcard texture overlay */}
-                    <div className="absolute inset-0 opacity-20 mix-blend-multiply">
-                      <div className="w-full h-full bg-gradient-to-br from-transparent via-amber-200 to-transparent"></div>
-                    </div>
+
+                    <h3 className="text-sm sm:text-base font-bold text-center text-gray-800 group-hover:text-red-600 transition-colors">
+                      {region.name}
+                    </h3>
+
+                    {/* <p className="text-xs text-gray-600 text-center mt-1 font-medium">
+                      Authentic
+                    </p>
+
+                    <p className="text-xs text-gray-500 text-center">
+                      Products
+                    </p> */}
                   </div>
                 </Link>
-              );
-            })}
-          </div>
-        )}
-      </section>
+              </CarouselItem>
+            );
+          })}
+        </CarouselContent>
+
+        {/* Desktop Navigation */}
+        <div className="hidden sm:flex gap-2 absolute -top-[72px] right-0">
+          <CarouselPrevious
+            className="static translate-y-0 h-10 w-10 rounded-full border-2 border-gray-300 bg-white hover:border-[#ba8c5c] hover:shadow-xl transition-all duration-200 shadow-md active:scale-90"
+            onMouseDown={(e) =>
+              setTimeout(() => e.currentTarget.blur(), 150)
+            }
+          />
+          <CarouselNext
+            className="static translate-y-0 h-10 w-10 rounded-full border-2 border-gray-300 bg-white hover:border-[#ba8c5c] hover:shadow-xl transition-all duration-200 shadow-md active:scale-90"
+            onMouseDown={(e) =>
+              setTimeout(() => e.currentTarget.blur(), 150)
+            }
+          />
+        </div>
+
+        {/* Mobile Navigation */}
+        <div className="flex sm:hidden justify-center gap-2 mt-6">
+          <CarouselPrevious
+            className="static translate-y-0 h-10 w-10 rounded-full border-2 border-gray-300 bg-white hover:border-[#ba8c5c] hover:shadow-xl transition-all duration-200 shadow-md active:scale-90"
+            onTouchEnd={(e) =>
+              setTimeout(() => e.currentTarget.blur(), 150)
+            }
+          />
+          <CarouselNext
+            className="static translate-y-0 h-10 w-10 rounded-full border-2 border-gray-300 bg-white hover:border-[#ba8c5c] hover:shadow-xl transition-all duration-200 shadow-md active:scale-90"
+            onTouchEnd={(e) =>
+              setTimeout(() => e.currentTarget.blur(), 150)
+            }
+          />
+        </div>
+      </Carousel>
+    </div>
+  )}
+</section>
 
    {/* Banner Section */}
   {/* Banner Section */}
@@ -1156,9 +1184,10 @@ const Index = () => {
       
 
       {/* New Arrivals */}
-      <section className="bg-[#faf3eb] container mx-auto px-4 py-12 md:py-12 bg-white rounded-xl shadow-sm">
+      <section style={{ backgroundColor: '#faf3eb' }} className="container mx-auto px-4 py-12 md:py-12 bg-white rounded-xl shadow-sm">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-foreground">
+          <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-foreground"
+          style={{ color: '#6b4423' }}>
             New Arrivals
           </h2>
          
@@ -1199,18 +1228,6 @@ const Index = () => {
               <div className="hidden sm:flex gap-2 absolute -top-[72px] right-0">
                 <CarouselPrevious 
                   className="static translate-y-0 h-10 w-10 rounded-full border-2 border-gray-300 bg-white hover:border-[#ba8c5c] hover:bg-white hover:shadow-xl transition-all duration-200 shadow-md focus:outline-none focus:ring-0 active:scale-90 active:bg-gray-100 active:border-[#ba8c5c]" 
-                  onMouseDown={(e) => setTimeout(() => e.currentTarget.blur(), 150)}
-                />
-                <CarouselNext 
-                  className="static translate-y-0 h-10 w-10 rounded-full border-2 border-gray-300 bg-white hover:border-[#ba8c5c] hover:bg-white hover:shadow-xl transition-all duration-200 shadow-md focus:outline-none focus:ring-0 active:scale-90 active:bg-gray-100 active:border-[#ba8c5c]" 
-                  onMouseDown={(e) => setTimeout(() => e.currentTarget.blur(), 150)}
-                />
-              </div>
-              
-              {/* Navigation Buttons - Mobile */}
-              <div className="flex sm:hidden justify-center gap-2 mt-6">
-                <CarouselPrevious 
-                  className="static translate-y-0 h-10 w-10 rounded-full border-2 border-gray-300 bg-white hover:border-[#ba8c5c] hover:bg-white hover:shadow-xl transition-all duration-200 shadow-md focus:outline-none focus:ring-0 active:scale-90 active:bg-gray-100 active:border-[#ba8c5c]" 
                   onTouchEnd={(e) => setTimeout(() => e.currentTarget.blur(), 150)}
                 />
                 <CarouselNext 
@@ -1220,15 +1237,7 @@ const Index = () => {
               </div>
             </Carousel>
             
-            <div className="text-center mt-10 md:mt-16">
-              <Link
-                to="/shop/new-arrivals"
-                className="inline-flex items-center text-sm font-medium text-primary hover:text-gray-900 transition-colors group"
-              >
-                View All Products
-                <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-              </Link>
-            </div>
+          
           </div>
         )}
       </section>

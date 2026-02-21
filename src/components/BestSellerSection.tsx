@@ -113,7 +113,8 @@ export default function BestSellerSection() {
             <TrendingUp className="h-4 w-4 text-orange-600" />
             <span className="text-sm font-medium text-orange-600">Best Sellers</span>
           </div> */}
-          <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-foreground">
+          <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-foreground"
+          style={{ color: '#6b4423' }}>
             Best Seller
           </h2>
           {/* <p className="text-gray-600 max-w-2xl mx-auto">

@@ -34,7 +34,8 @@ export const Footer = () => {
   }, []);
 
   return (
-    <footer className="bg-black text-white relative overflow-hidden mb-0">
+    <footer className=" text-white relative overflow-hidden mb-0"
+    style={{ backgroundColor: '#2d2117' }}>
       <div
         className="absolute bottom-0 left-0 w-full h-full bg-no-repeat bg-left-bottom opacity-10 sm:opacity-20"
         style={{ backgroundImage: 'url(/src/assets/table-outline.png)', backgroundSize: '40% auto' }}
@@ -185,7 +186,7 @@ export const Footer = () => {
                 href="/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/10 flex items-center justify-center text-yellow-400 hover:bg-yellow-400 hover:text-black transition-all duration-200"
+                className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white hover:text-black transition-all duration-200"
               >
                 <Instagram className="h-4 w-4 md:h-5 md:w-5" />
               </a>
@@ -193,7 +194,7 @@ export const Footer = () => {
                 href="/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/10 flex items-center justify-center text-yellow-400 hover:bg-yellow-400 hover:text-black transition-all duration-200"
+                className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white hover:text-black transition-all duration-200"
               >
                 <Twitter className="h-4 w-4 md:h-5 md:w-5" />
               </a>
@@ -201,7 +202,7 @@ export const Footer = () => {
                 href="/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/10 flex items-center justify-center text-yellow-400 hover:bg-yellow-400 hover:text-black transition-all duration-200"
+                className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white hover:text-black transition-all duration-200"
               >
                 <Facebook className="h-4 w-4 md:h-5 md:w-5" />
               </a>

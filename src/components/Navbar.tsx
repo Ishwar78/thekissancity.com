@@ -190,7 +190,8 @@ export const Navbar = ({ cartItemCount = 0 }: NavbarProps) => {
                 <Link
                   key={item.to}
                   to={item.to}
-                  className={`text-sm font-semibold px-3 py-2 rounded-full text-gray-700 hover:bg-gray-100 transition relative`}
+                  className={`text-sm font-semibold px-3 py-2 rounded-full hover:bg-amber-50 transition relative`}
+                  style={{ color: '#6b4423' }}
                 >
                   {item.isNew && (
                     <Sparkles className="absolute -top-1 -right-1 h-5 w-5 text-yellow-400 animate-pulse" />
@@ -259,7 +260,8 @@ export const Navbar = ({ cartItemCount = 0 }: NavbarProps) => {
               
               <Link
                 to="/wishlist"
-                className="text-sm font-semibold px-3 py-2 rounded-full text-gray-700 hover:bg-gray-100 transition"
+                className="text-sm font-semibold px-3 py-2 rounded-full hover:bg-amber-50 transition"
+                style={{ color: '#6b4423' }}
               >
                 Wishlist
               </Link>
@@ -314,7 +316,8 @@ export const Navbar = ({ cartItemCount = 0 }: NavbarProps) => {
         <Button
           variant="link"
           size="sm"
-          className="text-gray-900 hover:text-gray-700 hover:bg-gray-100 no-underline px-3 py-2 transition-colors"
+          className=" hover:text-gray-700 hover:bg-gray-100 no-underline px-3 py-2 transition-colors"
+           style={{ color: '#6b4423' }}
         >
           Support
         </Button>
@@ -326,7 +329,8 @@ export const Navbar = ({ cartItemCount = 0 }: NavbarProps) => {
           size="icon"
           className="text-gray-900 md:hover:text-gray-700 hover:bg-gray-100 md:hover:bg-gray-100 no-underline transition-colors"
         >
-          <User className="h-5 w-5 text-gray-900 md:hover:text-gray-700" />
+          <User className="h-5 w-5 md:hover:text-gray-700" 
+           style={{ color: '#6b4423' }}/>
         </Button>
       </Link>
     </>
@@ -337,7 +341,7 @@ export const Navbar = ({ cartItemCount = 0 }: NavbarProps) => {
         size="icon"
         className="text-gray-900 md:hover:text-gray-700 hover:bg-gray-100 md:hover:bg-gray-100 no-underline transition-colors"
       >
-        <User className="h-5 w-5 text-gray-900" />
+        <User className="h-5 w-5 "  style={{ color: '#6b4423' }} />
       </Button>
     </Link>
   )}
@@ -346,11 +350,14 @@ export const Navbar = ({ cartItemCount = 0 }: NavbarProps) => {
     <Button
       variant="link"
       size="icon"
-      className="relative text-gray-900 md:hover:text-gray-700 hover:bg-gray-100 md:hover:bg-gray-100 no-underline transition-colors"
+      className="relative md:hover:text-gray-700 hover:bg-gray-100 md:hover:bg-gray-100 no-underline transition-colors"
+       style={{ color: '#6b4423' }}
     >
       <ShoppingCart className="h-5 w-5 md:inherit-color" />
       {liveCount > 0 && (
-        <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground rounded-full w-5 h-5 text-xs flex items-center justify-center font-bold">
+        <span className="absolute -top-1 -right-1 rounded-full w-5 h-5 text-xs flex items-center justify-center font-bold text-white"
+              style={{ backgroundColor: '#6b4423' }}
+        >
           {liveCount}
         </span>
       )}
@@ -382,7 +389,8 @@ export const Navbar = ({ cartItemCount = 0 }: NavbarProps) => {
                 <Link
                   key={item.to}
                   to={item.to}
-                  className={`text-base font-semibold px-3 py-3 rounded-md text-gray-700 hover:bg-gray-100 transition-colors relative`}
+                  className={`text-base font-semibold px-3 py-3 rounded-md hover:bg-amber-50 transition-colors relative`}
+                  style={{ color: '#907258' }}
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {item.isNew && (
@@ -412,7 +420,8 @@ export const Navbar = ({ cartItemCount = 0 }: NavbarProps) => {
               
               <Link
                 to="/wishlist"
-                className="text-base font-semibold px-3 py-3 rounded-md text-gray-700 hover:bg-gray-100 transition-colors"
+                className="text-base font-semibold px-3 py-3 rounded-md hover:bg-amber-50 transition-colors"
+                style={{ color: '#907258' }}
                 onClick={() => setIsMenuOpen(false)}
               >
                 Wishlist

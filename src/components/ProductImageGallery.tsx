@@ -395,7 +395,7 @@ export const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
         />
 
         {/* Wishlist and Share Buttons */}
-        <div className="absolute top-3 -right-2 flex flex-col gap-2 z-10">
+        <div className="absolute top-3 right-2 flex flex-col gap-2 z-10">
           {showWishlistButton && (
             <button
               onClick={(e) => {

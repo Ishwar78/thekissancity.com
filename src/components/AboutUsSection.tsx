@@ -35,10 +35,11 @@ const AboutUsSection = () => {
   );
 
   return (
-    <section className="bg-black text-white py-12 lg:py-20 relative overflow-hidden">
+    <section className=" text-white py-12 lg:py-20 relative overflow-hidden"
+     style={{ backgroundColor: '#2d2117' }}>
       {/* Decorative Elements */}
-      <div className="absolute top-12 left-8 text-6xl font-bold opacity-20" style={{ color: '#ffffff' }}>///</div>
-      <div className="absolute bottom-0 right-0 w-48 h-48 rounded-tl-full opacity-10" style={{ backgroundColor: '#ffffff' }}></div>
+      <div className="absolute top-12 left-8 text-6xl font-bold opacity-20" style={{ color: '#2d2117' }}>///</div>
+      <div className="absolute bottom-0 right-0 w-48 h-48 rounded-tl-full opacity-10" style={{ backgroundColor: '#2d2117' }}></div>
       <div className="absolute top-1/3 right-1/4 w-32 h-32 rounded-full opacity-5" style={{ backgroundColor: '#ffffff' }}></div>
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -50,13 +51,14 @@ const AboutUsSection = () => {
               <h2 className="text-4xl lg:text-5xl font-bold tracking-tight" style={{ color: '#ffffff' }}>
                 OUR STORY
               </h2>
-              <div className="w-24 h-1 mt-3 rounded-full" style={{ background: 'linear-gradient(to right, #ffffff, #e0e0e0)' }}></div>
+              {/* <div className="w-24 h-1 mt-3 rounded-full" style={{ background: 'linear-gradient(to right, #ffffff, #e0e0e0)' }}></div> */}
             </div>
 
             <div className="space-y-5" style={{ color: '#cccccc' }}>
               <p className="text-base lg:text-lg leading-relaxed">
-               Kissan City is all about bringing you the purity of the pahad in its most natural form. We specialize in authentic pahaadi goods like pure desi ghee, raw honey, and premium dry fruits sourced directly from the hills.
-   Our products are carefully collected from trusted local farmers, preserving traditional methods and natural goodness.
+             Every jar, every packet tells a story. A story of farmers in the misty valleys of Himachal Pradesh, tending to their organic mushroom farms with the same care their ancestors showed to the land.
+
+A story of women in Haryana villages, preparing pure desi ghee using the ancient bilona method, handed down through generations. Each product is a testament to their dedication, their knowledge, and their love for the soil.
               </p>
 
               {!isReadMore && (
@@ -95,8 +97,8 @@ At Kissan City, we aim to deliver health, purity, and tradition straight from th
                     onClick={() => setIsReadMore(false)}
                     className="font-semibold text-sm uppercase tracking-wider transition-colors duration-200 flex items-center gap-2 mt-4"
                     style={{ color: '#8B3A1A' }}
-                    onMouseEnter={e => (e.currentTarget.style.color = '#C97B3A')}
-                    onMouseLeave={e => (e.currentTarget.style.color = '#8B3A1A')}
+                    onMouseEnter={e => (e.currentTarget.style.color = '#cccccc')}
+                    onMouseLeave={e => (e.currentTarget.style.color = '#ffffff')}
                   >
                     Read Less
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

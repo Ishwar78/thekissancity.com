@@ -280,7 +280,7 @@ export default function RecentReviewsSection() {
   }
 
   return (
-    <section className="py-20 bg-[#FFF8E1] relative overflow-hidden">
+    <section className="py-20  relative overflow-hidden" style={{ backgroundColor: '#faf3eb' }}>
       {/* Decorative background pattern */}
       <div className="absolute inset-0 opacity-20" style={{
         backgroundImage: 'radial-gradient(circle at 1px 1px, rgb(0 0 0 / 0.05) 1px, transparent 0)',
