@@ -114,7 +114,7 @@ export default function InfluencerImageDetailPage() {
               ${productId?.price?.toFixed(2) || 'N/A'}
             </span>
             <div className="flex space-x-4">
-              <button className="flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-amber-700 hover:bg-amber-800 transition-colors">
+              <button className="flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white btn-green-gradient transition-colors">
                 <ShoppingCart className="h-5 w-5 mr-2" /> Add to Cart
               </button>
               <button className="flex items-center justify-center p-3 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-100 transition-colors">

@@ -2872,35 +2872,35 @@ const handleProductSubmit = async (e: React.FormEvent) => {
 
 
 
-    <div className="space-y-6">
-  <div className="flex items-center justify-between">
-    <div>
-      <h2 className="text-2xl font-bold text-slate-500 dark:text-slate-200">Coupon Management</h2>
-      <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">Create and manage discount coupons</p>
-    </div>
+    <div className="space-y-8 max-w-6xl mx-auto">
+      <div className="flex items-center justify-between">
+        <div className="space-y-2">
+          <h2 className="text-3xl font-bold" style={{ color: '#6b4423' }}>Coupon Management</h2>
+          <p className="text-base text-gray-600 leading-relaxed max-w-2xl">Create and manage discount coupons</p>
+        </div>
 
     <Dialog open={couponDialogOpen} onOpenChange={handleCouponDialogOpenChange}>
       <DialogTrigger asChild>
-        <Button className="rounded-full">
-          <Plus className="h-4 w-4 mr-2" />
+        <Button className="rounded-full h-12 px-6 text-base font-semibold btn-brown-gradient shadow-lg hover:shadow-xl transition-all duration-300">
+          <Plus className="h-5 w-5 mr-2" />
           Create Coupon
         </Button>
       </DialogTrigger>
 
-      <DialogContent>
-        <DialogHeader>
-       <DialogTitle className="text-white">
+      <DialogContent className="rounded-2xl max-w-2xl" style={{ backgroundColor: '#faf3eb' }}>
+        <DialogHeader className="pb-6" style={{ borderBottom: '1px solid #e5d4c1' }}>
+         <DialogTitle className="text-2xl font-semibold" style={{ color: '#6b4423' }}>
   {editingCoupon ? 'Edit Coupon' : 'Create New Coupon'}
 </DialogTitle>
 
-          <DialogDescription className="text-slate-600 dark:text-slate-300">
+          <DialogDescription className="text-base" style={{ color: '#8b5a3c' }}>
             Add a discount coupon for customers
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="coupon-code" className="text-slate-700 dark:text-slate-200">Coupon Code</Label>
+        <div className="space-y-6 p-2">
+          <div className="space-y-3">
+            <Label htmlFor="coupon-code" className="text-base font-semibold" style={{ color: '#6b4423' }}>Coupon Code</Label>
             <Input
               id="coupon-code"
               placeholder="e.g., SAVE10"
@@ -2909,12 +2909,13 @@ const handleProductSubmit = async (e: React.FormEvent) => {
                 setCouponForm((p) => ({ ...p, code: e.target.value.toUpperCase() }))
               }
               disabled={couponSaving}
-              className="text-foreground placeholder:text-muted-foreground"
+              className="h-11 text-base rounded-lg border-2 focus:border-[#6b4423] focus:ring-2 focus:ring-[#6b4423]/20 transition-all duration-200"
+              style={{ backgroundColor: '#ffffff', borderColor: '#d1b89a' }}
             />
           </div>
 
-          <div>
-            <Label htmlFor="coupon-discount" className="text-slate-700 dark:text-slate-200">Discount (%)</Label>
+          <div className="space-y-3">
+            <Label htmlFor="coupon-discount" className="text-base font-semibold" style={{ color: '#6b4423' }}>Discount (%)</Label>
             <Input
               id="coupon-discount"
               type="number"
@@ -2923,23 +2924,25 @@ const handleProductSubmit = async (e: React.FormEvent) => {
               value={couponForm.discount}
               onChange={(e) => setCouponForm((p) => ({ ...p, discount: Number(e.target.value) }))}
               disabled={couponSaving}
-              className="text-foreground placeholder:text-muted-foreground"
+              className="h-11 text-base rounded-lg border-2 focus:border-[#6b4423] focus:ring-2 focus:ring-[#6b4423]/20 transition-all duration-200"
+              style={{ backgroundColor: '#ffffff', borderColor: '#d1b89a' }}
             />
           </div>
 
-          <div>
-            <Label htmlFor="coupon-expiry" className="text-slate-700 dark:text-slate-200">Expiry Date</Label>
+          <div className="space-y-3">
+            <Label htmlFor="coupon-expiry" className="text-base font-semibold" style={{ color: '#6b4423' }}>Expiry Date</Label>
             <Input
               id="coupon-expiry"
               type="date"
               value={couponForm.expiryDate}
               onChange={(e) => setCouponForm((p) => ({ ...p, expiryDate: e.target.value }))}
               disabled={couponSaving}
-              className="text-foreground placeholder:text-muted-foreground"
+              className="h-11 text-base rounded-lg border-2 focus:border-[#6b4423] focus:ring-2 focus:ring-[#6b4423]/20 transition-all duration-200"
+              style={{ backgroundColor: '#ffffff', borderColor: '#d1b89a' }}
             />
           </div>
-          <div>
-            <Label htmlFor="coupon-offer-text" className="text-slate-700 dark:text-slate-200">Offer Text</Label>
+          <div className="space-y-3">
+            <Label htmlFor="coupon-offer-text" className="text-base font-semibold" style={{ color: '#6b4423' }}>Offer Text</Label>
             <Input
               id="coupon-offer-text"
               placeholder="e.g., Get it for as low as ₹1,170"
@@ -2948,11 +2951,12 @@ const handleProductSubmit = async (e: React.FormEvent) => {
                 setCouponForm((p) => ({ ...p, offerText: e.target.value }))
               }
               disabled={couponSaving}
-              className="text-foreground placeholder:text-muted-foreground"
+              className="h-11 text-base rounded-lg border-2 focus:border-[#6b4423] focus:ring-2 focus:ring-[#6b4423]/20 transition-all duration-200"
+              style={{ backgroundColor: '#ffffff', borderColor: '#d1b89a' }}
             />
           </div>
-          <div>
-            <Label htmlFor="coupon-description" className="text-slate-700 dark:text-slate-200">Description</Label>
+          <div className="space-y-3">
+            <Label htmlFor="coupon-description" className="text-base font-semibold" style={{ color: '#6b4423' }}>Description</Label>
             <Textarea
               id="coupon-description"
               placeholder="e.g., New Year Offer: Buy 2, Get 10% Off"
@@ -2961,11 +2965,12 @@ const handleProductSubmit = async (e: React.FormEvent) => {
                 setCouponForm((p) => ({ ...p, description: e.target.value }))
               }
               disabled={couponSaving}
-              className="text-foreground placeholder:text-muted-foreground"
+              className="min-h-[100px] text-base rounded-lg border-2 focus:border-[#6b4423] focus:ring-2 focus:ring-[#6b4423]/20 transition-all duration-200 resize-none"
+              style={{ backgroundColor: '#ffffff', borderColor: '#d1b89a' }}
             />
           </div>
-          <div>
-            <Label htmlFor="coupon-terms-and-conditions" className="text-slate-700 dark:text-slate-200">Terms & Conditions</Label>
+          <div className="space-y-3">
+            <Label htmlFor="coupon-terms-and-conditions" className="text-base font-semibold" style={{ color: '#6b4423' }}>Terms & Conditions</Label>
             <Textarea
               id="coupon-terms-and-conditions"
               placeholder="e.g., Discount is applicable on all items."
@@ -2974,16 +2979,27 @@ const handleProductSubmit = async (e: React.FormEvent) => {
                 setCouponForm((p) => ({ ...p, termsAndConditions: e.target.value }))
               }
               disabled={couponSaving}
-              className="text-foreground placeholder:text-muted-foreground"
+              className="min-h-[100px] text-base rounded-lg border-2 focus:border-[#6b4423] focus:ring-2 focus:ring-[#6b4423]/20 transition-all duration-200 resize-none"
+              style={{ backgroundColor: '#ffffff', borderColor: '#d1b89a' }}
             />
           </div>
 
-          <div className="flex gap-2 justify-end">
-            <Button variant="outline" onClick={() => setCouponDialogOpen(false)} disabled={couponSaving}>
+          <div className="flex gap-3 justify-end pt-6">
+            <Button 
+              variant="outline" 
+              onClick={() => setCouponDialogOpen(false)} 
+              disabled={couponSaving}
+              className="h-11 px-6 text-base font-semibold border-2 rounded-lg transition-all duration-300 hover:bg-gray-50"
+              style={{ borderColor: '#d1b89a', color: '#6b4423' }}
+            >
               Cancel
             </Button>
-            <Button onClick={editingCoupon ? updateCoupon : createCoupon} disabled={couponSaving}>
-              {couponSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+            <Button 
+              onClick={editingCoupon ? updateCoupon : createCoupon} 
+              disabled={couponSaving}
+              className="h-11 px-6 text-base font-semibold btn-green-gradient shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              {couponSaving && <Loader2 className="h-5 w-5 mr-2 animate-spin" />}
               {editingCoupon ? 'Update' : 'Create'}
             </Button>
           </div>
@@ -2992,43 +3008,50 @@ const handleProductSubmit = async (e: React.FormEvent) => {
     </Dialog>
   </div>
 
-  <Card className="shadow-sm rounded-xl bg-white dark:bg-slate-900">
-    <CardContent className="p-4">
-      <div className="overflow-x-auto text-slate-800 dark:text-slate-200">
+  <Card className="rounded-2xl shadow-xl border-0 overflow-hidden" style={{ backgroundColor: '#faf3eb' }}>
+    <CardContent className="p-6">
+      <div className="overflow-x-auto">
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead className="text-slate-700 dark:text-slate-300">Coupon Code</TableHead>
-              <TableHead className="text-slate-700 dark:text-slate-300">Discount (%)</TableHead>
-              <TableHead className="text-slate-700 dark:text-slate-300">Expiry Date</TableHead>
-              <TableHead className="text-slate-700 dark:text-slate-300">Used By</TableHead>
-              <TableHead className="text-slate-700 dark:text-slate-300">Actions</TableHead>
+            <TableRow className="border-b-2" style={{ borderBottomColor: '#e5d4c1' }}>
+              <TableHead className="text-base font-semibold px-4 py-4" style={{ color: '#6b4423', backgroundColor: '#f0e5d0' }}>Coupon Code</TableHead>
+              <TableHead className="text-base font-semibold px-4 py-4" style={{ color: '#6b4423', backgroundColor: '#f0e5d0' }}>Discount (%)</TableHead>
+              <TableHead className="text-base font-semibold px-4 py-4" style={{ color: '#6b4423', backgroundColor: '#f0e5d0' }}>Expiry Date</TableHead>
+              <TableHead className="text-base font-semibold px-4 py-4" style={{ color: '#6b4423', backgroundColor: '#f0e5d0' }}>Used By</TableHead>
+              <TableHead className="text-base font-semibold px-4 py-4 text-right" style={{ color: '#6b4423', backgroundColor: '#f0e5d0' }}>Actions</TableHead>
             </TableRow>
           </TableHeader>
 
           <TableBody>
             {couponsLoading ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-6 text-slate-600 dark:text-slate-300">
-                  Loading...
+                <TableCell colSpan={5} className="text-center py-8 text-base" style={{ color: '#8b5a3c' }}>
+                  <div className="flex items-center justify-center">
+                    <Loader2 className="h-6 w-6 animate-spin mr-2" />
+                    Loading coupons...
+                  </div>
                 </TableCell>
               </TableRow>
             ) : coupons.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-6 text-slate-600 dark:text-slate-300">
-                  No coupons created yet
+                <TableCell colSpan={5} className="text-center py-8 text-base" style={{ color: '#8b5a3c' }}>
+                  <div className="space-y-2">
+                    <div className="text-4xl mb-2">🎫</div>
+                    <div className="font-medium">No coupons created yet</div>
+                    <div className="text-sm opacity-75">Create your first coupon to get started</div>
+                  </div>
                 </TableCell>
               </TableRow>
             ) : (
               coupons.map((coupon) => (
-                <TableRow key={coupon.id} className="hover:bg-muted/50">
-                  <TableCell className="font-medium text-sm break-words">{coupon.code}</TableCell>
-                  <TableCell className="text-sm">{coupon.discount}%</TableCell>
-                  <TableCell className="text-sm">
+                <TableRow key={coupon.id} className="border-b hover:bg-opacity-80 transition-all duration-200" style={{ borderBottomColor: '#e5d4c1', hoverBackgroundColor: '#f0e5d0' }}>
+                  <TableCell className="font-medium text-sm px-4 py-4" style={{ color: '#6b4423' }}>{coupon.code}</TableCell>
+                  <TableCell className="text-sm px-4 py-4" style={{ color: '#6b4423' }}>{coupon.discount}%</TableCell>
+                  <TableCell className="text-sm px-4 py-4" style={{ color: '#8b5a3c' }}>
                     {new Date(coupon.expiryDate).toLocaleDateString("en-IN")}
                   </TableCell>
-                  <TableCell className="text-sm">{coupon.usedCount}</TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-sm px-4 py-4" style={{ color: '#8b5a3c' }}>{coupon.usedCount}</TableCell>
+                  <TableCell className="text-sm px-4 py-4">
                     <div className="flex items-center justify-end gap-2">
                       <Button
                         variant="outline"
@@ -3045,6 +3068,8 @@ const handleProductSubmit = async (e: React.FormEvent) => {
                           });
                           setCouponDialogOpen(true);
                         }}
+                        className="border-2 rounded-lg transition-all duration-300 hover:bg-gray-50"
+                        style={{ borderColor: '#d1b89a', color: '#6b4423' }}
                       >
                         <SquarePen className="h-4 w-4" />
                       </Button>
@@ -3053,6 +3078,8 @@ const handleProductSubmit = async (e: React.FormEvent) => {
                         size="sm"
                         onClick={() => deleteCoupon(coupon.id)}
                         disabled={couponSaving}
+                        className="rounded-lg transition-all duration-300 hover:opacity-90"
+                        style={{ backgroundColor: '#dc2626' }}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -5481,37 +5508,37 @@ const handleProductSubmit = async (e: React.FormEvent) => {
   );
 
   const renderRazorpaySettings = () => (
-
-
-    <div className="space-y-6 max-w-2xl">
-      <div>
-        <h2 className="text-2xl font-bold">Razorpay Settings</h2>
-        <p className="text-sm text-muted-foreground">
-          Configure your Razorpay payment gateway credentials. Keys are stored securely on the backend and used for payment processing.
+    <div className="space-y-8 max-w-4xl mx-auto">
+      <div className="text-center space-y-3">
+        <h2 className="text-3xl font-bold" style={{ color: '#6b4423' }}>Razorpay Settings</h2>
+        <p className="text-base text-gray-600 max-w-2xl mx-auto leading-relaxed">
+          Configure your Razorpay payment gateway credentials. Keys are stored securely on backend and used for payment processing.
         </p>
       </div>
 
-      <Card className="bg-black rounded-xl shadow-sm p-5">
-        <CardHeader>
-          <CardTitle>Razorpay Configuration</CardTitle>
-          <CardDescription>Add your Razorpay API credentials to enable online payments</CardDescription>
+      <Card className="rounded-2xl shadow-xl border-0 overflow-hidden" style={{ backgroundColor: '#faf3eb' }}>
+        <CardHeader className="pb-6" style={{ borderBottom: '1px solid #e5d4c1' }}>
+          <CardTitle className="text-2xl font-semibold" style={{ color: '#6b4423' }}>Razorpay Configuration</CardTitle>
+          <CardDescription className="text-base" style={{ color: '#8b5a3c' }}>Add your Razorpay API credentials to enable online payments</CardDescription>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleRazorpaySubmit} className="space-y-5">
-            <div>
-              <Label htmlFor="keyId">Razorpay Key ID</Label>
+        <CardContent className="p-8 space-y-7">
+          <form onSubmit={handleRazorpaySubmit} className="space-y-7">
+            <div className="space-y-3">
+              <Label htmlFor="keyId" className="text-base font-semibold" style={{ color: '#6b4423' }}>Razorpay Key ID</Label>
               <Input
                 id="keyId"
                 placeholder="e.g., rzp_live_xxxxxxxxxxxxx"
                 value={razorpayForm.keyId}
                 onChange={(e) => setRazorpayForm((prev) => ({ ...prev, keyId: e.target.value }))}
                 disabled={settingsLoading || savingRazorpay || testingRazorpay}
+                className="h-12 text-base rounded-lg border-2 focus:border-[#6b4423] focus:ring-2 focus:ring-[#6b4423]/20 transition-all duration-200"
+                style={{ backgroundColor: '#ffffff', borderColor: '#d1b89a' }}
               />
-              <p className="text-sm text-muted-foreground mt-1">Your Razorpay public Key ID (from Settings → API Keys)</p>
+              <p className="text-sm leading-relaxed" style={{ color: '#8b5a3c' }}>Your Razorpay public Key ID (from Settings → API Keys)</p>
             </div>
 
-            <div>
-              <Label htmlFor="keySecret">Razorpay Key Secret</Label>
+            <div className="space-y-3">
+              <Label htmlFor="keySecret" className="text-base font-semibold" style={{ color: '#6b4423' }}>Razorpay Key Secret</Label>
               <Input
                 id="keySecret"
                 type="password"
@@ -5519,12 +5546,14 @@ const handleProductSubmit = async (e: React.FormEvent) => {
                 value={razorpayForm.keySecret}
                 onChange={(e) => setRazorpayForm((prev) => ({ ...prev, keySecret: e.target.value }))}
                 disabled={settingsLoading || savingRazorpay || testingRazorpay}
+                className="h-12 text-base rounded-lg border-2 focus:border-[#6b4423] focus:ring-2 focus:ring-[#6b4423]/20 transition-all duration-200"
+                style={{ backgroundColor: '#ffffff', borderColor: '#d1b89a' }}
               />
-              <p className="text-sm text-muted-foreground mt-1">Your Razorpay secret key (keep this confidential)</p>
+              <p className="text-sm leading-relaxed" style={{ color: '#8b5a3c' }}>Your Razorpay secret key (keep this confidential)</p>
             </div>
 
-            <div>
-              <Label htmlFor="webhookSecret">Webhook Secret (Optional)</Label>
+            <div className="space-y-3">
+              <Label htmlFor="webhookSecret" className="text-base font-semibold" style={{ color: '#6b4423' }}>Webhook Secret (Optional)</Label>
               <Input
                 id="webhookSecret"
                 type="password"
@@ -5532,18 +5561,20 @@ const handleProductSubmit = async (e: React.FormEvent) => {
                 value={razorpayForm.webhookSecret}
                 onChange={(e) => setRazorpayForm((prev) => ({ ...prev, webhookSecret: e.target.value }))}
                 disabled={settingsLoading || savingRazorpay || testingRazorpay}
+                className="h-12 text-base rounded-lg border-2 focus:border-[#6b4423] focus:ring-2 focus:ring-[#6b4423]/20 transition-all duration-200"
+                style={{ backgroundColor: '#ffffff', borderColor: '#d1b89a' }}
               />
-              <p className="text-sm text-muted-foreground mt-1">Optional: For webhook signature verification</p>
+              <p className="text-sm leading-relaxed" style={{ color: '#8b5a3c' }}>Optional: For webhook signature verification</p>
             </div>
 
-            <div>
-              <Label htmlFor="currency">Currency</Label>
+            <div className="space-y-3">
+              <Label htmlFor="currency" className="text-base font-semibold" style={{ color: '#6b4423' }}>Currency</Label>
               <Select
                 value={razorpayForm.currency}
                 onValueChange={(value) => setRazorpayForm((prev) => ({ ...prev, currency: value }))}
                 disabled={settingsLoading || savingRazorpay || testingRazorpay}
               >
-                <SelectTrigger id="currency">
+                <SelectTrigger id="currency" className="h-12 text-base rounded-lg border-2 focus:border-[#6b4423] focus:ring-2 focus:ring-[#6b4423]/20 transition-all duration-200" style={{ backgroundColor: '#ffffff', borderColor: '#d1b89a' }}>
                   <SelectValue placeholder="Select currency" />
                 </SelectTrigger>
                 <SelectContent>
@@ -5553,31 +5584,33 @@ const handleProductSubmit = async (e: React.FormEvent) => {
                   <SelectItem value="GBP">GBP (British Pound)</SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-sm text-muted-foreground mt-1">Currency for transactions (default: INR)</p>
+              <p className="text-sm leading-relaxed" style={{ color: '#8b5a3c' }}>Currency for transactions (default: INR)</p>
             </div>
 
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <Label htmlFor="isActive" className="font-medium">
+            <div className="flex items-center justify-between gap-6 p-5 rounded-xl" style={{ backgroundColor: '#f0e5d0' }}>
+              <div className="space-y-2">
+                <Label htmlFor="isActive" className="text-base font-semibold flex items-center gap-2" style={{ color: '#6b4423' }}>
                   Enable Razorpay
                 </Label>
-                <p className="text-sm text-muted-foreground">Activate to use Razorpay for checkout</p>
+                <p className="text-sm leading-relaxed" style={{ color: '#8b5a3c' }}>Activate to use Razorpay for checkout</p>
               </div>
               <Switch
                 id="isActive"
                 checked={razorpayForm.isActive}
                 onCheckedChange={(checked) => setRazorpayForm((prev) => ({ ...prev, isActive: checked }))}
                 disabled={settingsLoading || savingRazorpay || testingRazorpay}
+                className="scale-125"
+                style={{ '--ring-color': '#6b4423' } as React.CSSProperties}
               />
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-2 pt-4">
+            <div className="flex flex-col sm:flex-row gap-4 pt-8">
               <Button
                 type="submit"
                 disabled={savingRazorpay || settingsLoading || testingRazorpay}
-                className="flex-1"
+                className="flex-1 h-12 text-base font-semibold btn-green-gradient shadow-lg hover:shadow-xl transition-all duration-300"
               >
-                {savingRazorpay && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {savingRazorpay && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
                 Save Settings
               </Button>
               <Button
@@ -5585,7 +5618,8 @@ const handleProductSubmit = async (e: React.FormEvent) => {
                 variant="outline"
                 onClick={handleRazorpayReset}
                 disabled={savingRazorpay || settingsLoading || testingRazorpay}
-                className="flex-1"
+                className="flex-1 h-12 text-base font-semibold border-2 rounded-lg transition-all duration-300 hover:bg-gray-50"
+                style={{ borderColor: '#d1b89a', color: '#6b4423' }}
               >
                 Reset
               </Button>
@@ -5594,9 +5628,10 @@ const handleProductSubmit = async (e: React.FormEvent) => {
                 variant="secondary"
                 onClick={handleRazorpayTest}
                 disabled={savingRazorpay || settingsLoading || testingRazorpay || !razorpayForm.keyId.trim() || !razorpayForm.keySecret.trim()}
-                className="flex-1"
+                className="flex-1 h-12 text-base font-semibold rounded-lg transition-all duration-300 hover:opacity-90"
+                style={{ backgroundColor: '#8b5a3c', color: '#ffffff' }}
               >
-                {testingRazorpay && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {testingRazorpay && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
                 Test Connection
               </Button>
             </div>

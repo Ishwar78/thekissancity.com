@@ -26,7 +26,7 @@ const features = [
 
 const WhyUsSection = () => {
   return (
-    <section style={{ backgroundColor: '#F5F5E8' }} className="py-16 lg:py-24">
+    <section style={{ backgroundColor: '#F5F0E8' }} className="py-16 lg:py-24">
       {/* Section Title */}
       <div className="text-center mb-14">
         <h2
@@ -68,7 +68,7 @@ const WhyUsSection = () => {
               <h3
                 className="font-bold mb-4"
                 style={{
-                  color: '#3b1f0e',
+                  color: '#6b4423',
                   fontFamily: "'Georgia', 'Times New Roman', serif",
                   fontSize: '1.2rem',
                   lineHeight: '1.3',
@@ -81,7 +81,7 @@ const WhyUsSection = () => {
               <p
                 className="text-sm leading-relaxed"
                 style={{
-                  color: '#7a5c45',
+                  color: '#6b4423',
                   fontFamily: "'Georgia', serif",
                   lineHeight: '1.75',
                 }}

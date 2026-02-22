@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Loader2, TrendingUp } from 'lucide-react';
 import { ProductCard } from '@/components/ProductCard';
+import { BestSellerCard } from '@/components/BestSellerSection';
 import { api } from '@/lib/api';
 import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
@@ -131,12 +132,12 @@ export default function BestSellerProducts() {
               <p className="text-muted-foreground">No best seller products found.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-              {products.map((product) => {
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+              {products.map((product, index) => {
                 const card = mapToCard(product);
                 const to = `/products/${card.slug}`;
                 return (
-                  <ProductCard key={String(product._id || product.id)} {...card} to={to} />
+                  <BestSellerCard key={String(product._id || product.id)} product={product} index={index} to={to} />
                 );
               })}
             </div>

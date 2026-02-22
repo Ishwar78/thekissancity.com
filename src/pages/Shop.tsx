@@ -464,11 +464,10 @@ const fetchProducts = async () => {
 
       <main className="container mx-auto px-3 sm:px-4 pt-32 pb-12 md:pt-36 lg:pt-40">
         <div className="text-center mb-12">
-          <h1 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tighter mb-3">
+          <h1 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tighter mb-3" style={{ color: '#6b4423' }}>
             {pageTitle}
-          
           </h1>
-          <p className="text-sm sm:text-base text-muted-foreground">
+          <p className="text-sm sm:text-base" style={{ color: '#6b4423' }}>
             {pageSubtitle}
           </p>
         </div>
@@ -480,6 +479,7 @@ const fetchProducts = async () => {
               variant="outline"
               onClick={resetFilters}
               className="hidden lg:flex items-center shrink-0"
+              style={{ borderColor: '#6b4423', color: '#6b4423' }}
             >
               <XCircle className="w-4 h-4 mr-2" /> Clear Filters
             </Button>
@@ -510,10 +510,10 @@ const fetchProducts = async () => {
                   setCurrentPage(1);
                 }}
               >
-                <SelectTrigger className="w-[120px] h-9 border-2 border-gray-200 hover:border-[#ba8c5c] transition-all duration-200 shadow-sm hover:shadow-md bg-white focus:ring-2 focus:ring-[#ba8c5c] focus:ring-offset-1 rounded-md font-medium text-sm">
+                <SelectTrigger className="w-[120px] h-9 border-2 font-medium text-sm" style={{ borderColor: '#6b4423', hover: { borderColor: '#6b4423' } }}>
                   <SelectValue placeholder="Sort" />
                 </SelectTrigger>
-                <SelectContent className="bg-white border-2 border-gray-200 shadow-xl rounded-md">
+                <SelectContent className="bg-white border-2 shadow-xl rounded-md" style={{ borderColor: '#6b4423' }}>
                   <SelectItem 
                     value="none" 
                     className="cursor-pointer hover:bg-[#ba8c5c]/10 focus:bg-[#ba8c5c]/10 transition-colors"
@@ -549,10 +549,10 @@ const fetchProducts = async () => {
                   setCurrentPage(1);
                 }}
               >
-                <SelectTrigger className="w-[140px] sm:w-[160px] md:w-[200px] h-10 border-2 border-gray-200 hover:border-[#ba8c5c] transition-all duration-200 shadow-sm hover:shadow-md bg-white focus:ring-2 focus:ring-[#ba8c5c] focus:ring-offset-1 rounded-md font-medium">
+                <SelectTrigger className="w-[140px] sm:w-[160px] md:w-[200px] h-10 border-2 font-medium" style={{ borderColor: '#6b4423' }}>
                   <SelectValue placeholder="Sort by price" />
                 </SelectTrigger>
-                <SelectContent className="bg-white border-2 border-gray-200 shadow-xl rounded-md">
+                <SelectContent className="bg-white border-2 shadow-xl rounded-md" style={{ borderColor: '#6b4423' }}>
                   <SelectItem 
                     value="none" 
                     className="cursor-pointer hover:bg-[#ba8c5c]/10 focus:bg-[#ba8c5c]/10 transition-colors"
@@ -593,14 +593,15 @@ const fetchProducts = async () => {
                   <Button
                     variant="outline"
                     onClick={resetFilters}
-                    className="w-full flex items-center text-gray-900 hover:text-gray-900"
+                    className="w-full flex items-center"
+                    style={{ borderColor: '#6b4423', color: '#6b4423' }}
                   >
                     <XCircle className="w-4 h-4 mr-2" /> Clear Filters
                   </Button>
 
                   {/* Categories Filter */}
                   <Collapsible open={isCategoriesOpen} onOpenChange={setIsCategoriesOpen}>
-                    <CollapsibleTrigger className="flex justify-between items-center w-full py-2 text-lg font-semibold border-b">
+                    <CollapsibleTrigger className="flex justify-between items-center w-full py-2 text-lg font-semibold border-b" style={{ color: '#6b4423', borderColor: '#6b4423' }}>
                       Categories {isCategoriesOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                     </CollapsibleTrigger>
                     <CollapsibleContent className="pt-4 pb-2 space-y-2">
@@ -612,7 +613,8 @@ const fetchProducts = async () => {
                             setSelectedCategory(category);
                             setCurrentPage(1);
                           }}
-                          className="w-full justify-start text-gray-900 hover:text-gray-900"
+                          className="w-full justify-start"
+                      style={{ color: '#6b4423' }}
                         >
                           {category}
                         </Button>
@@ -624,7 +626,7 @@ const fetchProducts = async () => {
 
                   {/* Quantity Filter */}
                   <Collapsible open={isQuantityOpen} onOpenChange={setIsQuantityOpen}>
-                    <CollapsibleTrigger className="flex justify-between items-center w-full py-2 text-lg font-semibold border-b">
+                    <CollapsibleTrigger className="flex justify-between items-center w-full py-2 text-lg font-semibold border-b" style={{ color: '#6b4423', borderColor: '#6b4423' }}>
                       Quantity {isQuantityOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                     </CollapsibleTrigger>
                     <CollapsibleContent className="pt-4 pb-2 space-y-2">
@@ -646,7 +648,7 @@ const fetchProducts = async () => {
 
                   {/* Price Filter */}
                   <Collapsible open={isPriceOpen} onOpenChange={setIsPriceOpen}>
-                    <CollapsibleTrigger className="flex justify-between items-center w-full py-2 text-lg font-semibold border-b">
+                    <CollapsibleTrigger className="flex justify-between items-center w-full py-2 text-lg font-semibold border-b" style={{ color: '#6b4423', borderColor: '#6b4423' }}>
                       Price {isPriceOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                     </CollapsibleTrigger>
                     <CollapsibleContent className="pt-4 pb-2">
@@ -671,7 +673,7 @@ const fetchProducts = async () => {
 
                   {/* Sort By Price (Mobile) */}
                   <Collapsible defaultOpen={true}>
-                    <CollapsibleTrigger className="flex justify-between items-center w-full py-2 text-lg font-semibold border-b">
+                    <CollapsibleTrigger className="flex justify-between items-center w-full py-2 text-lg font-semibold border-b" style={{ color: '#6b4423', borderColor: '#6b4423' }}>
                       <div className="flex items-center gap-2">
                         <ArrowUpDown className="w-4 h-4 text-muted-foreground" />
                         Sort By Price
@@ -686,25 +688,25 @@ const fetchProducts = async () => {
                           setCurrentPage(1);
                         }}
                       >
-                        <SelectTrigger className="w-full h-11 border-2 border-gray-200 hover:border-[#ba8c5c] transition-all duration-200 shadow-sm hover:shadow-md bg-white focus:ring-2 focus:ring-[#ba8c5c] focus:ring-offset-1 rounded-md font-medium text-gray-900">
+                        <SelectTrigger className="w-full h-11 border-2 font-medium" style={{ borderColor: '#6b4423', color: '#6b4423' }}>
                           <SelectValue placeholder="Sort by price" />
                         </SelectTrigger>
-                        <SelectContent className="bg-white border-2 border-gray-200 shadow-xl rounded-md">
+                        <SelectContent className="bg-white border-2 shadow-xl rounded-md" style={{ borderColor: '#6b4423' }}>
                           <SelectItem 
                             value="none" 
-                            className="cursor-pointer hover:bg-[#ba8c5c]/10 focus:bg-[#ba8c5c]/10 transition-colors text-gray-900"
+                            className="cursor-pointer hover:bg-[#ba8c5c]/10 focus:bg-[#ba8c5c]/10 transition-colors" style={{ color: '#6b4423' }}
                           >
                             Default
                           </SelectItem>
                           <SelectItem 
                             value="low-to-high" 
-                            className="cursor-pointer hover:bg-[#ba8c5c]/10 focus:bg-[#ba8c5c]/10 transition-colors text-gray-900"
+                            className="cursor-pointer hover:bg-[#ba8c5c]/10 focus:bg-[#ba8c5c]/10 transition-colors" style={{ color: '#6b4423' }}
                           >
                             Price: Low to High
                           </SelectItem>
                           <SelectItem 
                             value="high-to-low" 
-                            className="cursor-pointer hover:bg-[#ba8c5c]/10 focus:bg-[#ba8c5c]/10 transition-colors text-gray-900"
+                            className="cursor-pointer hover:bg-[#ba8c5c]/10 focus:bg-[#ba8c5c]/10 transition-colors" style={{ color: '#6b4423' }}
                           >
                             Price: High to Low
                           </SelectItem>
@@ -738,6 +740,7 @@ const fetchProducts = async () => {
                         setCurrentPage(1);
                       }}
                       className="w-full justify-start"
+                      style={{ color: '#6b4423' }}
                     >
                       {category}
                     </Button>
@@ -762,6 +765,7 @@ const fetchProducts = async () => {
                         setCurrentPage(1);
                       }}
                       className="w-full justify-start"
+                      style={{ color: '#6b4423' }}
                     >
                       {quantity}
                     </Button>
@@ -779,7 +783,7 @@ const fetchProducts = async () => {
                     min={0}
                     max={5000} // Updated to match new price range
                     step={10}
-                    value={[0, 5000]}
+                    value={priceRange}
                     onValueChange={(val: [number, number]) => {
                       console.log('Desktop slider value changed to:', val);
                       console.log('Desktop slider current value:', priceRange);

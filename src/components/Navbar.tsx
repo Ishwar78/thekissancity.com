@@ -130,7 +130,7 @@ export const Navbar = ({ cartItemCount = 0 }: NavbarProps) => {
           {/* Mobile Search Bar - Only visible on mobile */}
           <div className={`md:hidden transition-all duration-300 ease-in-out ${
             isSearchExpanded 
-              ? 'absolute inset-0 z-50 bg-black px-4' 
+              ? 'absolute inset-0 z-50 bg-[#2d2117] px-4' 
               : 'hidden'
           }`}>
             {isSearchExpanded && (
@@ -154,12 +154,14 @@ export const Navbar = ({ cartItemCount = 0 }: NavbarProps) => {
                       onChange={(e) => setSearchQuery(e.target.value)}
                       onKeyDown={handleKeyDown}
                       autoFocus
-                      style={{ 
-                        color: '#374151',
-                        backgroundColor: '#f9fafb',
-                        borderColor: '#d1d5db'
-                      }}
                       className="w-full pl-10 pr-8 h-9 text-sm border-gray-300 placeholder:text-gray-500 focus-visible:ring-gray-400 focus-visible:bg-white focus-visible:border-gray-400 focus-visible:ring-1"
+                      style={{ 
+                        color: 'hsl(var(--foreground)) !important',
+                        backgroundColor: '#f9fafb',
+                        borderColor: '#6b4423'
+                      }}
+                      inputMode="search"
+                      autoComplete="off"
                       placeholder="Search for Products, Brands and More"
                     />
                     {searchQuery && (
@@ -278,7 +280,10 @@ export const Navbar = ({ cartItemCount = 0 }: NavbarProps) => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  className="pl-12 pr-12 h-11 text-base bg-gray-50 border-gray-300 text-gray-900 placeholder:text-gray-500 focus-visible:ring-gray-400 focus-visible:bg-white focus-visible:border-gray-400 focus-visible:ring-2"
+                  className="pl-12 pr-12 h-11 text-base bg-gray-50 border-gray-300 placeholder:text-gray-500 focus-visible:ring-gray-400 focus-visible:bg-white focus-visible:border-gray-400 focus-visible:ring-2"
+                  style={{ color: 'hsl(var(--foreground)) !important' }}
+                  inputMode="search"
+                  autoComplete="off"
                 />
                 {searchQuery && (
                   <Button

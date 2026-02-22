@@ -396,7 +396,7 @@ export default function Dashboard() {
                   <div className="text-center py-12 border border-dashed rounded">
                     <p className="text-muted-foreground mb-4">You have no orders yet.</p>
                     <Link to="/">
-                      <Button>Shop Now</Button>
+                      <Button className="btn-green-gradient">Shop Now</Button>
                     </Link>
                   </div>
                 ) : (

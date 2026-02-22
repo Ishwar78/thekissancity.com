@@ -109,7 +109,8 @@ export default function AllVideosPage() {
         {/* Header */}
         <div className="text-center mb-12 md:mb-16 space-y-4">
          
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold "
+            style={{ color: '#6b4423' }}>
             All Videos
           </h1>
           <p className="text-gray-600 max-w-2xl mx-auto text-base md:text-lg">

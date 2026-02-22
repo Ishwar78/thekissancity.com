@@ -45,11 +45,15 @@ type ProductRow = {
   title?: string;
   name?: string;
   price?: number;
-  category?: string;
-  images?: string[];
+  originalPrice?: number;
+  discountedPrice?: number;
+  discountPercentage?: number;
+  image?: string;
   image_url?: string;
+  images?: string[];
+  category?: string;
   slug?: string;
-  createdAt?: string;
+  rating?: number;
   quantityOptions?: Array<{
     id: string;
     quantity: number;
@@ -62,6 +66,71 @@ type ProductRow = {
     isActive: boolean;
     sortOrder: number;
   }>;
+  region?: string;
+  gender?: string;
+  stock?: number;
+  paragraph1?: string;
+  paragraph2?: string;
+  highlights?: string[];
+  specs?: Array<{ key: string; value: string }>;
+  colors?: string[];
+  colorVariants?: Array<{
+    colorName: string;
+    colorCode: string;
+    images: string[];
+    primaryImageIndex: number;
+  }>;
+  colorInventory?: Array<{
+    color: string;
+    qty: number;
+  }>;
+  colorImages?: Record<string, string>;
+  sizes?: string[];
+  trackInventoryBySize?: boolean;
+  sizeInventory?: Array<{
+    code: string;
+    label: string;
+    qty: number;
+  }>;
+  sizeChartUrl?: string;
+  sizeChartTitle?: string;
+  sizeChart?: {
+    title: string;
+    fieldLabels: {
+      chest: string;
+      waist: string;
+      length: string;
+    };
+    rows: Array<{
+      sizeLabel: string;
+      chest: string;
+      waist: string;
+      length: string;
+      brandSize: string;
+    }>;
+    guidelines: string;
+    diagramUrl: string;
+  };
+  discount?: {
+    type: 'flat' | 'percentage';
+    value: number;
+  };
+  seo?: {
+    title: string;
+    description: string;
+    keywords: string;
+  };
+  sizeFit?: {
+    fit: string;
+    modelWearingSize: string;
+  };
+  faq?: Array<{
+    question: string;
+    answer: string;
+  }>;
+  active?: boolean;
+  featured?: boolean;
+  isBestSeller?: boolean;
   reviews?: Array<{
     id: string;
     username: string;
@@ -69,8 +138,9 @@ type ProductRow = {
     rating: number;
     text: string;
     status: string;
-    createdAt: string;
+    createdAt: Date;
   }>;
+  createdAt?: Date;
 };
 
 type CategoryRow = {
@@ -643,7 +713,22 @@ const Index = () => {
 
     const img = resolveImage(rawImg);
     const originalPrice = Number(p.price || 0);
-    const discountedPrice = Math.round(originalPrice * 0.8); // 20% discount for demonstration
+    
+    // Check if product has discount data
+    let discountPercentage = 0;
+    let discountedPrice = originalPrice;
+    
+    // Check for discount in the correct structure
+    if (p.discount && p.discount.value && p.discount.value > 0) {
+      if (p.discount.type === 'percentage') {
+        discountPercentage = p.discount.value;
+        discountedPrice = Math.round(originalPrice * (1 - discountPercentage / 100));
+      } else if (p.discount.type === 'flat') {
+        discountPercentage = Math.round((p.discount.value / originalPrice) * 100);
+        discountedPrice = Math.round(originalPrice - p.discount.value);
+      }
+    }
+    
     // Calculate rating from actual reviews
     let rating = "0.0";
     if (p.reviews && p.reviews.length > 0) {
@@ -654,12 +739,14 @@ const Index = () => {
     return {
       id,
       name: title,
-      price: originalPrice,
+      price: discountedPrice, // Show discounted price as main price
+      originalPrice: originalPrice, // Show original price for strikethrough
+      discountedPrice: discountedPrice,
+      discountPercentage: discountPercentage,
       image: img,
       category: p.category || "",
       slug: p.slug || "",
       images: Array.isArray(p.images) ? p.images : [],
-      discountedPrice: discountedPrice,
       rating: Number(rating),
       quantityOptions: p.quantityOptions || [],
     };
@@ -941,7 +1028,7 @@ const Index = () => {
     
 
       {/* Featured Products */}
-      <section style={{ backgroundColor: '#faf3eb' }}   className="py-12">
+      <section style={{ backgroundColor: '#F5F0E8' }}   className="py-12">
   <div className="container mx-auto px-4 sm:px-6">
     {/* Header */}
     <div className="flex items-center justify-center mb-10">
@@ -1020,7 +1107,7 @@ const Index = () => {
 </section>
 
       {/* Categories grid with product showcase */}
-        <section style={{ backgroundColor: '#faf3eb' }} className="mx-auto px-2 sm:px-4 pb-6 sm:pb-12 pt-6 sm:pt-10">
+        <section style={{ backgroundColor: '#F5F0E8' }} className="mx-auto px-2 sm:px-4 pb-6 sm:pb-12 pt-6 sm:pt-10">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-foreground"
           style={{ color: '#6b4423' }}>
@@ -1072,7 +1159,7 @@ const Index = () => {
       </section>
 
       {/* Shop By Region */}
-      <section style={{ backgroundColor: '#faf3eb' }} className="mx-auto px-2 sm:px-4 pb-6 sm:pb-12 pt-6 sm:pt-10">
+      <section style={{ backgroundColor: '#F5F0E8' }} className="mx-auto px-2 sm:px-4 pb-6 sm:pb-12 pt-6 sm:pt-10">
   <div className="text-center mb-12">
     <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-foreground"
     style={{ color: '#6b4423' }}>
@@ -1081,7 +1168,7 @@ const Index = () => {
   </div>
 
   {regionsLoading ? (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6 mb-8 sm:mb-12 mt-6">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 mb-8 sm:mb-12 mt-6">
       {Array.from({ length: 6 }).map((_, i) => (
         <div
           key={i}
@@ -1096,7 +1183,7 @@ const Index = () => {
   ) : (
     <div className="relative">
       <Carousel opts={{ align: "start", loop: true }} className="w-full">
-        <CarouselContent className="-ml-4 sm:-ml-6">
+        <CarouselContent className="-ml-2 sm:-ml-3">
           {regions.map((region) => {
             const to = `/collection/region/${
               region.slug || slugify(region.name || "")
@@ -1107,7 +1194,7 @@ const Index = () => {
                 key={String(
                   region._id || region.id || region.slug || region.name
                 )}
-                className="pl-4 sm:pl-6 basis-1/2 md:basis-1/3 lg:basis-1/4"
+                className="pl-2 sm:pl-3 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/6"
               >
                 <Link
                   to={to}
@@ -1184,7 +1271,7 @@ const Index = () => {
       
 
       {/* New Arrivals */}
-      <section style={{ backgroundColor: '#faf3eb' }} className="container mx-auto px-4 py-12 md:py-12 bg-white rounded-xl shadow-sm">
+      <section style={{ backgroundColor: '#F5F0E8' }} className="container mx-auto px-4 py-12 md:py-12 bg-white rounded-xl shadow-sm">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-foreground"
           style={{ color: '#6b4423' }}>

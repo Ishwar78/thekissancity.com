@@ -214,13 +214,25 @@ export const ProductCard = ({
 
       <Card className="group overflow-hidden border-0 shadow-none hover:shadow-md transition-all duration-300 relative bg-white w-full max-w-[280px]">
         <Link to={linkTo} className="block">
-          <div className="aspect-square overflow-hidden bg-gray-50 relative flex items-center justify-center rounded-lg mb-3">
+          <div className="aspect-square overflow-hidden bg-[#faf3eb] relative flex items-center justify-center rounded-lg mb-3">
             <img
               src={src}
               alt={name}
               className="w-full h-full object-contain p-2 sm:p-4 group-hover:scale-105 transition-transform duration-500"
               loading="lazy"
             />
+            
+            {/* Discount Badge */}
+           {/* Discount Badge */}
+           {!!discountPercentage && discountPercentage > 0 && (
+  <div
+    className="absolute top-2 left-2 px-2 py-1 rounded-full text-xs font-bold"
+    style={{ backgroundColor: '#6b4423', color: '#ffffff' }}
+  >
+    {discountPercentage}% OFF
+  </div>
+)} 
+            
             <button
               onClick={handleWishlistClick}
               id={`wishlist-btn-${id}`}
@@ -235,25 +247,25 @@ export const ProductCard = ({
             >
               <Heart
                 className="h-4 w-4 sm:h-5 sm:w-5 transition-all"
-                fill={isInWishlist(id) ? '#000000' : 'none'}
-                color="#000000"
+                fill={isInWishlist(id) ? '#6b4423' : 'none'}
+                color="#6b4423"
                 strokeWidth={2}
               />
             </button>
           </div>
           <div className="px-1 sm:px-2 pb-2 sm:pb-3">
             <Link to={linkTo}>
-              <h3 className="font-medium text-xs sm:text-sm text-gray-900 hover:text-gray-700 transition-colors truncate mb-1.5 sm:mb-2 leading-tight uppercase tracking-wide">
+              <h3 className="font-medium text-xs sm:text-sm text-[#6b4423] hover:text-[#8b5a3c] transition-colors truncate mb-1.5 sm:mb-2 leading-tight uppercase tracking-wide">
                 {name}
               </h3>
             </Link>
             
             <div className="flex items-center gap-1.5 sm:gap-2">
-              <span className="text-sm sm:text-base font-bold text-gray-900">
+              <span className="text-sm sm:text-base font-bold text-[#6b4423]">
                 ₹{price.toLocaleString('en-IN')}
               </span>
               {originalPrice && originalPrice > price && (
-                <span className="text-xs sm:text-sm text-gray-400 line-through font-normal">
+                <span className="text-xs sm:text-sm text-[#999999] line-through font-normal">
                   {originalPrice.toLocaleString('en-IN')}
                 </span>
               )}
@@ -266,13 +278,13 @@ export const ProductCard = ({
                   {quantityOptions.slice(0, 2).map((option) => (
                     <span 
                       key={option.id}
-                      className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full font-medium"
+                      className="text-xs bg-[#f0e5d0] text-[#6b4423] px-2 py-0.5 rounded-full font-medium"
                     >
                       {option.displayLabel}
                     </span>
                   ))}
                   {quantityOptions.length > 2 && (
-                    <span className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full font-medium">
+                    <span className="text-xs bg-[#f0e5d0] text-[#6b4423] px-2 py-0.5 rounded-full font-medium">
                       +{quantityOptions.length - 2}
                     </span>
                   )}

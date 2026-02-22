@@ -161,7 +161,7 @@ const Wishlist = () => {
         ) : wishlistProducts.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-xs sm:text-sm text-muted-foreground mb-4">Your wishlist is empty</p>
-            <Button onClick={() => navigate('/shop')} className="text-xs sm:text-sm">Browse Products</Button>
+            <Button onClick={() => navigate('/shop')} className="text-xs sm:text-sm btn-green-gradient">Browse Products</Button>
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">

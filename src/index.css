@@ -9,46 +9,49 @@ All colors MUST be HSL.
 @layer base {
   :root {
     --background: 0 0% 100%; /* Pure white for input fields */
-    --foreground: 220 10% 3%;
+    --foreground: 25 25% 15%; /* Dark brown text */
 
     --card: 0 0% 100%;
-    --card-foreground: 220 10% 3%;
+    --card-foreground: 25 25% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 10% 3%;
+    --popover-foreground: 25 25% 15%;
 
-    --primary: 210 20% 25%;
-    --primary-foreground: 210 20% 98%;
+    --primary: 25 35% 35%; /* Brown primary color */
+    --primary-foreground: 0 0% 98%;
 
-    --secondary: 210 20% 90%;
-    --secondary-foreground: 210 20% 10%;
+    --secondary: 25 25% 95%; /* Light brown secondary */
+    --secondary-foreground: 25 25% 15%;
 
-    --muted: 210 20% 95%;
-    --muted-foreground: 210 20% 50%;
+    --muted: 25 25% 95%;
+    --muted-foreground: 25 25% 45%;
 
-    --accent: 210 20% 90%;
-    --accent-foreground: 210 20% 10%;
+    --accent: 25 25% 90%;
+    --accent-foreground: 25 25% 15%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 210 20% 85%;
-    --input: 210 20% 85%;
-    --ring: 210 20% 25%;
+    --border: 25 25% 85%;
+    --input: 25 25% 85%;
+    --ring: 25 35% 35%;
     
     /* Logo specific color */
     --logo-yellow: 43 96% 56%;
 
     --radius: 0.5rem;
 
-    /* Cosmic gradients */
-    --gradient-cosmic: linear-gradient(135deg, hsl(240 40% 8%), hsl(280 40% 12%));
-    --gradient-hero: linear-gradient(180deg, hsl(0 0% 7% / 0.8), hsl(0 0% 7%));
-    --gradient-card: linear-gradient(135deg, hsl(0 0% 10% / 0.6), hsl(0 0% 8% / 0.8));
+    /* Brown theme gradients */
+    --gradient-cosmic: linear-gradient(135deg, hsl(25 35% 25%), hsl(25 35% 35%));
+    --gradient-hero: linear-gradient(180deg, hsl(25 25% 15% / 0.8), hsl(25 25% 15%));
+    --gradient-card: linear-gradient(135deg, hsl(25 25% 20% / 0.6), hsl(25 25% 18% / 0.8));
+    
+    /* Green button gradient */
+    --gradient-button: linear-gradient(135deg, #22c55e, #16a34a);
     
     /* Shadows */
-    --shadow-glow: 0 0 40px hsl(0 84% 60% / 0.15);
-    --shadow-elegant: 0 10px 40px hsl(0 0% 0% / 0.5);
+    --shadow-glow: 0 0 40px hsl(25 35% 35% / 0.15);
+    --shadow-elegant: 0 10px 40px hsl(25 25% 15% / 0.3);
     
     /* Animations */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -100,6 +103,44 @@ All colors MUST be HSL.
     -webkit-text-fill-color: hsl(var(--foreground)) !important;
     background-color: hsl(var(--card)) !important;
   }
+}
+
+/* Green gradient button utility */
+.btn-green-gradient {
+  background: var(--gradient-button) !important;
+  color: white !important;
+  border: none !important;
+  transition: var(--transition-smooth);
+}
+
+.btn-green-gradient:hover {
+  background: linear-gradient(135deg, #16a34a, #15803d) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+}
+
+.btn-green-gradient:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(34, 197, 94, 0.2);
+}
+
+/* Brown gradient button utility */
+.btn-brown-gradient {
+  background: linear-gradient(135deg, #6b4423, #8b5a3c) !important;
+  color: white !important;
+  border: none !important;
+  transition: var(--transition-smooth);
+}
+
+.btn-brown-gradient:hover {
+  background: linear-gradient(135deg, #8b5a3c, #a06b3d) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(107, 68, 35, 0.3);
+}
+
+.btn-brown-gradient:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(107, 68, 35, 0.2);
 }
 
 /* Hide scrollbar utility */

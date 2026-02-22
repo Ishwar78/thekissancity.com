@@ -45,7 +45,7 @@ export default function InfluencerImageGrid() {
   }, [fetchInfluencerImages]);
 
   return (
-    <section className="w-full py-8 sm:py-10 lg:py-12" style={{ backgroundColor: '#faf3eb' }}>
+    <section className="w-full py-8 sm:py-10 lg:py-12" style={{ backgroundColor: '#F5F0E8' }}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12 md:mb-16">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">

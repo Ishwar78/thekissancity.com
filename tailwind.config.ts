@@ -88,6 +88,9 @@ export default {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
       },
+      backgroundImage: {
+        'green-gradient': 'linear-gradient(135deg, #22c55e, #16a34a)',
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],

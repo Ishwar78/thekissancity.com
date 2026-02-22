@@ -292,7 +292,7 @@ const OrderSuccess = () => {
             {sending ? 'Sending...' : 'Resend Confirmation Email'}
           </Button>
           <Link to="/my-orders" className="flex-1 sm:flex-none">
-            <Button className="w-full sm:w-auto flex items-center gap-2">
+            <Button className="w-full sm:w-auto flex items-center gap-2 btn-green-gradient">
               Track Your Order
               <ArrowRight className="h-4 w-4" />
             </Button>

@@ -475,7 +475,7 @@ const ProductDetail = () => {
               The product you're looking for doesn't exist or may have been removed.
             </p>
             <Link to="/shop">
-              <Button size="lg" className="bg-black text-white hover:bg-gray-800 rounded-full px-8">
+              <Button size="lg" className="btn-green-gradient text-white hover:opacity-90 rounded-full px-8">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Shop
               </Button>
@@ -842,7 +842,7 @@ const ProductDetail = () => {
                 <div className="space-y-2.5 mb-5">
                   <Button
                     size="lg"
-                    className="w-full h-12 bg-gray-900 hover:bg-black text-white text-sm font-semibold rounded-xl transition-all duration-200 shadow-sm hover:shadow-md"
+                    className="w-full h-12 btn-green-gradient text-white text-sm font-semibold rounded-xl transition-all duration-200 shadow-sm hover:shadow-md"
                     disabled={outOfStock}
                     onClick={handleAddToCart}
                   >
@@ -852,8 +852,7 @@ const ProductDetail = () => {
                   {!outOfStock && (
                     <Button
                       size="lg"
-                      variant="outline"
-                      className="w-full h-12 border-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white text-sm font-semibold rounded-xl transition-all duration-200"
+                      className="w-full h-12 btn-green-gradient text-white text-sm font-semibold rounded-xl transition-all duration-200 shadow-sm hover:shadow-md"
                       onClick={handleBuyNow}
                     >
                       Buy Now
