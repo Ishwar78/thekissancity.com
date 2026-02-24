@@ -23,6 +23,42 @@ export const PWAInstallPrompt = () => {
   useEffect(() => {
     console.log("🔍 PWA Debug: Component mounted");
     console.log("🔍 PWA Debug: Is installed?", isInstalledPWA());
+    console.log("🔍 PWA Debug: Current URL:", window.location.href);
+    console.log("🔍 PWA Debug: Is secure context?", window.isSecureContext);
+    console.log("🔍 PWA Debug: Protocol:", window.location.protocol);
+    
+    // Check PWA installability criteria
+    const checkInstallability = async () => {
+      try {
+        // Check if service worker is ready
+        const registration = await navigator.serviceWorker.ready;
+        console.log("🔍 PWA Debug: Service worker ready:", !!registration);
+        
+        // Check manifest
+        const manifestResponse = await fetch('/manifest.json');
+        const manifest = await manifestResponse.json();
+        console.log("🔍 PWA Debug: Manifest loaded:", manifest);
+        console.log("🔍 PWA Debug: Manifest icons:", manifest.icons);
+        
+        // Check if icons are accessible
+        for (const icon of manifest.icons) {
+          const iconResponse = await fetch(icon.src, { method: 'HEAD' });
+          console.log(`🔍 PWA Debug: Icon ${icon.src} accessible:`, iconResponse.ok);
+        }
+        
+        // Check if site meets criteria manually
+        console.log("🔍 PWA Debug: Installability check:");
+        console.log("  - Service worker:", !!registration);
+        console.log("  - Manifest exists:", !!manifest);
+        console.log("  - HTTPS/localhost:", window.isSecureContext || window.location.hostname === 'localhost');
+        console.log("  - Not already installed:", !isInstalledPWA());
+        
+      } catch (error) {
+        console.error("❌ PWA Debug: Installability check failed:", error);
+      }
+    };
+    
+    checkInstallability();
     
     // 🔥 DEBUG: Check if beforeinstallprompt fires
     window.addEventListener("beforeinstallprompt", (e) => {
