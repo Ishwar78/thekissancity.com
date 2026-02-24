@@ -3258,45 +3258,51 @@ const handleProductSubmit = async (e: React.FormEvent) => {
 
   const renderProducts = () => (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold">Products</h2>
           <p className="text-sm text-muted-foreground">Add, edit, or remove items from your store.</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
           <label className="flex items-center gap-2">
             <input type="checkbox" checked={selectAllOnPage} onChange={toggleSelectAllOnPage} />
             <span className="text-sm">Select all on page</span>
           </label>
           {selectedProductIds.size > 0 && (
-            <div className="flex items-center gap-2">
-              <Button variant="destructive" onClick={bulkDeleteProducts}>Bulk Delete ({selectedProductIds.size})</Button>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+              <Button variant="destructive" onClick={bulkDeleteProducts} className="w-full sm:w-auto">
+                Bulk Delete ({selectedProductIds.size})
+              </Button>
               {!selectAllResults && (
-                <button className="underline text-sm" onClick={(e)=>{ e.preventDefault(); void selectAllResultsClick(); }}>Select all results ({stats.totalProducts || 'N'})</button>
+                <button className="underline text-sm" onClick={(e)=>{ e.preventDefault(); void selectAllResultsClick(); }}>
+                  Select all results ({stats.totalProducts || 'N'})
+                </button>
               )}
             </div>
           )}
-        </div>
-        <Dialog
-          open={isDialogOpen}
-          onOpenChange={handleDialogOpenChange}
-        >
-          <DialogTrigger asChild>
-            <Button onClick={() => { resetForm(); setIsDialogOpen(true); }}>
-              <Plus className="mr-2 h-4 w-4" /> Add Product
-            </Button>
-          </DialogTrigger>
-          <DialogContent
-            className="max-w-2xl max-h-[90vh] overflow-y-auto"
-            onInteractOutside={(e) => {
-              // Prevent closing when clicking outside
-              e.preventDefault();
-            }}
-            onEscapeKeyDown={(e) => {
-              // Prevent closing with Escape key
-              e.preventDefault();
-            }}
+          <Dialog
+            open={isDialogOpen}
+            onOpenChange={handleDialogOpenChange}
           >
+            <DialogTrigger asChild>
+              <button 
+                onClick={() => { resetForm(); setIsDialogOpen(true); }} 
+                className="w-full sm:w-auto bg-black text-white border-black hover:bg-gray-800 hover:text-white focus-visible:bg-gray-800 focus-visible:text-white active:bg-gray-800 active:text-white px-4 py-2 rounded-md font-medium transition-colors"
+              >
+               Add Product
+              </button>
+            </DialogTrigger>
+            <DialogContent
+              className="max-w-2xl w-[95vw] max-h-[90vh] overflow-y-auto mx-auto"
+              onInteractOutside={(e) => {
+                // Prevent closing when clicking outside
+                e.preventDefault();
+              }}
+              onEscapeKeyDown={(e) => {
+                // Prevent closing with Escape key
+                e.preventDefault();
+              }}
+            >
             <DialogHeader>
               <DialogTitle>{editingProduct ? 'Edit Product' : 'Add New Product'}</DialogTitle>
               <DialogDescription>
@@ -3304,7 +3310,7 @@ const handleProductSubmit = async (e: React.FormEvent) => {
               </DialogDescription>
             </DialogHeader>
 
-            <form onSubmit={handleProductSubmit} className="space-y-4">
+            <form onSubmit={handleProductSubmit} className="space-y-4 px-1 sm:px-0">
               <div>
                 <Label htmlFor="name">Name</Label>
                 <Input
@@ -3323,7 +3329,7 @@ const handleProductSubmit = async (e: React.FormEvent) => {
                   required
                 />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
                   <Label htmlFor="price">Price</Label>
                   <Input
@@ -3365,7 +3371,7 @@ const handleProductSubmit = async (e: React.FormEvent) => {
                 />
               </div>
 
-              {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
                   <Label htmlFor="sizeFitFit">Size &amp; Fit - Fit</Label>
                   <Input
@@ -3423,7 +3429,7 @@ const handleProductSubmit = async (e: React.FormEvent) => {
                   maxImages={10}
                 />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
                   <Label htmlFor="category">Category</Label>
                   <Select
@@ -3499,7 +3505,7 @@ const handleProductSubmit = async (e: React.FormEvent) => {
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                 <div>
                   <Label>Product Status</Label>
                   <div className="flex items-center gap-3 mt-2">
@@ -4579,7 +4585,7 @@ const handleProductSubmit = async (e: React.FormEvent) => {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full" disabled={saving}>
+              <Button type="submit" className="w-full h-12 text-base font-semibold" disabled={saving}>
                 {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {editingProduct ? 'Update Product' : 'Add Product'}
               </Button>
@@ -4726,6 +4732,7 @@ const handleProductSubmit = async (e: React.FormEvent) => {
             )}
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {fetching ? (
@@ -4739,50 +4746,64 @@ const handleProductSubmit = async (e: React.FormEvent) => {
           )}
           {products.map((product) => (
             <Card key={(product as any)._id || (product as any).id}>
-              <CardContent className="flex items-center justify-between p-4">
-                <div className="flex items-center gap-4">
-                  <input type="checkbox" checked={selectedProductIds.has(((product as any)._id || (product as any).id))} onChange={() => toggleProductSelection(((product as any)._id || (product as any).id))} />
-                  <img
-                    src={(function(){
-                      const url = (product as any).image_url || (product as any).images?.[0] || '/placeholder.svg';
-                      if (!url) return '/placeholder.svg';
-                      if (String(url).startsWith('http')) return url;
-                      return String(url).startsWith('/') ? url : `/uploads/${url}`;
-                    })()}
-                    alt={(product as any).name || (product as any).title || 'Product'}
-                    className="w-16 h-16 object-cover rounded"
-                    loading="lazy"
-                  />
-                  <div>
-                    <h3 className="font-semibold">{(product as any).name || (product as any).title}</h3>
-                    <p className="text-sm text-muted-foreground">{product.category}</p>
-                    <p className="font-bold">₹{Number(product.price ?? 0).toLocaleString('en-IN')}</p>
+              <CardContent className="p-3 sm:p-4">
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                  <div className="flex items-start gap-3 sm:gap-4">
+                    <input 
+                      type="checkbox" 
+                      checked={selectedProductIds.has(((product as any)._id || (product as any).id))} 
+                      onChange={() => toggleProductSelection(((product as any)._id || (product as any).id))}
+                      className="mt-1"
+                    />
+                    <img
+                      src={(function(){
+                        const url = (product as any).image_url || (product as any).images?.[0] || '/placeholder.svg';
+                        if (!url) return '/placeholder.svg';
+                        if (String(url).startsWith('http')) return url;
+                        return String(url).startsWith('/') ? url : `/uploads/${url}`;
+                      })()}
+                      alt={(product as any).name || (product as any).title || 'Product'}
+                      className="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded flex-shrink-0"
+                      loading="lazy"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-sm sm:text-base truncate">{(product as any).name || (product as any).title}</h3>
+                      <p className="text-xs sm:text-sm text-muted-foreground truncate">{product.category}</p>
+                      <p className="font-bold text-sm sm:text-base">₹{Number(product.price ?? 0).toLocaleString('en-IN')}</p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    size="icon"
-                    variant="outline"
-                    onClick={() => {
-                      setViewingProduct(product as any);
-                      setViewDrawerOpen(true);
-                    }}
-                    title="View product details"
-                  >
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                  <Button size="icon" variant="outline" onClick={() => startEdit(product as any)}>
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    size="icon"
-                    variant="destructive"
-                    onClick={() =>
-                      deleteProduct(((product as any)._id || (product as any).id) as any)
-                    }
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <div className="flex gap-1 sm:gap-2 flex-shrink-0">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setViewingProduct(product as any);
+                        setViewDrawerOpen(true);
+                      }}
+                      title="View product details"
+                      className="h-8 w-8 sm:h-9 sm:w-9 p-0"
+                    >
+                      <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      onClick={() => startEdit(product as any)}
+                      className="h-8 w-8 sm:h-9 sm:w-9 p-0"
+                    >
+                      <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() =>
+                        deleteProduct(((product as any)._id || (product as any).id) as any)
+                      }
+                      className="h-8 w-8 sm:h-9 sm:w-9 p-0"
+                    >
+                      <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -5677,7 +5698,7 @@ const handleProductSubmit = async (e: React.FormEvent) => {
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <Label htmlFor="shiprocketEmail">Account Email</Label>
                 <Input
@@ -5702,7 +5723,7 @@ const handleProductSubmit = async (e: React.FormEvent) => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <Label htmlFor="shiprocketApiKey">API Key</Label>
                 <Input
