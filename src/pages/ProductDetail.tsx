@@ -1014,11 +1014,11 @@ const ProductDetail = () => {
                   <div className="animate-in fade-in duration-200">
                     <div className="flex items-center gap-3 mb-1">
                       <h3 className="text-xl font-black tracking-tight text-gray-900">Customer Reviews</h3>
-                      {product?.reviewCount > 0 && (
+                      {/* {product?.reviewCount > 0 && (
                         <span className="text-xs font-semibold bg-gray-100 text-gray-700 px-2.5 py-1 rounded-full">
                           {product.reviewCount}
                         </span>
-                      )}
+                      )} */}
                     </div>
                     <div className="h-0.5 w-10 bg-gray-900 rounded-full mb-5" />
                     <ReviewsList key={product?._id || product?.id || ""} productId={product?._id || product?.id || ""} />
