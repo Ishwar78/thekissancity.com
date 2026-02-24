@@ -4,6 +4,14 @@ import { cn } from '@/lib/utils';
 
 // Component-specific CSS to override global styles - iOS optimized
 const galleryStyles = `
+  /* Wishlist and Share Buttons positioning fix */
+  .wishlist-share-buttons {
+    top: 36px !important;
+    margin-top: 0px !important;
+    padding-top: 0px !important;
+    transform: none !important;
+  }
+
   .gallery-icon-btn,
   .gallery-nav-btn {
     background-color: transparent !important;
@@ -395,7 +403,7 @@ export const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
         />
 
         {/* Wishlist and Share Buttons */}
-        <div className="absolute top-3 right-2 flex flex-col gap-2 z-10">
+        <div className="absolute right-2 flex flex-col gap-2 z-10 wishlist-share-buttons" style={{ top: '0px !important' }}>
           {showWishlistButton && (
             <button
               onClick={(e) => {

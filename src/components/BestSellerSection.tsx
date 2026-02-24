@@ -18,7 +18,7 @@ interface Product {
   discount?: {
     type: 'percentage';
     value: number;
-  }; // Update discount field to be an object
+  };
   images?: string[];
   image_url?: string;
   slug?: string;
@@ -63,14 +63,7 @@ const BestSellerCard = ({ product, index }: { product: Product; index: number })
     return product.price || 0;
   })();
 
-  const discountPercentage = product.discount?.value || 0; // Handle discount object with value field
-
-  // Debug: Check if we have discount data
-  console.log(`BestSeller "${product.title}":`, {
-    discount: product.discount,
-    discountPercentage: discountPercentage,
-    hasDiscount: discountPercentage > 0
-  });
+  const discountPercentage = product.discount?.value || 0;
 
   const bullets = product.highlights?.slice(0, 3) || [];
 
@@ -97,11 +90,10 @@ const BestSellerCard = ({ product, index }: { product: Product; index: number })
   return (
     <Link to={linkTo} className="block group">
       <div
-        className="relative flex flex-row overflow-hidden rounded-2xl transition-shadow duration-300 hover:shadow-lg max-w-md"
+        className="relative flex flex-row overflow-hidden rounded-2xl transition-shadow duration-300 hover:shadow-lg w-full"
         style={{
           backgroundColor: '#fff',
           boxShadow: '0 2px 12px rgba(107,68,35,0.10)',
-          minHeight: '220px',
           border: '1px solid #f0e8dc',
         }}
       >
@@ -123,45 +115,44 @@ const BestSellerCard = ({ product, index }: { product: Product; index: number })
         {/* Discount Badge */}
         {discountPercentage > 0 && (
           <div
-            className="absolute top-2 left-2 px-2 py-1 rounded-full text-xs font-bold"
+            className="absolute top-2 left-2 z-10 px-2 py-1 rounded-full text-xs font-bold"
             style={{ backgroundColor: '#6b4423', color: '#ffffff' }}
           >
             {discountPercentage}% OFF
           </div>
-        )} 
+        )}
 
-        {/* Image — left */}
-       {/* Image — left, full cover */}
-      <div
-        className="shrink-0 overflow-hidden"
-        style={{
-          width: '160px',
-          minWidth: '160px',
-          height: '220px', // Fixed height for consistency
-          background: 'linear-gradient(135deg, #f7f0e6 0%, #ede0cc 100%)',
-          borderRadius: '16px 0 0 16px',
-        }}
-      >
-        <img
-          src={image}
-          alt={title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          style={{ display: 'block' }}
-          loading="lazy"
-        />
-      </div>
+        {/* Image — left, responsive width */}
+        <div
+          className="shrink-0 overflow-hidden"
+          style={{
+            width: 'clamp(110px, 35%, 160px)',
+            minWidth: 'clamp(110px, 35%, 160px)',
+            aspectRatio: '3/4',
+            background: 'linear-gradient(135deg, #f7f0e6 0%, #ede0cc 100%)',
+            borderRadius: '16px 0 0 16px',
+          }}
+        >
+          <img
+            src={image}
+            alt={title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            style={{ display: 'block' }}
+            loading="lazy"
+          />
+        </div>
 
         {/* Content — right */}
-        <div className="flex flex-col flex-1 p-4 min-w-0">
+        <div className="flex flex-col flex-1 p-3 sm:p-4 min-w-0 overflow-hidden">
 
           {/* Title + Wishlist */}
-          <div className="flex items-start justify-between gap-2 mb-2">
+          <div className="flex items-start justify-between gap-1 mb-1.5">
             <h3
-              className="font-bold leading-snug line-clamp-1 flex-1"
+              className="font-bold leading-snug line-clamp-2 flex-1 min-w-0"
               style={{
                 color: '#2d5a1b',
                 fontFamily: "'Georgia', serif",
-                fontSize: '0.92rem',
+                fontSize: 'clamp(0.78rem, 2.5vw, 0.92rem)',
               }}
             >
               {title}
@@ -182,41 +173,51 @@ const BestSellerCard = ({ product, index }: { product: Product; index: number })
           </div>
 
           {/* Price */}
-          <div className="flex items-baseline gap-2 mb-3">
+          <div className="flex items-baseline gap-1.5 mb-2">
             <span
-              className="text-2xl font-black"
-              style={{ color: '#2d5a1b', fontFamily: "'Georgia', serif" }}
+              className="font-black"
+              style={{
+                color: '#2d5a1b',
+                fontFamily: "'Georgia', serif",
+                fontSize: 'clamp(1.1rem, 4vw, 1.5rem)',
+              }}
             >
               {displayPrice > 0 ? `₹${displayPrice.toLocaleString('en-IN')}` : '—'}
             </span>
             {product.originalPrice && product.originalPrice > displayPrice && (
-              <span className="text-sm line-through" style={{ color: '#b0957a' }}>
+              <span
+                className="text-xs line-through"
+                style={{ color: '#b0957a' }}
+              >
                 ₹{product.originalPrice.toLocaleString('en-IN')}
               </span>
             )}
           </div>
 
           {/* Divider */}
-          <div className="mb-3 h-px" style={{ backgroundColor: '#ede8e0' }} />
+          <div className="mb-2 h-px" style={{ backgroundColor: '#ede8e0' }} />
 
           {/* Bullets or category */}
-          <div className="flex-1 mb-4 overflow-hidden">
+          <div className="flex-1 mb-2 overflow-hidden">
             {bullets.length > 0 ? (
-              <ul className="space-y-1 max-h-16 overflow-hidden">
+              <ul className="space-y-0.5">
                 {bullets.slice(0, 2).map((b, i) => (
-                  <li key={i} className="text-xs flex items-start gap-1.5" style={{ color: '#7a5c3a' }}>
-                    <span className="font-bold mt-px" style={{ color: '#c8973a' }}>·</span>
-                    <span className="leading-relaxed line-clamp-1">{b}</span>
+                  <li key={i} className="flex items-start gap-1" style={{ color: '#7a5c3a' }}>
+                    <span className="font-bold shrink-0" style={{ color: '#c8973a', fontSize: '0.75rem' }}>·</span>
+                    <span
+                      className="leading-relaxed line-clamp-1"
+                      style={{ fontSize: 'clamp(0.65rem, 2vw, 0.75rem)' }}
+                    >
+                      {b}
+                    </span>
                   </li>
                 ))}
-                {/* {bullets.length > 2 && (
-                  <li className="text-xs font-medium" style={{ color: '#c8973a' }}>
-                    +{bullets.length - 2} more...
-                  </li>
-                )} */}
               </ul>
             ) : (
-              <p className="text-xs leading-relaxed line-clamp-2" style={{ color: '#7a5c3a' }}>
+              <p
+                className="leading-relaxed line-clamp-2"
+                style={{ color: '#7a5c3a', fontSize: 'clamp(0.65rem, 2vw, 0.75rem)' }}
+              >
                 {product.category ? `Premium ${product.category}` : 'Pure & Natural · Farm Fresh'}
               </p>
             )}
@@ -224,12 +225,16 @@ const BestSellerCard = ({ product, index }: { product: Product; index: number })
 
           {/* Quantity pills */}
           {product.quantityOptions && product.quantityOptions.length > 0 && (
-            <div className="flex flex-wrap gap-1 mb-3">
+            <div className="flex flex-wrap gap-1 mb-2">
               {product.quantityOptions.slice(0, 3).map((opt) => (
                 <span
                   key={opt.id}
-                  className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
-                  style={{ backgroundColor: '#f0e8d8', color: '#6b4423' }}
+                  className="font-semibold px-1.5 py-0.5 rounded-full"
+                  style={{
+                    backgroundColor: '#f0e8d8',
+                    color: '#6b4423',
+                    fontSize: 'clamp(0.6rem, 1.8vw, 0.625rem)',
+                  }}
                 >
                   {opt.displayLabel || `${opt.quantity}${opt.unit}`}
                 </span>
@@ -237,20 +242,20 @@ const BestSellerCard = ({ product, index }: { product: Product; index: number })
             </div>
           )}
 
-          {/* Add to Cart — reduced width, left aligned */}
+          {/* Add to Cart */}
           <div className="mt-auto">
             <button
               onClick={handleAddToCart}
-              className="py-2.5 px-6 rounded-xl text-sm font-bold tracking-wide transition-all duration-200 hover:opacity-90 active:scale-[0.98] flex items-center justify-center gap-2"
+              className="w-full py-2 px-3 rounded-xl font-bold tracking-wide transition-all duration-200 hover:opacity-90 active:scale-[0.98] flex items-center justify-center gap-1.5"
               style={{
                 background: 'linear-gradient(135deg, #2d5a1b, #3a7522)',
                 color: '#fff',
-                minWidth: '165px',
+                fontSize: 'clamp(0.7rem, 2.5vw, 0.875rem)',
                 boxShadow: '0 2px 8px rgba(45,90,27,0.25)',
               }}
             >
-              <ShoppingCart className="h-4 w-4" />
-              Add to Cart
+              <ShoppingCart className="h-3.5 w-3.5 shrink-0" />
+              <span>Add to Cart</span>
             </button>
           </div>
         </div>
@@ -296,20 +301,21 @@ export default function BestSellerSection() {
   if (error || !products.length) return null;
 
   return (
-    <section className="py-14" style={{ backgroundColor: '#F5F0E8' }}>
-      <div className="container mx-auto px-4 max-w-5xl">
+    <section className="py-10 sm:py-14" style={{ backgroundColor: '#F5F0E8' }}>
+      <div className="container mx-auto px-3 sm:px-4 max-w-5xl">
 
         {/* Section Header */}
-        <div className="flex items-center justify-center gap-4 mb-10">
+        <div className="flex items-center justify-center gap-3 sm:gap-4 mb-7 sm:mb-10">
           <div
             className="flex-1 h-px"
             style={{ background: 'linear-gradient(to right, transparent, #c8973a)' }}
           />
           <h2
-            className="text-2xl md:text-4xl font-bold whitespace-nowrap px-2"
+            className="font-bold whitespace-nowrap px-2"
             style={{
               color: '#6b4423',
               fontFamily: "'Georgia', 'Times New Roman', serif",
+              fontSize: 'clamp(1.2rem, 5vw, 2.25rem)',
             }}
           >
             · Our Bestsellers ·
@@ -321,7 +327,7 @@ export default function BestSellerSection() {
         </div>
 
         {/* Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-5">
           {products.slice(0, 4).map((product, index) => (
             <BestSellerCard
               key={String(product._id || product.id)}
@@ -332,7 +338,7 @@ export default function BestSellerSection() {
         </div>
 
         {/* View All */}
-        <div className="text-center mt-10">
+        <div className="text-center mt-7 sm:mt-10">
           <Link
             to="/best-sellers"
             className="inline-flex items-center gap-2 text-sm font-semibold transition-colors group"
@@ -346,4 +352,4 @@ export default function BestSellerSection() {
       </div>
     </section>
   );
-};
+}

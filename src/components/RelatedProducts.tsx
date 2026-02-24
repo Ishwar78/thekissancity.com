@@ -284,7 +284,7 @@ export const RelatedProducts = ({ productId }: { productId: string }) => {
                     </button>
                   </div>
                   <div className="p-3 sm:p-4 flex flex-col flex-grow">
-                    <h3 className="font-semibold text-xs sm:text-sm line-clamp-2 mb-2 sm:mb-3 group-hover:text-primary transition-colors">
+                    <h3 className="font-semibold text-xs sm:text-sm line-clamp-1 mb-2 sm:mb-3 group-hover:text-primary transition-colors whitespace-nowrap overflow-hidden text-ellipsis">
                       {title}
                     </h3>
                     <div className="flex items-baseline gap-2">

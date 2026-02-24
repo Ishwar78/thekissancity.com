@@ -1024,7 +1024,7 @@ const Index = () => {
       {/* Ticker line – header ke niche */}
 
       {/* Product Slider Section */}
-      <ProductSlider className="-mb-4" />
+      <ProductSlider className="-mb-4 mt-20 sm:mt-20 md:mt-0 lg:mt-8" />
     
 
       {/* Featured Products */}
@@ -1129,32 +1129,87 @@ const Index = () => {
             {catsError}
           </div>
         ) : (
-          <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 sm:gap-3 md:gap-4">
-            {topCats.slice(0, 8).map((c) => {
-              const catId = c.slug || c.name || "";
-              const prod = categoryProducts.get(catId);
-              const to = `/collection/${c.slug || slugify(c.name || "")}`;
+          <>
+            {/* Mobile Carousel View */}
+            <div className="block sm:hidden">
+              <Carousel opts={{ align: "start", loop: true }} className="w-full">
+                <CarouselContent className="-ml-2">
+                  {topCats.slice(0, 8).map((c) => {
+                    const catId = c.slug || c.name || "";
+                    const prod = categoryProducts.get(catId);
+                    const to = `/collection/${c.slug || slugify(c.name || "")}`;
 
-              return (
-                <Link
-                  key={String(c._id || c.id || c.slug || c.name)}
-                  to={to}
-                  className="flex flex-col items-center justify-center space-y-1.5 sm:space-y-2 group"
-                >
-                  <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-xl bg-primary-foreground flex items-center justify-center shadow-md transition-all duration-300 hover:scale-105 group-hover:shadow-lg">
-                    <img
-                      src={resolveImage(c.imageUrl || "/placeholder.svg")}
-                      alt={c.name}
-                      className="w-full h-full object-contain p-1"
-                    />
-                  </div>
-                  <span className="text-[10px] sm:text-xs font-medium text-center line-clamp-2">
-                    {c.name}
-                  </span>
-                </Link>
-              );
-            })}
-          </div>
+                    return (
+                      <CarouselItem
+                        key={String(c._id || c.id || c.slug || c.name)}
+                        className="pl-2 basis-1/3"
+                      >
+                        <Link
+                          to={to}
+                          className="flex flex-col items-center justify-center space-y-1.5 group"
+                        >
+                          <div className="w-20 h-20 rounded-xl bg-primary-foreground flex items-center justify-center shadow-md transition-all duration-300 hover:scale-105 group-hover:shadow-lg">
+                            <img
+                              src={resolveImage(c.imageUrl || "/placeholder.svg")}
+                              alt={c.name}
+                              className="w-full h-full object-contain p-1"
+                            />
+                          </div>
+                          <span className="text-[10px] font-medium text-center line-clamp-2">
+                            {c.name}
+                          </span>
+                        </Link>
+                      </CarouselItem>
+                    );
+                  })}
+                </CarouselContent>
+                
+                {/* Mobile Navigation - positioned below carousel */}
+                <div className="flex justify-center gap-2 mt-6">
+                  <CarouselPrevious
+                    className="static translate-y-0 h-10 w-10 rounded-full border-2 border-gray-300 bg-white hover:border-[#ba8c5c] hover:shadow-xl transition-all duration-200 shadow-md active:scale-90"
+                    onTouchEnd={(e) =>
+                      setTimeout(() => e.currentTarget.blur(), 150)
+                    }
+                  />
+                  <CarouselNext
+                    className="static translate-y-0 h-10 w-10 rounded-full border-2 border-gray-300 bg-white hover:border-[#ba8c5c] hover:shadow-xl transition-all duration-200 shadow-md active:scale-90"
+                    onTouchEnd={(e) =>
+                      setTimeout(() => e.currentTarget.blur(), 150)
+                    }
+                  />
+                </div>
+              </Carousel>
+            </div>
+
+            {/* Desktop Grid View */}
+            <div className="hidden sm:grid grid-cols-6 md:grid-cols-8 gap-3 md:gap-4">
+              {topCats.slice(0, 8).map((c) => {
+                const catId = c.slug || c.name || "";
+                const prod = categoryProducts.get(catId);
+                const to = `/collection/${c.slug || slugify(c.name || "")}`;
+
+                return (
+                  <Link
+                    key={String(c._id || c.id || c.slug || c.name)}
+                    to={to}
+                    className="flex flex-col items-center justify-center space-y-2 group"
+                  >
+                    <div className="w-24 h-24 md:w-32 md:h-32 rounded-xl bg-primary-foreground flex items-center justify-center shadow-md transition-all duration-300 hover:scale-105 group-hover:shadow-lg">
+                      <img
+                        src={resolveImage(c.imageUrl || "/placeholder.svg")}
+                        alt={c.name}
+                        className="w-full h-full object-contain p-1"
+                      />
+                    </div>
+                    <span className="text-xs font-medium text-center line-clamp-2">
+                      {c.name}
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
+          </>
         )}
       </section>
 

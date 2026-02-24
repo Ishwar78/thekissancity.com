@@ -41,15 +41,15 @@ export const ProductSlider = ({ className }: { className?: string }) => {
         <CarouselContent>
           {products.map((product, index) => (
             <CarouselItem key={product.id}>
-              <div className="relative w-full flex items-center justify-center">
+              <div className="relative w-full flex items-center justify-center overflow-hidden">
                 <img
                   src={product.image}
                   alt={product.name}
                   className="w-full h-auto object-contain"
                 />
-                
-                {/* Mobile Navigation Buttons - Positioned on Image */}
-                <div className="md:hidden absolute inset-0 flex items-center justify-between px-4 pointer-events-none">
+
+                {/* Mobile Navigation Buttons - Fixed to vertical center */}
+                <div className="md:hidden absolute left-0 right-0 top-1/2 -translate-y-1/2 flex items-center justify-between px-4 pointer-events-none">
                   <button
                     onClick={(e) => {
                       scrollPrev();
@@ -60,7 +60,7 @@ export const ProductSlider = ({ className }: { className?: string }) => {
                   >
                     <ChevronLeft className="h-10 w-10 drop-shadow-lg" strokeWidth={2.5} />
                   </button>
-                  
+
                   <button
                     onClick={(e) => {
                       scrollNext();
@@ -76,7 +76,7 @@ export const ProductSlider = ({ className }: { className?: string }) => {
             </CarouselItem>
           ))}
         </CarouselContent>
-        
+
         {/* Hide the default buttons */}
         <style>
           {`
@@ -87,7 +87,7 @@ export const ProductSlider = ({ className }: { className?: string }) => {
           `}
         </style>
       </Carousel>
-      
+
       {/* Desktop Navigation Buttons */}
       <div className="hidden md:flex absolute inset-0 items-center justify-between p-4 pointer-events-none">
         <button

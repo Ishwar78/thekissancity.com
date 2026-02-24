@@ -119,6 +119,12 @@ All colors MUST be HSL.
   box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
 }
 
+.btn-green-gradient-solid:hover {
+  background: #22c55e !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+}
+
 .btn-green-gradient:active {
   transform: translateY(0);
   box-shadow: 0 2px 4px rgba(34, 197, 94, 0.2);
@@ -184,7 +190,7 @@ All colors MUST be HSL.
     outline: none !important;
     transition: all 0.1s ease !important;
     border-color: #d1d5db !important;
-    background-color: white !important;
+    background-color: transparent !important;
   }
   
   button[data-slot="carousel-previous"]:hover,
@@ -199,7 +205,7 @@ All colors MUST be HSL.
   button[class*="h-10"]:hover,
   button[class*="w-10"]:hover {
     border-color: #d1d5db !important;
-    background-color: white !important;
+    background-color: transparent !important;
   }
   
   button[data-slot="carousel-previous"]:active,
@@ -213,7 +219,7 @@ All colors MUST be HSL.
   button[class*="border-2"]:active,
   button[class*="h-10"]:active,
   button[class*="w-10"]:active {
-    background-color: white !important;
+    background-color: transparent !important;
     border-color: #d1d5db !important;
     color: #374151 !important;
     transform: scale(1) !important;
@@ -234,7 +240,7 @@ All colors MUST be HSL.
     outline: none !important;
     box-shadow: none !important;
     border-color: #d1d5db !important;
-    background-color: white !important;
+    background-color: transparent !important;
   }
   
   /* Remove any stuck active states after touch */
@@ -252,7 +258,7 @@ All colors MUST be HSL.
     outline: none !important;
     box-shadow: none !important;
     border-color: #d1d5db !important;
-    background-color: white !important;
+    background-color: transparent !important;
   }
   
   /* Force reset any stuck states */
@@ -267,7 +273,7 @@ All colors MUST be HSL.
   button[class*="border-2"]:not(:hover):not(:active):not(:focus),
   button[class*="h-10"]:not(:hover):not(:active):not(:focus),
   button[class*="w-10"]:not(:hover):not(:active):not(:focus) {
-    background-color: white !important;
+    background-color: transparent !important;
     border-color: #d1d5db !important;
     color: #374151 !important;
     transform: none !important;
@@ -302,7 +308,7 @@ All colors MUST be HSL.
   button[class*="h-10"][style],
   button[class*="w-10"][style] {
     border-color: #d1d5db !important;
-    background-color: white !important;
+    background-color: transparent !important;
   }
   
   /* Aggressive universal reset for any button with inline styles - REMOVED for mobile navbar */
@@ -527,10 +533,10 @@ button[class*="p-2"][class*="bg-white"]:active {
     transform: none !important;
   }
   
-  /* Allow only subtle hover effect */
+  /* Remove hover effect completely */
   nav.fixed button:hover,
   nav.fixed a button:hover {
-    background-color: rgba(255, 255, 255, 0.1) !important;
+    background-color: transparent !important;
   }
   
   /* Remove active state background */
@@ -617,11 +623,31 @@ button[class*="p-2"][class*="bg-white"]:active {
   }
 }
 
-/* Override inputs.css white background for buttons */
+/* FINAL OVERRIDE - Override inputs.css white background for navbar buttons */
 @media (max-width: 768px) {
   nav button,
   nav a button {
     background-color: transparent !important;
+    background: transparent !important;
+    background-image: none !important;
+  }
+  
+  nav button:hover,
+  nav a button:hover {
+    background-color: transparent !important;
+    background: transparent !important;
+  }
+  
+  nav button:active,
+  nav a button:active {
+    background-color: transparent !important;
+    background: transparent !important;
+  }
+  
+  nav button:focus,
+  nav a button:focus {
+    background-color: transparent !important;
+    background: transparent !important;
   }
 }
 
@@ -731,7 +757,7 @@ button[class*="p-2"][class*="bg-white"]:active {
   
   nav button[class]:hover,
   nav a button[class]:hover {
-    background-color: rgba(255, 255, 255, 0.1) !important;
+    background-color: transparent !important;
   }
 }
 
@@ -765,11 +791,11 @@ button[class*="p-2"][class*="bg-white"]:active {
   }
 }
 
-/* Fix specific navbar icons - mobile white, desktop hover black */
+/* Fix specific navbar icons - mobile gray, desktop hover black */
 @media (max-width: 768px) {
   nav button svg,
   nav a button svg {
-    color: white !important;
+    color: #374151 !important;
   }
 }
 
@@ -797,3 +823,46 @@ button[class*="p-2"][class*="bg-white"]:active {
   }
 }
 
+/* ULTIMATE OVERRIDE - Must be last rule in file */
+@media (max-width: 768px) {
+  html body div#root nav.fixed div div button,
+  html body div#root nav.fixed div div button:hover,
+  html body div#root nav.fixed div div button:active,
+  html body div#root nav.fixed div div button:focus,
+  html body div#root nav.fixed div div a button,
+  html body div#root nav.fixed div div a button:hover,
+  html body div#root nav.fixed div div a button:active,
+  html body div#root nav.fixed div div a button:focus {
+    background-color: transparent !important;
+    background: transparent !important;
+    background-image: none !important;
+    background-size: auto !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    box-shadow: none !important;
+    border: none !important;
+    outline: none !important;
+  }
+}
+
+/* PRODUCT SLIDER MOBILE MARGIN FIX */
+@media (max-width: 768px) {
+  #product-slider-mobile,
+  #product-slider-mobile > div,
+  div[id*="product-slider"],
+  div[class*="ProductSlider"] {
+    margin-top: 80px !important;
+    display: block !important;
+    visibility: visible !important;
+  }
+  
+  /* Target any div that might be the ProductSlider wrapper */
+  div[class*="relative"][class*="w-full"]:has(> div > div > img) {
+    margin-top: 60px !important;
+  }
+  
+  /* Also target the section after ProductSlider */
+  section[style*="backgroundColor: '#F5F0E8'"] {
+    margin-top: 32px !important;
+  }
+}
