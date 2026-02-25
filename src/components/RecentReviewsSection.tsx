@@ -101,7 +101,7 @@ const ReviewCard = ({ review, index, isExpanded, onToggleExpand }: ReviewCardPro
       <div className="flex flex-col flex-1 p-6">
         {/* Quote icon */}
         <Quote
-          className="h-8 w-8 mb-4 opacity-20"
+          className="h-8 w-8 mb-4 opacity-20 rotate-180"
           style={{ color: BRAND.brown }}
         />
 
