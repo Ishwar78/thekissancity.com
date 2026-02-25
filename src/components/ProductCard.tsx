@@ -100,7 +100,7 @@ export const ProductCard = ({
     e.preventDefault();
     e.stopPropagation();
     if (!user) {
-      navigate('/login');
+      navigate('/auth');
       return;
     }
     toggleWishlist(id);

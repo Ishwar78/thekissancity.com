@@ -37,9 +37,10 @@ interface Review {
 
 interface ReviewsListProps {
   productId: string;
+  onReviewCountChange?: (count: number) => void;
 }
 
-export const ReviewsList = ({ productId }: ReviewsListProps) => {
+export const ReviewsList = ({ productId, onReviewCountChange }: ReviewsListProps) => {
   const { toast } = useToast();
   const { user } = useAuth();
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -61,6 +62,8 @@ export const ReviewsList = ({ productId }: ReviewsListProps) => {
       const { ok, json } = await api(`/api/reviews/product/${productId}`);
       if (ok && json?.data) {
         setReviews(json.data);
+        // Notify parent component of review count change
+        onReviewCountChange?.(json.data.length);
       }
     } catch (error) {
       console.error('Error fetching reviews:', error);

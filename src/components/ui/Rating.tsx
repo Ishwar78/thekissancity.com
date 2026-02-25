@@ -29,7 +29,7 @@ export const Rating = ({ value, onChange, maxStars = 5, size = 6 }: RatingProps)
               className={cn(
                 `h-${size} w-${size}`,
                 starValue <= (hoveredRating || value)
-                  ? 'fill-yellow-400 text-yellow-400'
+                  ? 'fill-emerald-500 text-emerald-500'
                   : 'text-muted-foreground'
               )}
             />

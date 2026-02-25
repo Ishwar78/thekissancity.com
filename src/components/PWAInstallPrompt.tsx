@@ -124,23 +124,23 @@ export const PWAInstallPrompt = () => {
 
   return (
     <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:max-w-md z-50 animate-in slide-in-from-bottom-5">
-      <div className="bg-black border border-gray-700 rounded-lg shadow-lg p-4 flex items-center gap-4">
-        <div className="flex-shrink-0 w-12 h-12 bg-gray-900 rounded-lg flex items-center justify-center">
-          <Download className="h-6 w-6 text-white" />
+      <div className="bg-card border-border rounded-lg shadow-lg p-4 flex items-center gap-4">
+        <div className="flex-shrink-0 w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
+          <Download className="h-6 w-6 text-primary-foreground" />
         </div>
 
         <div className="flex-1">
-          <h3 className="font-bold text-sm mb-1 text-white">Install Kissan City App</h3>
-          <p className="text-xs text-gray-300">
+          <h3 className="font-bold text-sm mb-1 text-foreground">Install Kissan City App</h3>
+          <p className="text-xs text-muted-foreground">
             Get faster access and offline support
           </p>
         </div>
 
         <div className="flex gap-2">
-          <Button size="sm" onClick={handleInstall} className="text-xs bg-white text-black hover:bg-gray-200">
+          <Button size="sm" onClick={handleInstall} className="text-xs btn-green-gradient">
             Install
           </Button>
-          <Button size="sm" variant="ghost" onClick={handleDismiss} className="text-white hover:bg-gray-800">
+          <Button size="sm" variant="ghost" onClick={handleDismiss} className="text-muted-foreground hover:bg-accent">
             <X className="h-4 w-4" />
           </Button>
         </div>

@@ -180,6 +180,7 @@ const ProductDetail = () => {
     typeof window !== 'undefined' && window.innerWidth >= 768 ? "description" : ""
   );
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
+  const [actualReviewCount, setActualReviewCount] = useState<number>(0);
 
   const descriptionRef = useRef<HTMLDivElement>(null);
 
@@ -861,13 +862,14 @@ const ProductDetail = () => {
                 }] : []),
                 {
                   id: "reviews",
-                  label: `Reviews (${product?.reviewCount || 0})`,
+                  label: `Reviews (${actualReviewCount})`,
                   content: (
                     <ReviewsList
                       productId={String(product?._id || product?.id)}
                       reviewKey={reviewKey}
                       isVerifiedBuyer={isVerifiedBuyer}
                       onReviewSubmitted={() => { setReviewKey((prev) => prev + 1); refetchProduct(); }}
+                      onReviewCountChange={setActualReviewCount}
                     />
                   )
                 }
@@ -899,7 +901,7 @@ const ProductDetail = () => {
                     { id: "description", label: "Description" },
                     ...((product?.highlights?.length || product?.specs?.length) ? [{ id: "additional", label: "Product Details" }] : []),
                     ...(product?.faq?.length > 0 ? [{ id: "faq", label: `FAQ (${product.faq.length})` }] : []),
-                    { id: "reviews", label: `Reviews (${product?.reviewCount || 0})` },
+                    { id: "reviews", label: `Reviews (${actualReviewCount})` },
                   ].map(({ id, label }) => (
                     <button
                       key={id}
@@ -1021,7 +1023,11 @@ const ProductDetail = () => {
                       )} */}
                     </div>
                     <div className="h-0.5 w-10 bg-gray-900 rounded-full mb-5" />
-                    <ReviewsList key={product?._id || product?.id || ""} productId={product?._id || product?.id || ""} />
+                    <ReviewsList 
+                      key={product?._id || product?.id || ""} 
+                      productId={product?._id || product?.id || ""} 
+                      onReviewCountChange={setActualReviewCount}
+                    />
                   </div>
                 )}
               </div>
