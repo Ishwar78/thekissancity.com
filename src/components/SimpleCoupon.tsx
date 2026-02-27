@@ -1,22 +1,8 @@
-import { useState, useEffect } from 'react';
-import { Tag, Copy } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
-import { api } from '@/lib/api';
-
-type Coupon = {
-  code: string;
-  discount: number;
-  expiryDate: string;
-  offerText?: string;
-  description?: string;
-  termsAndConditions?: string;
-};
-
-type Props = {
-  onUseNow?: (code: string) => void;
-  productPrice: number;
-};
+import { useState, useEffect } from "react";
+import { Tag, Copy, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { api } from "@/lib/api";
 
 export const SimpleCoupon: React.FC<Props> = ({ onUseNow, productPrice }) => {
   const { toast } = useToast();
@@ -27,12 +13,12 @@ export const SimpleCoupon: React.FC<Props> = ({ onUseNow, productPrice }) => {
     const fetchCoupons = async () => {
       try {
         setLoading(true);
-        const { ok, json } = await api('/api/coupons/active');
+        const { ok, json } = await api("/api/coupons/active");
         if (ok && Array.isArray(json?.data)) {
           setCoupons(json.data);
         }
       } catch (error) {
-        console.error('Failed to fetch coupons:', error);
+        console.error("Failed to fetch coupons:", error);
       } finally {
         setLoading(false);
       }
@@ -42,69 +28,78 @@ export const SimpleCoupon: React.FC<Props> = ({ onUseNow, productPrice }) => {
   }, []);
 
   const handleUseNow = async (code: string) => {
-    if (onUseNow) {
-      onUseNow(code);
-    }
-    // Copy to clipboard
+    if (onUseNow) onUseNow(code);
+
     try {
       await navigator.clipboard.writeText(code);
-      toast({ 
-        title: 'Coupon copied!', 
-        description: `Code ${code} has been copied to your clipboard`,
+      toast({
+        title: "Coupon Copied 🎉",
+        description: `${code} copied to clipboard`,
       });
-    } catch (err) {
+    } catch {
       toast({ title: `Coupon ${code} is ready to use!` });
     }
   };
 
-  if (loading || coupons.length === 0) {
-    return null;
-  }
+  if (loading || coupons.length === 0) return null;
 
   return (
-    <div className="my-4 w-fit">
-      {coupons.slice(0, 1).map((coupon) => (
-        <div
-          key={coupon.code}
-          className="border-2 border-dashed border-gray-300 rounded-lg p-3 bg-white hover:border-gray-400 transition-colors w-fit"
-        >
+    <div className="my-4">
+      <h3 className="text-xs font-semibold mb-2 text-gray-600">Available Offers</h3>
+
+      {/* SLIDER CONTAINER */}
+      <div className="flex gap-3 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-1">
+        {coupons.map((coupon) => (
           <div
-            className="flex items-center justify-between cursor-pointer"
-            onClick={() => handleUseNow(coupon.code)}
+            key={coupon.code}
+            className="min-w-[200px] snap-start flex-shrink-0 
+                       rounded-lg border border-dashed border-primary/40
+                       bg-gradient-to-r from-primary/5 to-primary/10
+                       p-3 shadow-sm hover:shadow transition-all duration-200"
           >
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 bg-gray-100 rounded-md">
-                <Tag className="h-4 w-4 text-gray-600" />
-              </div>
-              <div>
-                <p className="text-xs text-gray-600 font-medium">Coupon Code</p>
-                <p className="text-sm font-bold text-gray-900 tracking-wider">
+            {/* TOP ROW */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5">
+                <Tag className="h-3.5 w-3.5 text-primary" />
+                <span className="text-xs font-semibold text-primary tracking-wide">
                   {coupon.code}
-                </p>
+                </span>
               </div>
+
+              <Button
+                size="sm"
+                onClick={() => handleUseNow(coupon.code)}
+                className="h-6 rounded-full px-2 text-[10px] bg-primary text-black hover:bg-primary/90"
+              >
+                Apply
+              </Button>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="p-1.5 hover:bg-gray-100"
-            >
-              <Copy className="h-4 w-4 text-gray-600" />
-            </Button>
+
+            {/* DISCOUNT */}
+            <div className="mt-2 flex items-center gap-1.5">
+              <Sparkles className="h-3.5 w-3.5 text-yellow-500" />
+              <span className="text-xs font-medium text-gray-700">
+                Save {coupon.discount}%
+              </span>
+            </div>
+
+            {/* EXPIRY */}
+            <p className="text-[10px] text-muted-foreground mt-1">
+              Valid till{" "}
+              {new Date(coupon.expiryDate).toLocaleDateString("en-IN", {
+                day: "numeric",
+                month: "short",
+              })}
+            </p>
+
+            {coupon.termsAndConditions && (
+              <button className="text-[10px] mt-1.5 font-medium text-primary/80 hover:text-primary">
+                View Terms →
+              </button>
+            )}
           </div>
-          
-          {coupon.termsAndConditions && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                // Handle terms view if needed
-              }}
-              className="w-full text-xs text-gray-600 hover:text-gray-900 hover:underline focus:outline-none font-medium transition-colors text-center mt-2"
-            >
-              View Terms & Conditions
-            </button>
-          )}
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 };

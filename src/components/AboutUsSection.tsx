@@ -1,118 +1,322 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { ChevronDown, ChevronUp, Leaf, Mountain, Heart } from 'lucide-react';
+
+const stats = [
+  { value: '500+', label: 'Partner Farmers' },
+  { value: '100%', label: 'Organic Certified' },
+  { value: '50+', label: 'Hill Products' },
+  { value: '10K+', label: 'Happy Homes' },
+];
 
 const AboutUsSection = () => {
   const [isReadMore, setIsReadMore] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const sectionRef = useRef<HTMLDivElement>(null);
 
-  const ImageCard = ({ height = "h-80" }: { height?: string }) => (
-    <div
-      className="rounded-3xl overflow-hidden shadow-2xl border-2"
-      style={{ borderColor: '#ffffff' }}
-    >
-      {/* Top brown bar */}
-      <div className="h-10" style={{ backgroundColor: '#333333' }}></div>
+  useEffect(() => {
+    const node = sectionRef.current;
+    if (!node) return;
+    const rect = node.getBoundingClientRect();
+    if (rect.top < window.innerHeight) { setVisible(true); return; }
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setVisible(true); observer.disconnect(); } },
+      { threshold: 0.08 }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
 
-      {/* Single Image */}
-      <div className={`relative overflow-hidden group ${height}`}>
-        <img
-          src="/Capture.PNG"
-          alt="About us"
-          className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
-        />
-        <div className="absolute inset-0 bg-black opacity-10"></div>
+  const ImageCard = ({ height = 420 }: { height?: number }) => (
+    <div className="au-image-card">
+      <div className="au-img-top-bar" />
+      {/* 
+        Key fix: use object-cover + fixed height so the image fills
+        the container without leaving empty black space.
+        The image /Capture.PNG appears to be a 3-panel collage —
+        object-cover crops it to fill the area cleanly.
+      */}
+      <div className="au-img-wrap" style={{ height }}>
+        <img src="/Capture.PNG" alt="Direct from source" />
+        <div className="au-img-overlay" />
+        <div className="au-float-badge">
+          <Leaf size={10} />
+          100% Organic
+        </div>
       </div>
-
-      {/* Bottom Banner */}
-      <div
-        className="text-white text-center py-4 relative"
-        style={{ background: 'linear-gradient(to right, #333333, #666666, #333333)' }}
-      >
-        <div className="absolute inset-0 bg-black opacity-10"></div>
-        <h3 className="font-bold uppercase tracking-[0.2em] relative z-10 text-sm lg:text-base">
-          PERFECT FOR ALL OCCASIONS
-        </h3>
+      <div className="au-img-banner">
+        <div className="au-img-banner-dot" />
+        <span className="au-img-banner-text">Perfect for all occasions</span>
+        <div className="au-img-banner-dot" />
       </div>
     </div>
   );
 
   return (
-    <section className=" text-white py-12 lg:py-20 relative overflow-hidden"
-     style={{ backgroundColor: '#2d2117' }}>
-      {/* Decorative Elements */}
-      <div className="absolute top-12 left-8 text-6xl font-bold opacity-20" style={{ color: '#2d2117' }}>///</div>
-      <div className="absolute bottom-0 right-0 w-48 h-48 rounded-tl-full opacity-10" style={{ backgroundColor: '#2d2117' }}></div>
-      <div className="absolute top-1/3 right-1/4 w-32 h-32 rounded-full opacity-5" style={{ backgroundColor: '#ffffff' }}></div>
+    <section className="au-root" ref={sectionRef}>
+      <style>{`
+        .au-root {
+          position: relative; overflow: hidden;
+          background: linear-gradient(135deg, #1a120a 0%, #2d1f10 40%, #1e160c 100%);
+          padding: 80px 0;
+        }
+        .au-root::before {
+          content: ''; position: absolute; inset: 0;
+          background-image: radial-gradient(circle, rgba(186,140,92,0.06) 1px, transparent 1px);
+          background-size: 28px 28px;
+          pointer-events: none; z-index: 0;
+        }
+
+        /* Glowing orbs */
+        .au-orb1 {
+          position: absolute; top: -80px; left: -80px;
+          width: 320px; height: 320px; border-radius: 50%;
+          background: radial-gradient(circle, rgba(45,106,79,0.18) 0%, transparent 70%);
+          pointer-events: none;
+          animation: au-drift 8s ease-in-out infinite alternate;
+        }
+        .au-orb2 {
+          position: absolute; bottom: -60px; right: -60px;
+          width: 280px; height: 280px; border-radius: 50%;
+          background: radial-gradient(circle, rgba(186,140,92,0.14) 0%, transparent 70%);
+          pointer-events: none;
+          animation: au-drift 10s ease-in-out infinite alternate-reverse;
+        }
+        @keyframes au-drift {
+          0%   { transform: translate(0, 0) scale(1); }
+          100% { transform: translate(25px, 18px) scale(1.08); }
+        }
+
+        /* Scroll reveal */
+        .au-reveal-left {
+          opacity: 0; transform: translateX(-30px);
+          transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+        .au-reveal-left.au-in { opacity: 1; transform: translateX(0); }
+        .au-reveal-right {
+          opacity: 0; transform: translateX(30px);
+          transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+        .au-reveal-right.au-in { opacity: 1; transform: translateX(0); }
+        .au-reveal {
+          opacity: 0; transform: translateY(24px);
+          transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+        .au-reveal.au-in { opacity: 1; transform: translateY(0); }
+        .au-d2 { transition-delay: 0.15s; }
+        .au-d3 { transition-delay: 0.3s; }
+
+        /* Eyebrow */
+        .au-eyebrow {
+          display: inline-flex; align-items: center; gap: 7px;
+          font-size: 11px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase;
+          color: #ba8c5c; background: rgba(186,140,92,0.1);
+          border: 1px solid rgba(186,140,92,0.22);
+          padding: 5px 14px; border-radius: 20px; margin-bottom: 16px;
+        }
+
+        /* Title */
+        .au-title {
+          font-size: clamp(2.4rem, 5vw, 3.8rem);
+          font-weight: 900; line-height: 1; letter-spacing: -0.03em;
+          color: #fff; margin-bottom: 8px;
+        }
+        .au-title span {
+          background: linear-gradient(135deg, #ba8c5c, #e8c07a);
+          -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+        .au-title-underline {
+          height: 3px; width: 60px; border-radius: 3px;
+          background: linear-gradient(90deg, #2d6a4f, #ba8c5c);
+          margin-bottom: 28px;
+        }
+
+        /* Body text */
+        .au-body { font-size: 15px; line-height: 1.8; color: rgba(255,255,255,0.62); margin-bottom: 12px; }
+        .au-body-more { font-size: 14px; line-height: 1.8; color: rgba(255,255,255,0.5); margin-bottom: 12px; }
+
+        /* Toggle btn */
+        .au-toggle-btn {
+          display: inline-flex; align-items: center; gap: 6px;
+          font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+          color: #ba8c5c; border: none; background: none; cursor: pointer; padding: 0; margin-top: 6px;
+          transition: color 0.2s, gap 0.2s;
+        }
+        .au-toggle-btn:hover { color: #e8c07a; gap: 10px; }
+
+        /* Shimmer divider */
+        .au-shimmer-line {
+          height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(186,140,92,0.4), transparent);
+          margin: 26px 0; position: relative; overflow: hidden;
+        }
+        .au-shimmer-line::after {
+          content: ''; position: absolute; top: 0; left: -100%;
+          width: 100%; height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+          animation: au-shimmer 3s ease-in-out infinite;
+        }
+        @keyframes au-shimmer { 0% { left: -100%; } 100% { left: 100%; } }
+
+        /* Icon pills */
+        .au-icons-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 24px; }
+        .au-icon-pill {
+          display: inline-flex; align-items: center; gap: 6px;
+          font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.45);
+          background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07);
+          padding: 6px 12px; border-radius: 20px;
+          transition: color 0.2s, background 0.2s, border-color 0.2s;
+        }
+        .au-icon-pill:hover { color: #ba8c5c; background: rgba(186,140,92,0.1); border-color: rgba(186,140,92,0.25); }
+
+        /* Stats */
+        .au-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        @media (min-width: 480px) { .au-stats { grid-template-columns: repeat(4, 1fr); } }
+        .au-stat-card {
+          background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07);
+          border-radius: 14px; padding: 14px 8px; text-align: center;
+          transition: background 0.25s, border-color 0.25s, transform 0.25s;
+        }
+        .au-stat-card:hover { background: rgba(45,106,79,0.15); border-color: rgba(45,106,79,0.35); transform: translateY(-3px); }
+        .au-stat-value {
+          font-size: 22px; font-weight: 900; letter-spacing: -0.03em;
+          background: linear-gradient(135deg, #ba8c5c, #e8c07a);
+          -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+          background-clip: text; display: block; margin-bottom: 3px;
+        }
+        .au-stat-label { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.35); }
+
+        /* ── IMAGE CARD ── */
+        .au-image-card {
+          position: relative; border-radius: 24px; overflow: hidden;
+          box-shadow: 0 30px 70px rgba(0,0,0,0.55);
+          border: 1px solid rgba(255,255,255,0.07);
+          background: #1a120a;
+          transition: transform 0.4s ease, box-shadow 0.4s ease;
+        }
+        .au-image-card:hover {
+          transform: translateY(-5px) scale(1.01);
+          box-shadow: 0 40px 90px rgba(0,0,0,0.65);
+        }
+        .au-img-top-bar {
+          height: 4px;
+          background: linear-gradient(90deg, #2d6a4f, #ba8c5c, #e8c07a);
+        }
+        .au-img-wrap {
+          position: relative; overflow: hidden; width: 100%;
+        }
+        /* ✅ THE FIX: object-cover fills the height, no black void */
+        .au-img-wrap img {
+          width: 100%; height: 100%;
+          object-fit: cover;
+          object-position: top center;
+          display: block;
+          transition: transform 0.7s ease;
+        }
+        .au-image-card:hover .au-img-wrap img { transform: scale(1.04); }
+        .au-img-overlay {
+          position: absolute; inset: 0;
+          background: linear-gradient(to top, rgba(0,0,0,0.35) 0%, transparent 55%);
+          pointer-events: none;
+        }
+
+        /* Floating badge */
+        .au-float-badge {
+          position: absolute; top: 14px; right: 14px; z-index: 3;
+          background: rgba(0,0,0,0.5); backdrop-filter: blur(8px);
+          border: 1px solid rgba(186,140,92,0.35); border-radius: 30px;
+          padding: 6px 13px;
+          display: flex; align-items: center; gap: 5px;
+          font-size: 11px; font-weight: 700; color: #e8c07a; letter-spacing: 0.08em;
+          animation: au-badge-float 3s ease-in-out infinite;
+        }
+        @keyframes au-badge-float {
+          0%, 100% { transform: translateY(0); }
+          50%       { transform: translateY(-5px); }
+        }
+
+        /* Bottom banner */
+        .au-img-banner {
+          background: linear-gradient(135deg, #1a120a, #2d1f10);
+          border-top: 1px solid rgba(255,255,255,0.06);
+          padding: 15px 20px;
+          display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .au-img-banner-text {
+          font-size: 12px; font-weight: 800; letter-spacing: 0.2em;
+          text-transform: uppercase; color: rgba(255,255,255,0.8);
+        }
+        .au-img-banner-dot {
+          width: 5px; height: 5px; border-radius: 50%;
+          background: linear-gradient(135deg, #2d6a4f, #ba8c5c);
+        }
+      `}</style>
+
+      <div className="au-orb1" />
+      <div className="au-orb2" />
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16">
+        <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
 
-          {/* Left Section */}
-          <div className="lg:w-[48%] w-full space-y-6">
-            <div className="inline-block">
-              <h2 className="text-4xl lg:text-5xl font-bold tracking-tight" style={{ color: '#ffffff' }}>
-                OUR STORY
-              </h2>
-              {/* <div className="w-24 h-1 mt-3 rounded-full" style={{ background: 'linear-gradient(to right, #ffffff, #e0e0e0)' }}></div> */}
+          {/* ── LEFT TEXT ── */}
+          <div className={`lg:w-[50%] w-full au-reveal-left ${visible ? 'au-in' : ''}`}>
+
+            <div className="au-eyebrow">
+              <Mountain size={12} />
+              Kissan City
             </div>
 
-            <div className="space-y-5" style={{ color: '#cccccc' }}>
-              <p className="text-base lg:text-lg leading-relaxed">
-             Every jar, every packet tells a story. A story of farmers in the misty valleys of Himachal Pradesh, tending to their organic mushroom farms with the same care their ancestors showed to the land.
+            <h2 className="au-title">Our <span>Story</span></h2>
+            <div className="au-title-underline" />
 
-A story of women in Haryana villages, preparing pure desi ghee using the ancient bilona method, handed down through generations. Each product is a testament to their dedication, their knowledge, and their love for the soil.
-              </p>
+            <p className="au-body">
+              Every jar, every packet tells a story. A story of farmers in the misty valleys of Himachal Pradesh, tending to their organic farms with the same care their ancestors showed to the land.
+            </p>
+            <p className="au-body">
+              A story of women in Haryana villages, preparing pure desi ghee using the ancient bilona method, handed down through generations.
+            </p>
 
-              {!isReadMore && (
-                <button
-                  onClick={() => setIsReadMore(true)}
-                  className="font-semibold text-sm uppercase tracking-wider transition-colors duration-200 flex items-center gap-2"
-                  style={{ color: '#ffffff' }}
-                  onMouseEnter={e => (e.currentTarget.style.color = '#cccccc')}
-                  onMouseLeave={e => (e.currentTarget.style.color = '#ffffff')}
-                >
-                  Read More
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-              )}
+            {isReadMore && (
+              <>
+                <p className="au-body-more">
+                  From rich, aromatic ghee to unprocessed honey and handpicked dry fruits, every item reflects quality, freshness, and the true taste of the mountains.
+                </p>
+                <p className="au-body-more">
+                  Our mission is to deliver health, purity, and tradition straight from the hills to your home — food that is wholesome, natural, and crafted with care, just the way nature intended.
+                </p>
+                <div className="lg:hidden mt-6">
+                  <ImageCard height={260} />
+                </div>
+              </>
+            )}
 
-              {isReadMore && (
-                <>
-                  <p className="text-sm lg:text-base leading-relaxed opacity-90">
-                    From rich, aromatic ghee to unprocessed honey and handpicked dry fruits, every item reflects quality, freshness, and the true taste of the mountains.
+            <button className="au-toggle-btn" onClick={() => setIsReadMore(!isReadMore)}>
+              {isReadMore
+                ? <><span>Read Less</span><ChevronUp size={14} /></>
+                : <><span>Read More</span><ChevronDown size={14} /></>}
+            </button>
 
-At Kissan City, we aim to deliver health, purity, and tradition straight from the hills to your home.
-                  </p>
+            <div className="au-shimmer-line" />
 
-                  <p className="text-sm lg:text-base leading-relaxed opacity-90">
-                    At Kissan City, our mission is to deliver health, purity, and tradition straight from the hills to your home. We believe in bringing you food that is not only delicious but also wholesome, natural, and crafted with care — just the way nature intended.
-                  </p>
+            <div className="au-icons-row">
+              <span className="au-icon-pill"><Leaf size={11} />Organic</span>
+              <span className="au-icon-pill"><Mountain size={11} />Hill Fresh</span>
+              <span className="au-icon-pill"><Heart size={11} />Farmer-first</span>
+            </div>
 
-                  {/* Mobile Image — shown only when Read More expanded */}
-                  <div className="lg:hidden w-full mt-6">
-                    <ImageCard height="h-64" />
-                  </div>
-
-                  <button
-                    onClick={() => setIsReadMore(false)}
-                    className="font-semibold text-sm uppercase tracking-wider transition-colors duration-200 flex items-center gap-2 mt-4"
-                    style={{ color: '#8B3A1A' }}
-                    onMouseEnter={e => (e.currentTarget.style.color = '#cccccc')}
-                    onMouseLeave={e => (e.currentTarget.style.color = '#ffffff')}
-                  >
-                    Read Less
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                    </svg>
-                  </button>
-                </>
-              )}
+            <div className={`au-stats au-reveal au-d3 ${visible ? 'au-in' : ''}`}>
+              {stats.map((s, i) => (
+                <div key={i} className="au-stat-card">
+                  <span className="au-stat-value">{s.value}</span>
+                  <span className="au-stat-label">{s.label}</span>
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* Right Section — Desktop only */}
-          <div className="hidden lg:block lg:w-[48%] w-full">
-            <ImageCard height="h-96" />
+          {/* ── RIGHT IMAGE (desktop) ── */}
+          <div className={`hidden lg:block lg:w-[46%] au-reveal-right au-d2 ${visible ? 'au-in' : ''}`}>
+            <ImageCard height={480} />
           </div>
 
         </div>

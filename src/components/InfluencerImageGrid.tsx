@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { User, Package } from 'lucide-react';
+import { User, Package, ArrowRight, Sparkles } from 'lucide-react';
 import { api } from '@/lib/api';
 import { Link } from 'react-router-dom';
-import { ArrowRight } from "lucide-react";
 
 interface Product {
   _id: string;
@@ -22,18 +21,14 @@ export default function InfluencerImageGrid() {
   const [influencerImages, setInfluencerImages] = useState<InfluencerImageItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [hoveredId, setHoveredId] = useState<string | null>(null);
 
   const fetchInfluencerImages = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const res = await api('/api/influencer-images/public');
-      if (!res.ok) {
-        throw new Error(res.json?.message || 'Failed to fetch influencer images');
-      }
-      const data = res.json.data;
-      setInfluencerImages(data);
+      if (!res.ok) throw new Error(res.json?.message || 'Failed to fetch');
+      setInfluencerImages(res.json.data);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -41,104 +36,249 @@ export default function InfluencerImageGrid() {
     }
   }, []);
 
-  useEffect(() => {
-    fetchInfluencerImages();
-  }, [fetchInfluencerImages]);
+  useEffect(() => { fetchInfluencerImages(); }, [fetchInfluencerImages]);
 
   return (
-    <section className="w-full py-6 sm:py-8 lg:py-10" style={{ backgroundColor: '#F5F0E8' }}>
-      <div className="container mx-auto px-3 sm:px-4 lg:px-6">
-        <div className="text-center mb-8 sm:mb-10 lg:mb-12">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-3 mb-4">
-            <div className="flex-1"></div>
-            <h2 
-              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight"
-              style={{ color: '#6b4423' }}
-            >
-              Featured Collections
-            </h2>
-            <div className="flex-1"></div>
-          </div>
+    <section className="iig-root w-full py-14 sm:py-20" style={{ backgroundColor: '#F5F0E8' }}>
+      <style>{`
+        .iig-root {
+          --green:      #2d6a4f;
+          --green-dark: #1b4332;
+          --green-soft: #d8f3dc;
+          --brown:      #6b4423;
+          --brown-mid:  #ba8c5c;
+          --cream:      #faf3eb;
+        }
+
+        /* ── Header ── */
+        .iig-eyebrow {
+          display: inline-block;
+          font-size: 11px; font-weight: 700;
+          letter-spacing: 0.22em; text-transform: uppercase;
+          color: var(--brown-mid);
+          background: rgba(107,68,35,0.08);
+          padding: 4px 14px; border-radius: 20px;
+          margin-bottom: 10px;
+        }
+        .iig-title {
+          font-size: clamp(1.9rem, 4.5vw, 3.2rem);
+          font-weight: 900; letter-spacing: -0.03em; line-height: 1;
+          color: var(--brown); margin-bottom: 10px;
+        }
+        .iig-title span { color: var(--green); }
+        .iig-underline {
+          height: 4px; width: 60px; border-radius: 4px;
+          background: linear-gradient(90deg, var(--green), var(--brown-mid));
+          margin: 0 auto;
+        }
+
+        /* ── Grid ── */
+        .iig-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 10px;
+        }
+        @media (min-width: 768px) {
+          .iig-grid { grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        }
+
+        /* ── Card ── */
+        .iig-card {
+          position: relative;
+          overflow: hidden;
+          border-radius: 16px;
+          cursor: pointer;
+          background: #111;
+          box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+          transition: transform 0.35s ease, box-shadow 0.35s ease;
+        }
+        .iig-card:hover {
+          transform: translateY(-4px) scale(1.01);
+          box-shadow: 0 16px 40px rgba(0,0,0,0.18);
+        }
+
+        /* Tall cards span 2 rows */
+        .iig-card.tall {
+          grid-row: span 2;
+        }
+
+        /* Image */
+        .iig-card img {
+          width: 100%; height: 100%; object-fit: cover; display: block;
+          transition: transform 0.65s ease;
+        }
+        .iig-card:hover img { transform: scale(1.08); }
+
+        /* Overlay */
+        .iig-overlay {
+          position: absolute; inset: 0;
+          background: linear-gradient(to top, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.1) 55%, transparent 100%);
+          opacity: 0;
+          transition: opacity 0.35s ease;
+        }
+        .iig-card:hover .iig-overlay { opacity: 1; }
+
+        /* Info */
+        .iig-info {
+          position: absolute; bottom: 0; left: 0; right: 0;
+          padding: 14px 14px 16px;
+          z-index: 3;
+          transform: translateY(8px);
+          opacity: 0;
+          transition: transform 0.35s ease, opacity 0.35s ease;
+        }
+        .iig-card:hover .iig-info { transform: translateY(0); opacity: 1; }
+
+        .iig-prod-title {
+          font-size: 13px; font-weight: 700; color: #fff;
+          line-height: 1.35;
+          display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+          text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+          margin-bottom: 5px;
+        }
+        .iig-influencer {
+          display: inline-flex; align-items: center; gap: 5px;
+          background: rgba(255,255,255,0.15);
+          backdrop-filter: blur(6px);
+          color: #fff; font-size: 10px; font-weight: 600;
+          padding: 3px 9px; border-radius: 20px;
+          max-width: 100%;
+        }
+        .iig-influencer span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        /* Corner tag */
+        .iig-corner-tag {
+          position: absolute; top: 10px; right: 10px; z-index: 4;
+          width: 28px; height: 28px; border-radius: 50%;
+          background: rgba(255,255,255,0.9);
+          backdrop-filter: blur(4px);
+          display: flex; align-items: center; justify-content: center;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+          opacity: 0; transform: scale(0.7);
+          transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+        .iig-card:hover .iig-corner-tag { opacity: 1; transform: scale(1); }
+
+        /* Number badge (always visible) */
+        .iig-num {
+          position: absolute; top: 10px; left: 10px; z-index: 4;
+          font-size: 10px; font-weight: 800; color: #fff;
+          background: rgba(0,0,0,0.35);
+          backdrop-filter: blur(4px);
+          padding: 2px 8px; border-radius: 20px;
+          letter-spacing: 0.3px;
+        }
+
+        /* ── Skeleton ── */
+        @keyframes iig-shimmer {
+          0%   { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
+        }
+        .iig-shimmer {
+          background: linear-gradient(90deg,#ede8e0 25%,#f5f0e8 50%,#ede8e0 75%);
+          background-size: 200% 100%;
+          animation: iig-shimmer 1.4s infinite;
+          border-radius: 16px;
+        }
+
+        /* ── View all button ── */
+        .iig-view-all {
+          display: inline-flex; align-items: center; gap: 7px;
+          font-size: 13px; font-weight: 700;
+          color: var(--green);
+          text-decoration: none;
+          padding: 10px 22px; border-radius: 30px;
+          border: 1.5px solid rgba(45,106,79,0.3);
+          background: rgba(45,106,79,0.05);
+          transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.2s;
+        }
+        .iig-view-all:hover {
+          background: var(--green);
+          color: #fff;
+          border-color: var(--green);
+          transform: translateY(-2px);
+        }
+        .iig-view-all svg { transition: transform 0.2s; }
+        .iig-view-all:hover svg { transform: translateX(3px); }
+      `}</style>
+
+      <div className="container mx-auto px-4 sm:px-6">
+
+        {/* Header */}
+        <div className="text-center mb-10 sm:mb-12">
+          <span className="iig-eyebrow">As Seen On</span>
+          <h2 className="iig-title">Featured <span>Collections</span></h2>
+          <div className="iig-underline" />
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5 sm:gap-2 md:gap-3 animate-pulse">
+          <div className="iig-grid">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div 
-                key={i} 
-                className="bg-gray-200 rounded-none overflow-hidden" 
-                style={{ 
-                  gridRow: i % 3 === 0 ? 'span 2' : 'span 1',
-                  height: i % 3 === 0 ? '350px' : '175px',
-                  maxHeight: i % 3 === 0 ? '400px' : '200px'
-                }}
-              >
-                <div className="w-full h-full bg-gray-300" />
-              </div>
+              <div
+                key={i}
+                className={`iig-shimmer ${i % 3 === 0 ? 'iig-card tall' : ''}`}
+                style={{ minHeight: i % 3 === 0 ? 320 : 160 }}
+              />
             ))}
           </div>
         ) : error ? (
-          <div className="text-red-500 text-center py-8 sm:py-10">
+          <div className="text-center py-12 text-sm" style={{ color: '#a0a0a0' }}>
             Error loading images. Please try again.
           </div>
         ) : influencerImages.length === 0 ? (
-          <div className="text-gray-500 text-center py-8 sm:py-10">
+          <div className="text-center py-12 text-sm" style={{ color: '#a0a0a0' }}>
             No images available at the moment.
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5 sm:gap-2 md:gap-3">
-            {influencerImages.slice(0, -2).map((item, index) => (
-              <div
-                key={item._id}
-                className="relative overflow-hidden group cursor-pointer"
-                style={{ 
-                  gridRow: index % 3 === 0 ? 'span 2' : 'span 1',
-                  minHeight: index % 3 === 0 ? '300px' : '150px',
-                  maxHeight: index % 3 === 0 ? '400px' : '200px'
-                }}
-                onMouseEnter={() => setHoveredId(item._id)}
-                onMouseLeave={() => setHoveredId(null)}
-              >
-                <img
-                  src={item.imageUrl}
-                  alt={item.influencerName}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  loading="lazy"
-                />
-                <div className={`absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent transition-opacity duration-500 ${
-                  hoveredId === item._id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-                }`}>
-                  <div className="absolute bottom-0 left-0 right-0 p-2 sm:p-3 md:p-4 text-white transform translate-y-1 group-hover:translate-y-0 transition-transform duration-500">
-                    <h3 className="font-semibold text-xs sm:text-sm md:text-base lg:text-lg mb-0.5 sm:mb-1 line-clamp-2">
+          <div className="iig-grid">
+            {influencerImages.slice(0, -2).map((item, index) => {
+              const isTall = index % 3 === 0;
+              return (
+                <div
+                  key={item._id}
+                  className={`iig-card ${isTall ? 'tall' : ''}`}
+                  style={{ minHeight: isTall ? 320 : 160 }}
+                >
+                  <img
+                    src={item.imageUrl}
+                    alt={item.influencerName}
+                    loading="lazy"
+                  />
+
+                  <div className="iig-overlay" />
+
+                  {/* Index badge */}
+                  <div className="iig-num">#{String(index + 1).padStart(2, '0')}</div>
+
+                  {/* Corner icon */}
+                  <div className="iig-corner-tag">
+                    <Package size={12} color="#2d6a4f" />
+                  </div>
+
+                  {/* Info */}
+                  <div className="iig-info">
+                    <div className="iig-prod-title">
                       {item.productId?.title || 'Exclusive Collection'}
-                    </h3>
-                    <p className="text-[10px] sm:text-xs md:text-sm text-gray-200 flex items-center gap-1">
-                      <User className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-4 md:w-4" />
-                      <span className="truncate max-w-[80px] sm:max-w-[120px]">{item.influencerName}</span>
-                    </p>
+                    </div>
+                    <div className="iig-influencer">
+                      <User size={9} />
+                      <span>{item.influencerName}</span>
+                    </div>
                   </div>
                 </div>
-                <div className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div className="bg-white/90 backdrop-blur-sm rounded-full p-1 sm:p-1.5 shadow-lg">
-                    <Package className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-4 md:w-4 text-gray-800" />
-                  </div>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
-        
-        {/* Show all influencers button */}
-        <div className="text-center mt-8 sm:mt-10 md:mt-12">
-          <Link
-            to="/all-influencers"
-            className="inline-flex items-center text-xs sm:text-sm font-medium text-primary hover:text-gray-900 transition-colors group"
-            style={{ color: '#6b4423' }}
-          >
+
+        {/* View all */}
+        <div className="text-center mt-10 sm:mt-14">
+          <Link to="/all-influencers" className="iig-view-all">
             View All Influencers
-            <ArrowRight className="ml-1.5 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4 group-hover:translate-x-1 transition-transform" />
+            <ArrowRight size={14} />
           </Link>
         </div>
+
       </div>
     </section>
   );

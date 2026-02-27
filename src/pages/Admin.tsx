@@ -2887,8 +2887,8 @@ const handleProductSubmit = async (e: React.FormEvent) => {
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="rounded-2xl max-w-2xl" style={{ backgroundColor: '#faf3eb' }}>
-        <DialogHeader className="pb-6" style={{ borderBottom: '1px solid #e5d4c1' }}>
+      <DialogContent className="rounded-2xl max-w-2xl max-h-[90vh] flex flex-col" style={{ backgroundColor: '#faf3eb' }}>
+        <DialogHeader className="pb-6 flex-shrink-0" style={{ borderBottom: '1px solid #e5d4c1' }}>
          <DialogTitle className="text-2xl font-semibold" style={{ color: '#6b4423' }}>
   {editingCoupon ? 'Edit Coupon' : 'Create New Coupon'}
 </DialogTitle>
@@ -2898,7 +2898,7 @@ const handleProductSubmit = async (e: React.FormEvent) => {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6 p-2">
+        <div className="space-y-6 p-2 overflow-y-auto flex-1" style={{ maxHeight: 'calc(90vh - 180px)' }}>
           <div className="space-y-3">
             <Label htmlFor="coupon-code" className="text-base font-semibold" style={{ color: '#6b4423' }}>Coupon Code</Label>
             <Input
@@ -2984,7 +2984,7 @@ const handleProductSubmit = async (e: React.FormEvent) => {
             />
           </div>
 
-          <div className="flex gap-3 justify-end pt-6">
+          <div className="flex gap-3 justify-end pt-6 flex-shrink-0 border-t" style={{ borderColor: '#e5d4c1' }}>
             <Button 
               variant="outline" 
               onClick={() => setCouponDialogOpen(false)} 

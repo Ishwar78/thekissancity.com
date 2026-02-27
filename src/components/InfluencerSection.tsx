@@ -1,589 +1,463 @@
 import React, { useState, useEffect, useRef } from 'react';
-
-import { Loader2, Star, TrendingUp, Clock, Play, ArrowRight, ChevronLeft, ChevronRight, Volume2, VolumeX } from 'lucide-react';
-
+import { Loader2, ArrowRight, ChevronLeft, ChevronRight, Volume2, VolumeX, Play } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-import { Button } from '@/components/ui/button';
-
-
-
 interface Product {
-
   _id: string;
-
   title: string;
-
   images: string[];
-
 }
-
-
 
 interface InfluencerDataItem {
-
   _id: string;
-
   videoUrl: string;
-
   productId: Product;
-
   createdAt: string;
-
   updatedAt: string;
-
 }
 
-
-
-// API utility type
-
-declare const api: (url: string) => Promise<{ok: boolean, json: any}>;
-
-
+declare const api: (url: string) => Promise<{ ok: boolean; json: any }>;
 
 export default function InfluencerSection() {
-
   const [influencerData, setInfluencerData] = useState<InfluencerDataItem[]>([]);
-
   const [loading, setLoading] = useState(true);
-
   const [error, setError] = useState<string | null>(null);
-
   const [selectedVideo, setSelectedVideo] = useState<InfluencerDataItem | null>(null);
-
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
-
   const [isMuted, setIsMuted] = useState(false);
   const [hasVideoEnded, setHasVideoEnded] = useState(false);
-  const [hasAudioTrack, setHasAudioTrack] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Touch swipe
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const minSwipeDistance = 50;
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 1) { setTouchEnd(null); setTouchStart(e.targetTouches[0].clientX); }
+  };
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (touchStart) setTouchEnd(e.targetTouches[0].clientX);
+  };
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    if (distance > minSwipeDistance) handleNext();
+    if (distance < -minSwipeDistance) handlePrevious();
+    setTouchStart(null); setTouchEnd(null);
+  };
 
   const toggleMute = () => {
     if (videoRef.current) {
       videoRef.current.muted = !videoRef.current.muted;
       setIsMuted(videoRef.current.muted);
-      if (hasVideoEnded) {
-        setHasVideoEnded(false);
-        videoRef.current.currentTime = 0;
-        videoRef.current.play();
-      }
     }
   };
-
-  // Touch handlers for swipe functionality - iOS optimized
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = useState<number | null>(null);
-
-  const minSwipeDistance = 50;
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    // Prevent iOS zoom on double tap
-    if (e.touches.length === 1) {
-      setTouchEnd(null);
-      setTouchStart(e.targetTouches[0].clientX);
-    }
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (!touchStart || !touchEnd) return;
-    
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
-
-    if (isLeftSwipe) {
-      handleNext();
-    }
-    if (isRightSwipe) {
-      handlePrevious();
-    }
-    
-    // Reset touch states
-    setTouchStart(null);
-    setTouchEnd(null);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    // Prevent scrolling during swipe on iOS
-    if (touchStart) {
-      setTouchEnd(e.targetTouches[0].clientX);
-    }
-  };
-
-
 
   useEffect(() => {
-
     const fetchInfluencerData = async () => {
-
-      setLoading(true);
-
-      setError(null);
-
-      console.log('=== INFLUENCER SECTION INIT ===');
-
+      setLoading(true); setError(null);
       try {
-
-        // Check if api utility is available
-
+        let data;
         if (typeof api === 'function') {
-
           const res = await api('/api/influencer-data/public');
-
-          if (!res.ok) {
-
-            throw new Error(res.json?.message || 'Failed to fetch influencer data');
-
-          }
-
-          const data = res.json.data;
-
-          setInfluencerData(data);
-          
-          console.log('Influencer data loaded:', data.length, 'videos');
-          data.forEach((video, index) => {
-            console.log(`Video ${index}:`, video.videoUrl);
-          });
-
-          if (data.length > 0) {
-
-            setSelectedVideo(data[0]);
-
-            setCurrentVideoIndex(0);
-            
-            console.log('Selected first video:', data[0].videoUrl);
-
-          }
-
+          if (!res.ok) throw new Error(res.json?.message || 'Failed to fetch');
+          data = res.json.data;
         } else {
-
-          // Fallback to fetch
-
           const response = await fetch('/api/influencer-data/public');
-
           const json = await response.json();
-
-          if (!response.ok) {
-
-            throw new Error(json?.message || 'Failed to fetch influencer data');
-
-          }
-
-          setInfluencerData(json.data);
-          
-          console.log('Influencer data loaded (fallback):', json.data.length, 'videos');
-          json.data.forEach((video, index) => {
-            console.log(`Video ${index}:`, video.videoUrl);
-          });
-
-          if (json.data.length > 0) {
-
-            setSelectedVideo(json.data[0]);
-
-            setCurrentVideoIndex(0);
-            
-            console.log('Selected first video (fallback):', json.data[0].videoUrl);
-
-          }
-
+          if (!response.ok) throw new Error(json?.message || 'Failed to fetch');
+          data = json.data;
         }
-
+        setInfluencerData(data);
+        if (data.length > 0) { setSelectedVideo(data[0]); setCurrentVideoIndex(0); }
       } catch (err: any) {
-
         setError(err.message);
-
       } finally {
-
         setLoading(false);
-
       }
-
     };
-
     fetchInfluencerData();
-
   }, []);
-
-
-
-  if (loading) {
-
-    return (
-
-      <section className="py-16 bg-white">
-
-        <div className="container mx-auto px-4 text-center">
-
-          <Loader2 className="h-10 w-10 animate-spin mx-auto text-blue-600" />
-
-          <p className="mt-4 text-gray-600">Loading influencer content...</p>
-
-        </div>
-
-      </section>
-
-    );
-
-  }
-
-
-
-  if (error) {
-
-    return (
-
-      <section className="py-16">
-
-        <div className="container mx-auto px-4 text-center text-red-500">
-
-          <p>Error loading influencer data: {error}</p>
-
-        </div>
-
-      </section>
-
-    );
-
-  }
-
-
-
-  if (!influencerData.length) {
-
-    return null;
-
-  }
-
-
-
-  const otherVideos = influencerData.filter(item => item._id !== selectedVideo?._id);
 
   const handlePrevious = () => {
     const newIndex = currentVideoIndex === 0 ? influencerData.length - 1 : currentVideoIndex - 1;
-    setCurrentVideoIndex(newIndex);
-    setSelectedVideo(influencerData[newIndex]);
+    setCurrentVideoIndex(newIndex); setSelectedVideo(influencerData[newIndex]);
   };
-
   const handleNext = () => {
     const newIndex = currentVideoIndex === influencerData.length - 1 ? 0 : currentVideoIndex + 1;
-    setCurrentVideoIndex(newIndex);
-    setSelectedVideo(influencerData[newIndex]);
+    setCurrentVideoIndex(newIndex); setSelectedVideo(influencerData[newIndex]);
+  };
+  const handleVideoSelect = (index: number) => {
+    setCurrentVideoIndex(index); setSelectedVideo(influencerData[index]);
   };
 
-  const handleVideoSelect = (index: number) => {
-    setCurrentVideoIndex(index);
-    setSelectedVideo(influencerData[index]);
-  };
+  if (loading) {
+    return (
+      <section className="py-20 bg-[#F5F0E8]">
+        <div className="container mx-auto px-4 text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto" style={{ color: '#2d6a4f' }} />
+          <p className="mt-4 text-sm" style={{ color: '#6b4423' }}>Loading content…</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (error || !influencerData.length) return null;
+
+  const otherVideos = influencerData.filter(item => item._id !== selectedVideo?._id);
 
   return (
-    <section className="py-8 bg-[#F5F0E8]">
-      <div className="container mx-auto px-4">
-        {/* Section Header */}
-        <div className="text-center mb-12 space-y-3">
-          {/* <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-100 rounded-full mb-2">
-            <TrendingUp className="h-4 w-4 text-purple-600" />
-            <span className="text-sm font-medium text-purple-600">Featured Content</span>
-          </div> */}
+    <section className="is-root py-14 sm:py-20 bg-[#F5F0E8] overflow-hidden">
+      <style>{`
+        .is-root {
+          --green:      #2d6a4f;
+          --green-dark: #1b4332;
+          --green-soft: #d8f3dc;
+          --brown:      #6b4423;
+          --brown-mid:  #ba8c5c;
+          --cream:      #faf3eb;
+        }
 
-         
-           <div className="text-center mb-12">
-                    <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
-                      <div className="flex-1"></div>
-                      <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-foreground"
-                      style={{ color: '#6b4423' }}>
-                        Influencer Spotlight
-                      </h2>
-                      <div className="flex-1"></div>
-                    </div>
-                    {/* <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto">
-                     Watch real reviews from our community of creators and  influencer.
-                    </p> */}
-                  </div>
+        /* ── Header ── */
+        .is-eyebrow {
+          display: inline-block;
+          font-size: 11px; font-weight: 700;
+          letter-spacing: 0.22em; text-transform: uppercase;
+          color: var(--brown-mid);
+          background: rgba(107,68,35,0.08);
+          padding: 4px 14px; border-radius: 20px;
+          margin-bottom: 10px;
+        }
+        .is-title {
+          font-size: clamp(1.9rem, 4.5vw, 3.2rem);
+          font-weight: 900; letter-spacing: -0.03em; line-height: 1;
+          color: var(--brown); margin-bottom: 10px;
+        }
+        .is-title span { color: var(--green); }
+        .is-underline {
+          height: 4px; width: 60px; border-radius: 4px;
+          background: linear-gradient(90deg, var(--green), var(--brown-mid));
+          margin: 0 auto;
+        }
+
+        /* ── Main video card ── */
+        .is-main-card {
+          position: relative;
+          background: #111;
+          border-radius: 24px;
+          overflow: hidden;
+          box-shadow: 0 24px 60px rgba(0,0,0,0.3);
+        }
+        .is-main-card video {
+          width: 100%; height: 100%; object-fit: cover; display: block;
+        }
+
+        /* Bottom gradient */
+        .is-vid-gradient {
+          position: absolute; bottom: 0; left: 0; right: 0; height: 45%;
+          background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 100%);
+          pointer-events: none; z-index: 2;
+        }
+
+        /* Video info overlay */
+        .is-vid-info {
+          position: absolute; bottom: 0; left: 0; right: 0;
+          padding: 20px 18px;
+          z-index: 3;
+        }
+        .is-vid-title {
+          font-size: 15px; font-weight: 700; color: #fff;
+          line-height: 1.35; text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+        }
+
+        /* Counter pill */
+        .is-counter {
+          position: absolute; top: 14px; right: 14px; z-index: 10;
+          background: rgba(0,0,0,0.4);
+          backdrop-filter: blur(6px);
+          color: #fff; font-size: 11px; font-weight: 700; letter-spacing: 0.4px;
+          padding: 4px 11px; border-radius: 20px;
+        }
+
+        /* Mute button */
+        .is-mute-btn {
+          position: absolute; top: 14px; left: 14px; z-index: 10;
+          width: 34px; height: 34px; border-radius: 50%; border: none; cursor: pointer;
+          display: flex; align-items: center; justify-content: center;
+          background: rgba(0,0,0,0.4);
+          backdrop-filter: blur(6px);
+          color: #fff;
+          transition: background 0.2s, transform 0.2s;
+        }
+        .is-mute-btn:hover { background: rgba(0,0,0,0.65); transform: scale(1.08); }
+        .is-mute-btn:focus { outline: none; }
+
+        /* Mobile nav buttons */
+        .is-nav-btn {
+          position: absolute; top: 50%; transform: translateY(-50%); z-index: 10;
+          width: 40px; height: 40px; border-radius: 50%; border: none; cursor: pointer;
+          display: flex; align-items: center; justify-content: center;
+          background: rgba(255,255,255,0.12);
+          backdrop-filter: blur(8px);
+          color: #fff;
+          box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+          transition: background 0.2s, transform 0.2s;
+        }
+        .is-nav-btn:hover { background: rgba(255,255,255,0.25); transform: translateY(-50%) scale(1.08); }
+        .is-nav-btn:active { transform: translateY(-50%) scale(0.92) !important; }
+        .is-nav-btn:focus { outline: none; }
+        .is-nav-btn:disabled { opacity: 0.3; cursor: default; }
+        .is-nav-prev { left: 10px; }
+        .is-nav-next { right: 10px; }
+
+        /* Dot indicators */
+        .is-dots {
+          display: flex; justify-content: center; align-items: center; gap: 6px;
+          margin-top: 16px;
+        }
+        .is-dot {
+          border: none; cursor: pointer; padding: 0;
+          height: 5px; width: 5px; border-radius: 20px;
+          background: rgba(107,68,35,0.25);
+          transition: width 0.3s, background 0.3s;
+        }
+        .is-dot.active { background: var(--green); width: 20px; }
+        .is-dot:focus { outline: none; }
+
+        /* ── Desktop sidebar thumbnails ── */
+        .is-thumb-grid {
+          display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+          max-height: 580px; overflow-y: auto;
+          padding-right: 4px;
+          scrollbar-width: thin;
+          scrollbar-color: rgba(107,68,35,0.2) transparent;
+        }
+        .is-thumb-grid::-webkit-scrollbar { width: 4px; }
+        .is-thumb-grid::-webkit-scrollbar-thumb { background: rgba(107,68,35,0.2); border-radius: 4px; }
+
+        .is-thumb {
+          position: relative;
+          border-radius: 16px; overflow: hidden;
+          cursor: pointer;
+          box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+          transition: transform 0.25s ease, box-shadow 0.25s ease;
+          background: #111;
+        }
+        .is-thumb:hover {
+          transform: translateY(-3px) scale(1.02);
+          box-shadow: 0 10px 28px rgba(0,0,0,0.18);
+        }
+        .is-thumb.active {
+          ring: 2px solid var(--green);
+          outline: 2.5px solid var(--green);
+          outline-offset: 2px;
+        }
+        .is-thumb video { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .is-thumb-overlay {
+          position: absolute; inset: 0;
+          background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 55%);
+          pointer-events: none;
+        }
+        .is-thumb-label {
+          position: absolute; bottom: 0; left: 0; right: 0; padding: 10px;
+          z-index: 2;
+        }
+        .is-thumb-label span {
+          font-size: 11px; font-weight: 700; color: #fff;
+          display: -webkit-box; -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical; overflow: hidden;
+          line-height: 1.3; text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+        }
+
+        /* Play icon on thumb hover */
+        .is-thumb-play {
+          position: absolute; top: 50%; left: 50%;
+          transform: translate(-50%, -50%) scale(0.8);
+          opacity: 0; z-index: 3;
+          width: 36px; height: 36px; border-radius: 50%;
+          background: rgba(255,255,255,0.9);
+          display: flex; align-items: center; justify-content: center;
+          transition: opacity 0.2s, transform 0.2s;
+          pointer-events: none;
+        }
+        .is-thumb:hover .is-thumb-play {
+          opacity: 1; transform: translate(-50%, -50%) scale(1);
+        }
+
+        /* View all link */
+        .is-view-all {
+          display: inline-flex; align-items: center; gap: 6px;
+          font-size: 13px; font-weight: 700;
+          color: var(--green);
+          text-decoration: none;
+          padding: 9px 20px; border-radius: 30px;
+          border: 1.5px solid rgba(45,106,79,0.3);
+          background: rgba(45,106,79,0.05);
+          transition: background 0.2s, border-color 0.2s, transform 0.2s;
+        }
+        .is-view-all:hover {
+          background: var(--green);
+          color: #fff;
+          border-color: var(--green);
+          transform: translateY(-1px);
+        }
+        .is-view-all svg { transition: transform 0.2s; }
+        .is-view-all:hover svg { transform: translateX(3px); }
+      `}</style>
+
+      <div className="container mx-auto px-4 sm:px-6">
+
+        {/* Header */}
+        <div className="text-center mb-10 sm:mb-12">
+          <span className="is-eyebrow">Creator Content</span>
+          <h2 className="is-title">Influencer <span>Spotlight</span></h2>
+          <div className="is-underline" />
         </div>
 
-     
-        {/* Mobile View - Carousel */}
-<div className="lg:hidden mb-6">
-  {/* Main Video Display with Navigation */}
-  <div className="relative bg-white rounded-2xl shadow-xl overflow-hidden mb-6" style={{ minHeight: '400px' }}>
-    {/* Left Navigation Button Container */}
-    <div className="absolute left-2 top-1/2 -translate-y-1/2 z-20">
-      <button
-        onClick={(e) => {
-          handlePrevious();
-          setTimeout(() => {
-            if (e.currentTarget && e.currentTarget.blur) {
-              e.currentTarget.blur();
-            }
-          }, 150);
-        }}
-        className="p-2.5 bg-transparent   "
-        disabled={influencerData.length <= 1}
-      >
-        <ChevronLeft className="w-8 h-8 text-white drop-shadow-lg" strokeWidth={2.5} />
-      </button>
-    </div>
-    
-    {/* Right Navigation Button Container */}
-    <div className="absolute right-2 top-1/2 -translate-y-1/2 z-20">
-      <button
-        onClick={(e) => {
-          handleNext();
-          setTimeout(() => {
-            if (e.currentTarget && e.currentTarget.blur) {
-              e.currentTarget.blur();
-            }
-          }, 150);
-        }}
-        className="p-2.5 bg-transparent "
-        disabled={influencerData.length <= 1}
-      >
-        <ChevronRight className="w-8 h-8 text-white drop-shadow-lg" strokeWidth={2.5} />
-      </button>
-    </div>
-    
-    {/* Video Counter */}
-    <div className="absolute top-2 right-2 z-10 bg-black/50 text-white text-xs px-2 py-1 rounded-full">
-      {currentVideoIndex + 1} / {influencerData.length}
-    </div>
-    
-        
-        
-    <div className="relative aspect-[9/16] w-full bg-gray-900 overflow-hidden" style={{ minHeight: '400px' }}>
-      <video
-                ref={videoRef}
-                src={selectedVideo?.videoUrl}
-                controls
-                muted={false}
-                onTouchStart={handleTouchStart}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-                onClick={(e) => {
-                  // iOS-compatible video interaction
-                  const video = e.currentTarget;
-                  console.log('Video clicked - Current muted state:', video.muted);
-                  
-                  // iOS requires user gesture for audio
-                  if (video.paused) {
-                    video.play().catch(err => {
-                      console.log('Autoplay prevented:', err);
-                    });
-                  }
-                  
-                  // Gentle unmute for iOS compatibility
-                  video.muted = false;
-                  video.volume = 1.0;
-                  setIsMuted(false);
-                  
-                  console.log('After click - muted:', video.muted, 'volume:', video.volume);
-                }}
-                onVolumeChange={(e) => {
-                  const video = e.currentTarget;
-                  console.log('Volume change event - muted:', video.muted, 'volume:', video.volume);
-                  setIsMuted(video.muted);
-                }}
-                onLoadedMetadata={(e) => {
-                  const video = e.currentTarget as HTMLVideoElement;
-                  console.log('Video metadata loaded');
-                  console.log('Video duration:', video.duration);
-                  console.log('Video readyState:', video.readyState);
-                  console.log('Video muted:', video.muted);
-                  console.log('Video volume:', video.volume);
-                  
-                  // Better audio detection
-                  let hasAudio = false;
-                  
-                  // Method 1: Check if video has audio tracks (modern browsers)
-                  if ('audioTracks' in video) {
-                    hasAudio = (video as any).audioTracks.length > 0;
-                    console.log('Audio tracks method:', hasAudio);
-                  }
-                  
-                  // Method 2: Check webkitAudioDecodedByteCount (Chrome/Safari)
-                  if ('webkitAudioDecodedByteCount' in video) {
-                    hasAudio = (video as any).webkitAudioDecodedByteCount > 0;
-                    console.log('Webkit audio bytes method:', hasAudio);
-                  }
-                  
-                  // Method 3: Try to detect by playing briefly and checking audio context
-                  if (!hasAudio && video.duration > 0) {
-                    // Assume videos under 6 seconds might be muted WhatsApp videos
-                    hasAudio = video.duration > 6;
-                    console.log('Duration-based detection:', hasAudio, 'duration:', video.duration);
-                  }
-                  
-                  setHasAudioTrack(hasAudio);
-                  console.log('Final audio detection result:', hasAudio);
-                  
-                  if (video.duration > 0 && video.readyState >= 2) {
-                    video.currentTime = 0.1;
-                  }
-                }}
-                onPlay={(e) => {
-                  // iOS-compatible play handling
-                  const video = e.currentTarget;
-                  console.log('Video play event triggered');
-                  
-                  // Don't force unmute on iOS - let user control
-                  video.volume = Math.min(video.volume, 1.0);
-                  setIsMuted(video.muted);
-                  setHasVideoEnded(false);
-                  
-                  console.log('Play - muted after:', video.muted, 'volume:', video.volume);
-                }}
-                onEnded={() => {
-                  setHasVideoEnded(true);
-                }}
-                className="w-full h-full object-cover"
-                preload="metadata"
-              />
-    </div>
-  </div>
-</div>
+        {/* ── MOBILE ── */}
+        <div className="lg:hidden">
+          <div className="is-main-card" style={{ aspectRatio: '9/16', maxHeight: 520 }}>
+            <video
+              ref={videoRef}
+              src={selectedVideo?.videoUrl}
+              controls
+              muted={false}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+              onClick={(e) => {
+                const v = e.currentTarget;
+                if (v.paused) v.play().catch(() => {});
+                v.muted = false; v.volume = 1.0; setIsMuted(false);
+              }}
+              onVolumeChange={(e) => setIsMuted(e.currentTarget.muted)}
+              onPlay={(e) => { setIsMuted(e.currentTarget.muted); setHasVideoEnded(false); }}
+              onEnded={() => setHasVideoEnded(true)}
+              onLoadedMetadata={(e) => {
+                const v = e.currentTarget;
+                if (v.duration > 0 && v.readyState >= 2) v.currentTime = 0.1;
+              }}
+              className="w-full h-full object-cover"
+              preload="metadata"
+              style={{ borderRadius: 24 }}
+            />
 
-        {/* Desktop View - Original Layout */}
-        <div className="hidden lg:block">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col lg:flex-row gap-6">
-              {/* Left Side: Large Featured Video */}
-              <div className="lg:w-1/2">
-                {selectedVideo && (
-                  <div className="bg-white rounded-2xl shadow-xl overflow-hidden sticky top-4">
-                    <div className="relative aspect-[3/4] w-full max-h-[600px] bg-gray-900 overflow-hidden">
-                      <video
-                        key={selectedVideo._id}
-                        src={selectedVideo.videoUrl}
-                        controls
-                        muted={false}
-                        onVolumeChange={(e) => {
-                          const video = e.currentTarget;
-                          console.log('Desktop volume change - muted:', video.muted, 'volume:', video.volume);
-                          setIsMuted(video.muted);
-                        }}
-                        onPlay={(e) => {
-                          // iOS-compatible desktop video play
-                          const video = e.currentTarget;
-                          console.log('Desktop video play event');
-                          
-                          video.volume = Math.min(video.volume, 1.0);
-                          setIsMuted(video.muted);
-                          setHasVideoEnded(false);
-                          
-                          console.log('Desktop - muted after:', video.muted, 'volume:', video.volume);
-                        }}
-                        onEnded={() => {
-                          setHasVideoEnded(true);
-                        }}
-                        className="w-full h-full object-cover"
-                        preload="metadata"
-                        onLoadedMetadata={(e) => {
-                          const videoElement = e.currentTarget;
-                          console.log('Desktop video metadata loaded');
-                          console.log('Desktop duration:', videoElement.duration);
-                          console.log('Desktop readyState:', videoElement.readyState);
-                          console.log('Desktop muted:', videoElement.muted);
-                          console.log('Desktop volume:', videoElement.volume);
-                          
-                          if (videoElement.duration > 0 && videoElement.readyState >= 2) {
-                            videoElement.currentTime = 0.1;
-                          }
-                        }}
-                      />
+            <div className="is-vid-gradient" />
+
+            {/* Counter */}
+            <div className="is-counter">{currentVideoIndex + 1} / {influencerData.length}</div>
+
+            {/* Mute toggle */}
+            <button className="is-mute-btn" onClick={toggleMute} aria-label={isMuted ? "Unmute" : "Mute"}>
+              {isMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
+            </button>
+
+            {/* Video title */}
+            <div className="is-vid-info">
+              <div className="is-vid-title">{selectedVideo?.productId?.title || 'Featured Product'}</div>
+            </div>
+
+            {/* Nav */}
+            <button className="is-nav-btn is-nav-prev" onClick={handlePrevious} disabled={influencerData.length <= 1} aria-label="Previous">
+              <ChevronLeft size={20} strokeWidth={2.5} />
+            </button>
+            <button className="is-nav-btn is-nav-next" onClick={handleNext} disabled={influencerData.length <= 1} aria-label="Next">
+              <ChevronRight size={20} strokeWidth={2.5} />
+            </button>
+          </div>
+
+          {/* Dots */}
+          <div className="is-dots">
+            {influencerData.map((_, i) => (
+              <button key={i} className={`is-dot ${i === currentVideoIndex ? 'active' : ''}`}
+                onClick={() => handleVideoSelect(i)} aria-label={`Video ${i + 1}`} />
+            ))}
+          </div>
+        </div>
+
+        {/* ── DESKTOP ── */}
+        <div className="hidden lg:flex gap-8 items-start max-w-6xl mx-auto">
+
+          {/* Main feature video */}
+          <div className="w-[42%] flex-shrink-0">
+            <div className="is-main-card" style={{ aspectRatio: '9/16', maxHeight: 600 }}>
+              {selectedVideo && (
+                <video
+                  key={selectedVideo._id}
+                  src={selectedVideo.videoUrl}
+                  controls
+                  muted={false}
+                  onVolumeChange={(e) => setIsMuted(e.currentTarget.muted)}
+                  onPlay={(e) => { setIsMuted(e.currentTarget.muted); setHasVideoEnded(false); }}
+                  onEnded={() => setHasVideoEnded(true)}
+                  onLoadedMetadata={(e) => {
+                    const v = e.currentTarget;
+                    if (v.duration > 0 && v.readyState >= 2) v.currentTime = 0.1;
+                  }}
+                  className="w-full h-full object-cover"
+                  preload="metadata"
+                  style={{ borderRadius: 24 }}
+                />
+              )}
+              <div className="is-vid-gradient" />
+              <button className="is-mute-btn" onClick={toggleMute} aria-label={isMuted ? "Unmute" : "Mute"}>
+                {isMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
+              </button>
+              <div className="is-vid-info">
+                <div className="is-vid-title">{selectedVideo?.productId?.title || 'Featured Product'}</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Thumbnail grid */}
+          <div className="flex-1">
+            <div className="is-thumb-grid">
+              {otherVideos.map((item, i) => {
+                const globalIndex = influencerData.findIndex(v => v._id === item._id);
+                return (
+                  <div
+                    key={item._id}
+                    className={`is-thumb ${selectedVideo?._id === item._id ? 'active' : ''}`}
+                    style={{ aspectRatio: '9/16' }}
+                    onClick={() => handleVideoSelect(globalIndex)}
+                  >
+                    <video
+                      src={item.videoUrl}
+                      muted playsInline preload="metadata"
+                      className="w-full h-full object-cover"
+                      onLoadedMetadata={(e) => {
+                        const v = e.currentTarget;
+                        if (v.duration > 0 && v.readyState >= 2) v.currentTime = 0.1;
+                      }}
+                      onLoadedData={(e) => {
+                        const v = e.currentTarget;
+                        if (v.readyState >= 2) v.currentTime = 0.1;
+                      }}
+                    />
+                    <div className="is-thumb-overlay" />
+                    <div className="is-thumb-play">
+                      <Play size={14} fill="#2d6a4f" color="#2d6a4f" />
                     </div>
-                    <div className="p-6">
-                      <div className="flex items-start justify-between mb-3">
-                        <h3 className="text-xl font-bold text-gray-900">
-                          {selectedVideo.productId?.title || 'Featured Product'}
-                        </h3>
-                        <button
-                          onClick={toggleMute}
-                          className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
-                          aria-label={isMuted ? "Unmute" : "Mute"}
-                        >
-                          {isMuted ? (
-                            <VolumeX className="h-5 w-5 text-gray-600" />
-                          ) : (
-                            <Volume2 className="h-5 w-5 text-gray-600" />
-                          )}
-                        </button>
-                      </div>
+                    <div className="is-thumb-label">
+                      <span>{item.productId?.title || 'Product Review'}</span>
                     </div>
                   </div>
-                )}
-              </div>
-
-              {/* Right Side: Scrollable Grid */}
-              <div className="lg:w-1/2">
-                <div className="max-h-[600px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-                  <div className="grid grid-cols-2 gap-4">
-                    {otherVideos.map((item) => (
-                      <div
-                        key={item._id}
-                        onClick={() => setSelectedVideo(item)}
-                        className="bg-white rounded-xl shadow-md overflow-hidden cursor-pointer hover:shadow-xl hover:scale-[1.02] transition-all duration-300 group"
-                      >
-                        <div className="relative aspect-[9/16] bg-gray-900 overflow-hidden">
-                          <video
-                            src={item.videoUrl}
-                            className="w-full h-full object-cover"
-                            preload="metadata"
-                            muted
-                            playsInline
-                            onLoadedMetadata={(e) => {
-                              // Seek to first frame to show preview
-                              const videoElement = e.currentTarget;
-                              if (videoElement.duration > 0 && videoElement.readyState >= 2) {
-                                videoElement.currentTime = 0.1;
-                              }
-                            }}
-                            onLoadedData={(e) => {
-                              // Ensure first frame is shown
-                              const videoElement = e.currentTarget;
-                              if (videoElement.readyState >= 2) {
-                                videoElement.currentTime = 0.1;
-                              }
-                            }}
-                            onCanPlay={(e) => {
-                              // Show first frame when video can play
-                              const videoElement = e.currentTarget;
-                              if (videoElement.currentTime === 0) {
-                                videoElement.currentTime = 0.1;
-                              }
-                            }}
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none" />
-                          <div className="absolute bottom-0 left-0 right-0 p-3 z-10">
-                            <h4 className="font-bold text-white text-sm mb-1 line-clamp-2 drop-shadow-lg">
-                              {item.productId?.title || 'Product Review'}
-                            </h4>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
+                );
+              })}
             </div>
           </div>
         </div>
 
-        {/* Show all videos button at the end */}
-        <div className="text-center mt-10 md:mt-16">
-                            <Link
-                              to="/videos"
-                              className="inline-flex items-center text-sm font-medium text-primary hover:text-gray-900 transition-colors group"
-                            >
-                             
-                              View All Videos
-                              <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                            </Link>
-                          </div>
-
-       
+        {/* View all */}
+        <div className="text-center mt-10 sm:mt-14">
+          <Link to="/videos" className="is-view-all">
+            View All Videos
+            <ArrowRight size={14} />
+          </Link>
+        </div>
 
       </div>
     </section>
   );
-
 }

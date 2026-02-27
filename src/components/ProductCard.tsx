@@ -1,12 +1,10 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ShoppingCart, Heart, Star } from "lucide-react";
+import { Heart, ShoppingCart } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
 import { useWishlist } from "@/hooks/useWishlist";
 import { toast } from "sonner";
-import { useEffect } from "react";
 
 interface ProductCardProps {
   id: string;
@@ -37,58 +35,33 @@ interface ProductCardProps {
   }>;
 }
 
-export const ProductCard = ({ 
-  id, 
-  name, 
-  price, 
-  originalPrice, 
-  discountedPrice, 
-  discountPercentage, 
-  discountAmount, 
-  image, 
-  category, 
-  to, 
-  slug, 
-  images, 
-  rating, 
+export const ProductCard = ({
+  id,
+  name,
+  price,
+  originalPrice,
+  discountPercentage,
+  image,
+  category,
+  to,
+  slug,
+  images,
   isBestSeller,
   quantityOptions
 }: ProductCardProps) => {
   const { user } = useAuth();
-  const { addToCart } = (() => { 
-    try { 
-      return useCart(); 
-    } catch { 
-      return { addToCart: () => {} } as any; 
-    } 
+  const { addToCart } = (() => {
+    try { return useCart(); }
+    catch { return { addToCart: () => {} } as any; }
   })();
   const { isInWishlist, toggleWishlist } = useWishlist();
   const navigate = useNavigate();
 
   const primaryImage = images && images.length > 0 ? images[0] : image;
 
-  const handleAdd = (e: React.MouseEvent) => {
-    e.preventDefault();
-    const item = { id, title: name, price, image: primaryImage };
-    if (!user) {
-      try {
-        localStorage.setItem('uni_add_intent', JSON.stringify({ item, qty: 1 }));
-      } catch {}
-      navigate('/auth');
-      return;
-    }
-    addToCart(item, 1);
-    toast.success('Added to cart');
-  };
-
   const src = (() => {
-    // Handle Cloudinary URLs with transformations
     if (image && image.includes('cloudinary')) {
-      // If it's already a Cloudinary URL with transformations, use as-is
-      if (image.includes('/w_') || image.includes('/h_') || image.includes('/c_')) {
-        return image;
-      }
-      // Add basic optimization for Cloudinary images
+      if (image.includes('/w_') || image.includes('/h_') || image.includes('/c_')) return image;
       return image.replace('/upload/', '/upload/w_400,h_400,c_fill,q_auto,f_auto/');
     }
     return image;
@@ -96,204 +69,323 @@ export const ProductCard = ({
 
   const linkTo = to || (slug && String(slug).trim() ? `/products/${slug}` : `/products/${id}`);
 
-  const handleWishlistClick = (e: React.MouseEvent) => {
+  const handleAdd = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    const item = { id, title: name, price, image: primaryImage };
     if (!user) {
+      try { localStorage.setItem('uni_add_intent', JSON.stringify({ item, qty: 1 })); } catch {}
       navigate('/auth');
       return;
     }
+    addToCart(item, 1);
+    toast.success('Added to cart');
+  };
+
+  const handleWishlistClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!user) { navigate('/auth'); return; }
     toggleWishlist(id);
   };
 
-  // Force transparent background for ALL wishlist buttons globally
-  useEffect(() => {
-    const forceTransparentBackground = () => {
-      // Target all wishlist buttons by multiple selectors
-      const selectors = [
-        `#wishlist-btn-${id}`,
-        '[aria-label*="wishlist"]',
-        '[aria-label*="Wishlist"]',
-        'button[class*="p-1.5"][class*="rounded-full"]',
-        'button[class*="p-2"][class*="rounded-full"]',
-        'button:has(svg[class*="lucide-heart"])',
-        'button:has(svg[class*="heart"])'
-      ];
-      
-      selectors.forEach(selector => {
-        const buttons = document.querySelectorAll(selector);
-        buttons.forEach(button => {
-          const btn = button as HTMLElement;
-          btn.style.setProperty('background-color', 'transparent', 'important');
-          btn.style.setProperty('background', 'transparent', 'important');
-          btn.style.setProperty('background-image', 'none', 'important');
-          btn.style.setProperty('box-shadow', 'none', 'important');
-        });
-      });
-    };
-    
-    // Initial force
-    forceTransparentBackground();
-    
-    // Continuous monitoring to fight back
-    const interval = setInterval(forceTransparentBackground, 50);
-    
-    // Also fight back on interactions
-    const handleGlobalInteraction = (e: Event) => {
-      const target = e.target as HTMLElement;
-      const button = target.closest('button');
-      if (button) {
-        const isWishlistBtn = 
-          button.getAttribute('aria-label')?.toLowerCase().includes('wishlist') ||
-          button.className.includes('p-1.5') ||
-          button.className.includes('p-2') ||
-          button.querySelector('svg[class*="heart"]') ||
-          button.querySelector('svg[class*="lucide-heart"]');
-          
-        if (isWishlistBtn) {
-          setTimeout(() => {
-            const btn = button as HTMLElement;
-            btn.style.setProperty('background-color', 'transparent', 'important');
-            btn.style.setProperty('background', 'transparent', 'important');
-            btn.style.setProperty('background-image', 'none', 'important');
-            btn.style.setProperty('box-shadow', 'none', 'important');
-          }, 0);
-        }
-      }
-    };
-    
-    document.addEventListener('mousedown', handleGlobalInteraction);
-    document.addEventListener('touchstart', handleGlobalInteraction);
-    document.addEventListener('click', handleGlobalInteraction);
-    
-    return () => {
-      clearInterval(interval);
-      document.removeEventListener('mousedown', handleGlobalInteraction);
-      document.removeEventListener('touchstart', handleGlobalInteraction);
-      document.removeEventListener('click', handleGlobalInteraction);
-    };
-  }, [id]);
+  const inWishlist = isInWishlist(id);
 
   return (
     <>
       <style>{`
-        /* Override for ALL wishlist buttons - prevent white background from global p-2 rules */
-        button[aria-label*="wishlist"],
-        button[aria-label*="Wishlist"],
-        button[class*="p-1.5"][class*="rounded-full"],
-        button[class*="p-2"][class*="rounded-full"],
-        button[aria-label*="wishlist"]:hover,
-        button[aria-label*="Wishlist"]:hover,
-        button[class*="p-1.5"][class*="rounded-full"]:hover,
-        button[class*="p-2"][class*="rounded-full"]:hover,
-        button[aria-label*="wishlist"]:active,
-        button[aria-label*="Wishlist"]:active,
-        button[class*="p-1.5"][class*="rounded-full"]:active,
-        button[class*="p-2"][class*="rounded-full"]:active,
-        button[aria-label*="wishlist"]:focus,
-        button[aria-label*="Wishlist"]:focus,
-        button[class*="p-1.5"][class*="rounded-full"]:focus,
-        button[class*="p-2"][class*="rounded-full"]:focus {
-          background-color: transparent !important;
-          background: transparent !important;
-          background-image: none !important;
-          box-shadow: none !important;
+        .pc3 {
+          --green:      #2d6a4f;
+          --green-dark: #1b4332;
+          --green-soft: #d8f3dc;
+          --brown:      #6b4423;
+          --brown-soft: #f0e5d0;
+          --cream:      #faf3eb;
+          --muted:      #a0a0a0;
+          --r:          18px;
+          --ri:         14px;
         }
-        
-        /* Ultra-specific override for any button with heart icon */
-        button svg[class*="lucide-heart"],
-        button svg[class*="heart"],
-        button:has(svg[class*="lucide-heart"]),
-        button:has(svg[class*="heart"]) {
-          background-color: transparent !important;
-          background: transparent !important;
-          background-image: none !important;
-          box-shadow: none !important;
+
+        /* Card */
+        .pc3-card {
+          position: relative;
+          border: 1.5px solid rgba(107,68,35,0.08) !important;
+          border-radius: var(--r) !important;
+          box-shadow: 0 2px 10px rgba(45,106,79,0.06) !important;
+          background: #fff !important;
+          overflow: hidden;
+          width: 100%;
+          max-width: 300px;
+          transition: box-shadow 0.3s ease, transform 0.3s ease, border-color 0.3s !important;
         }
+        .pc3-card:hover {
+          box-shadow: 0 14px 40px rgba(45,106,79,0.15) !important;
+          border-color: rgba(45,106,79,0.22) !important;
+          transform: translateY(-5px);
+        }
+
+        /* Image wrap */
+        .pc3-img-wrap {
+          position: relative;
+          aspect-ratio: 1;
+          background: var(--cream);
+          border-radius: var(--ri);
+          margin: 8px 8px 0;
+          overflow: hidden;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .pc3-img-wrap img {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+          padding: 14px;
+          transition: transform 0.5s ease;
+          position: relative;
+          z-index: 1;
+        }
+        .pc3-card:hover .pc3-img-wrap img {
+          transform: scale(1.07);
+        }
+
+        /* Dark overlay on hover */
+        .pc3-img-wrap::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(to top, rgba(27,67,50,0.6) 0%, transparent 55%);
+          opacity: 0;
+          transition: opacity 0.35s ease;
+          border-radius: var(--ri);
+          pointer-events: none;
+          z-index: 2;
+        }
+        .pc3-card:hover .pc3-img-wrap::after { opacity: 1; }
+
+        /* Add to cart button — slides up */
+        .pc3-cart-btn {
+          position: absolute;
+          bottom: 12px;
+          left: 50%;
+          transform: translateX(-50%) translateY(20px);
+          opacity: 0;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          background: #ffffff;
+          color: var(--green);
+          border: none;
+          border-radius: 30px;
+          padding: 8px 20px;
+          font-size: 12px;
+          font-weight: 700;
+          letter-spacing: 0.3px;
+          cursor: pointer;
+          white-space: nowrap;
+          z-index: 5;
+          box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+          transition: transform 0.3s ease, opacity 0.3s ease, background 0.2s, color 0.2s;
+        }
+        .pc3-cart-btn:hover {
+          background: var(--green);
+          color: #fff;
+        }
+        .pc3-card:hover .pc3-cart-btn {
+          opacity: 1;
+          transform: translateX(-50%) translateY(0);
+        }
+
+        /* Badges */
+        .pc3-badge {
+          position: absolute;
+          top: 10px;
+          left: 10px;
+          font-size: 10px;
+          font-weight: 800;
+          padding: 3px 9px;
+          border-radius: 20px;
+          letter-spacing: 0.5px;
+          z-index: 3;
+          text-transform: uppercase;
+        }
+        .pc3-badge-discount { background: var(--brown); color: #fff; }
+        .pc3-badge-bestseller {
+          background: linear-gradient(135deg, var(--green), #40916c);
+          color: #fff;
+        }
+
+        /* Wishlist */
+        .pc3-wishlist-btn {
+          position: absolute;
+          top: 8px;
+          right: 8px;
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          background: rgba(255,255,255,0.9) !important;
+          border: none;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: transform 0.2s ease, background 0.2s !important;
+          z-index: 5;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+          backdrop-filter: blur(4px);
+        }
+        .pc3-wishlist-btn:hover { transform: scale(1.15); background: #fff !important; }
+        .pc3-wishlist-btn:focus, .pc3-wishlist-btn:active {
+          background: rgba(255,255,255,0.9) !important;
+          outline: none;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+        }
+
+        /* Divider */
+        .pc3-divider {
+          height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(107,68,35,0.1), transparent);
+          margin: 8px 12px 0;
+        }
+
+        /* Body */
+        .pc3-body { padding: 10px 12px 14px; }
+
+        .pc3-category {
+          font-size: 10px;
+          font-weight: 600;
+          color: var(--brown);
+          text-transform: uppercase;
+          letter-spacing: 0.8px;
+          opacity: 0.7;
+          margin-bottom: 3px;
+        }
+
+        .pc3-name {
+          font-size: 13px;
+          font-weight: 700;
+          color: var(--green);
+          line-height: 1.4;
+          margin-bottom: 8px;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+          letter-spacing: 0.2px;
+          transition: color 0.2s;
+        }
+        .pc3-card:hover .pc3-name { color: var(--green-dark); }
+
+        /* Price */
+        .pc3-price-row {
+          display: flex;
+          align-items: center;
+          gap: 7px;
+          margin-bottom: 8px;
+          flex-wrap: wrap;
+        }
+        .pc3-price {
+          font-size: 16px;
+          font-weight: 800;
+          color: var(--green);
+          letter-spacing: -0.3px;
+        }
+        .pc3-original {
+          font-size: 12px;
+          color: var(--muted);
+          text-decoration: line-through;
+          font-weight: 400;
+        }
+        .pc3-savings {
+          font-size: 10px;
+          font-weight: 700;
+          color: var(--green);
+          background: var(--green-soft);
+          padding: 2px 7px;
+          border-radius: 20px;
+          margin-left: auto;
+        }
+
+        /* Qty tags */
+        .pc3-qty-row { display: flex; flex-wrap: wrap; gap: 4px; }
+        .pc3-qty-tag {
+          font-size: 10px;
+          font-weight: 600;
+          background: var(--brown-soft);
+          color: var(--brown);
+          padding: 2px 8px;
+          border-radius: 20px;
+          letter-spacing: 0.2px;
+          transition: background 0.2s, color 0.2s;
+        }
+        .pc3-qty-tag:hover { background: var(--green-soft); color: var(--green); }
       `}</style>
 
-      <Card className="group overflow-hidden border-0 shadow-none hover:shadow-md transition-all duration-300 relative bg-white w-full max-w-[280px]">
-        <Link to={linkTo} className="block">
-          <div className="aspect-square overflow-hidden bg-[#faf3eb] relative flex items-center justify-center rounded-lg mb-3">
-            <img
-              src={src}
-              alt={name}
-              className="w-full h-full object-contain p-2 sm:p-4 group-hover:scale-105 transition-transform duration-500"
-              loading="lazy"
-            />
-            
-            {/* Discount Badge */}
-           {/* Discount Badge */}
-           {!!discountPercentage && discountPercentage > 0 && (
-  <div
-    className="absolute top-2 left-2 px-2 py-1 rounded-full text-xs font-bold"
-    style={{ backgroundColor: '#6b4423', color: '#ffffff' }}
-  >
-    {discountPercentage}% OFF
-  </div>
-)} 
-            
-            <button
-              onClick={handleWishlistClick}
-              id={`wishlist-btn-${id}`}
-              className="absolute top-2 right-2 sm:top-3 sm:-right-2 p-1.5 sm:p-2 rounded-full hover:bg-black/5 transition-all duration-200 z-10"
-              style={{
-                backgroundColor: 'transparent',
-                background: 'transparent',
-                backgroundImage: 'none',
-                boxShadow: 'none'
-              }}
-              aria-label={isInWishlist(id) ? "Remove from wishlist" : "Add to wishlist"}
-            >
-              <Heart
-                className="h-4 w-4 sm:h-5 sm:w-5 transition-all"
-                fill={isInWishlist(id) ? '#6b4423' : 'none'}
-                color="#6b4423"
-                strokeWidth={2}
-              />
-            </button>
-          </div>
-          <div className="px-1 sm:px-2 pb-2 sm:pb-3">
-            <Link to={linkTo}>
-              <h3 className="font-medium text-xs sm:text-sm text-[#6b4423] hover:text-[#8b5a3c] transition-colors truncate mb-1.5 sm:mb-2 leading-tight uppercase tracking-wide">
-                {name}
-              </h3>
-            </Link>
-            
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              <span className="text-sm sm:text-base font-bold text-[#6b4423]">
-                ₹{price.toLocaleString('en-IN')}
-              </span>
-              {originalPrice && originalPrice > price && (
-                <span className="text-xs sm:text-sm text-[#999999] line-through font-normal">
-                  {originalPrice.toLocaleString('en-IN')}
-                </span>
+      <div className="pc3">
+        <Card className="pc3-card group">
+          <Link to={linkTo} className="block">
+
+            {/* Image */}
+            <div className="pc3-img-wrap">
+              <img src={src} alt={name} loading="lazy" />
+
+              {isBestSeller && !discountPercentage && (
+                <div className="pc3-badge pc3-badge-bestseller">Best Seller</div>
               )}
+              {!!discountPercentage && discountPercentage > 0 && (
+                <div className="pc3-badge pc3-badge-discount">{discountPercentage}% OFF</div>
+              )}
+
+              <button
+                onClick={handleWishlistClick}
+                className="pc3-wishlist-btn"
+                aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
+              >
+                <Heart
+                  size={15}
+                  fill={inWishlist ? '#e63946' : 'none'}
+                  color={inWishlist ? '#e63946' : '#6b4423'}
+                  strokeWidth={2.2}
+                />
+              </button>
+
+              <button className="pc3-cart-btn" onClick={handleAdd}>
+                <ShoppingCart size={13} />
+                Add to Cart
+              </button>
             </div>
-            
-            {/* Quantity Options Display */}
-            {quantityOptions && quantityOptions.length > 0 && (
-              <div className="mt-1.5">
-                <div className="flex flex-wrap gap-1">
-                  {quantityOptions.slice(0, 2).map((option) => (
-                    <span 
-                      key={option.id}
-                      className="text-xs bg-[#f0e5d0] text-[#6b4423] px-2 py-0.5 rounded-full font-medium"
-                    >
-                      {option.displayLabel}
-                    </span>
+
+            <div className="pc3-divider" />
+
+            {/* Body */}
+            <div className="pc3-body">
+              <div className="pc3-category">{category}</div>
+              <h3 className="pc3-name">{name}</h3>
+
+              <div className="pc3-price-row">
+                <span className="pc3-price">₹{price.toLocaleString('en-IN')}</span>
+                {originalPrice && originalPrice > price && (
+                  <span className="pc3-original">₹{originalPrice.toLocaleString('en-IN')}</span>
+                )}
+                {!!discountPercentage && discountPercentage > 0 && (
+                  <span className="pc3-savings">Save {discountPercentage}%</span>
+                )}
+              </div>
+
+              {quantityOptions && quantityOptions.length > 0 && (
+                <div className="pc3-qty-row">
+                  {quantityOptions.slice(0, 3).map((opt) => (
+                    <span key={opt.id} className="pc3-qty-tag">{opt.displayLabel}</span>
                   ))}
-                  {quantityOptions.length > 2 && (
-                    <span className="text-xs bg-[#f0e5d0] text-[#6b4423] px-2 py-0.5 rounded-full font-medium">
-                      +{quantityOptions.length - 2}
-                    </span>
+                  {quantityOptions.length > 3 && (
+                    <span className="pc3-qty-tag">+{quantityOptions.length - 3}</span>
                   )}
                 </div>
-              </div>
-            )}
-          </div>
-        </Link>
-      </Card>
+              )}
+            </div>
+          </Link>
+        </Card>
+      </div>
     </>
   );
 };

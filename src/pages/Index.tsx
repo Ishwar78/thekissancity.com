@@ -19,6 +19,34 @@ import RecentReviewsSection from "@/components/RecentReviewsSection";
 import FAQSection from "@/components/FAQSection";
 import BestSellerSection from "@/components/BestSellerSection";
 
+
+
+// ── STEP 1: Paste this ABOVE your Index component (outside it) ──
+import * as React from "react";
+
+const useScrollReveal = (threshold = 0.15) => {
+  const [visible, setVisible] = React.useState(false);
+  const ref = React.useRef<HTMLDivElement>(null);
+  React.useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [threshold]);
+  return { ref, visible };
+};
+
+// ── STEP 2: Paste this INSIDE your Index component, with your other hooks ──
+// const { ref: naRef, visible: naVisible } = useScrollReveal();
 // ✅ UPDATED FEATURE IMAGES
 // HOODIES -> new image
 import hoodiesFeatureImg from "@/assets/IMG_4100.jpg";
@@ -396,6 +424,9 @@ const Index = () => {
   }, []);
 
   const { user } = useAuth();
+  
+  // ── STEP 2: Paste this INSIDE your Index component, with your other hooks ──
+  const { ref: naRef, visible: naVisible } = useScrollReveal();
   useEffect(() => {
     let ignore = false;
     (async () => {
@@ -1028,296 +1059,562 @@ const Index = () => {
     
 
       {/* Featured Products */}
-      <section style={{ backgroundColor: '#F5F0E8' }}   className="py-12">
-  <div className="container mx-auto px-4 sm:px-6">
-    {/* Header */}
-    <div className="flex items-center justify-center mb-10">
-      <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-center">
-        <span style={{ color: '#6b4423' }}>Collection</span>
-      </h2>
-    </div>
+  <section style={{ backgroundColor: '#F5F0E8' }} className="py-14 sm:py-20 overflow-hidden">
+  <style>{`
+    .coll-section {
+      --green:      #2d6a4f;
+      --green-dark: #1b4332;
+      --green-soft: #d8f3dc;
+      --brown:      #6b4423;
+      --brown-mid:  #ba8c5c;
+      --cream:      #faf3eb;
+    }
+    .coll-eyebrow {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--brown-mid);
+      background: rgba(107,68,35,0.08);
+      padding: 4px 14px;
+      border-radius: 20px;
+      display: inline-block;
+      margin-bottom: 8px;
+    }
+    .coll-title {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      color: var(--brown);
+      margin-bottom: 10px;
+    }
+    .coll-title span { color: var(--green); }
+    .coll-title-underline {
+      height: 4px;
+      width: 60px;
+      border-radius: 4px;
+      background: linear-gradient(90deg, var(--green), var(--brown-mid));
+    }
+    .coll-nav-btn {
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+      width: 42px !important;
+      height: 42px !important;
+      border-radius: 50% !important;
+      border: 1.5px solid rgba(107,68,35,0.18) !important;
+      background: #fff !important;
+      box-shadow: 0 2px 10px rgba(45,106,79,0.08) !important;
+      transition: all 0.2s ease !important;
+      flex-shrink: 0;
+      position: static !important;
+      transform: none !important;
+    }
+    .coll-nav-btn:hover {
+      border-color: #2d6a4f !important;
+      box-shadow: 0 4px 18px rgba(45,106,79,0.2) !important;
+      transform: scale(1.05) !important;
+      background: #fff !important;
+    }
+    .coll-nav-btn:active  { transform: scale(0.94) !important; }
+    .coll-nav-btn:focus   { outline: none !important; box-shadow: 0 2px 10px rgba(45,106,79,0.08) !important; }
+
+    /* Skeleton shimmer */
+    .coll-skeleton-card {
+      background: #fff;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(45,106,79,0.06);
+    }
+    @keyframes shimmer {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    .coll-shimmer {
+      background: linear-gradient(90deg, #ede8e0 25%, #f5f0e8 50%, #ede8e0 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+    }
+  `}</style>
+
+  <div className="coll-section container mx-auto px-4 sm:px-6">
 
     {featuredLoading ? (
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <div
-            key={i}
-            className="bg-white rounded-2xl overflow-hidden shadow-sm"
-          >
-            <div className="aspect-square bg-gray-200 animate-pulse" />
-            <div className="p-4 space-y-3">
-              <div className="h-4 bg-gray-200 rounded animate-pulse" />
-              <div className="h-4 bg-gray-200 rounded w-2/3 animate-pulse" />
+      <>
+        {/* Static header during loading */}
+        <div className="mb-10 sm:mb-12">
+          <span className="coll-eyebrow">Our Products</span>
+          <h2 className="coll-title">Featured <span>Collection</span></h2>
+          <div className="coll-title-underline" />
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="coll-skeleton-card">
+              <div className="aspect-square coll-shimmer" />
+              <div className="p-4 space-y-3">
+                <div className="h-3 rounded-full coll-shimmer" />
+                <div className="h-3 rounded-full coll-shimmer w-3/4" />
+                <div className="h-3 rounded-full coll-shimmer w-1/2" />
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      </>
     ) : featuredError ? (
-      <div className="text-center py-12 text-gray-500">
-        {featuredError}
-      </div>
+      <>
+        <div className="mb-10">
+          <span className="coll-eyebrow">Our Products</span>
+          <h2 className="coll-title">Featured <span>Collection</span></h2>
+          <div className="coll-title-underline" />
+        </div>
+        <div className="text-center py-16 text-gray-400 text-sm">{featuredError}</div>
+      </>
     ) : (
-      <div className="relative">
+      /* ── Carousel wraps EVERYTHING including nav buttons ── */
+      <Carousel opts={{ align: "start", loop: true }} className="w-full">
+
+        {/* Header row with nav buttons INSIDE Carousel */}
+        <div className="flex items-end justify-between mb-10 sm:mb-12">
+          <div>
+            <span className="coll-eyebrow">Our Products</span>
+            <h2 className="coll-title">Featured <span>Collection</span></h2>
+            <div className="coll-title-underline" />
+          </div>
+
+          {/* Desktop nav — inside Carousel context ✓ */}
+          <div className="hidden sm:flex items-center gap-2">
+            <CarouselPrevious
+              className="coll-nav-btn"
+              onMouseDown={(e) => setTimeout(() => e.currentTarget.blur(), 150)}
+            />
+            <CarouselNext
+              className="coll-nav-btn"
+              onMouseDown={(e) => setTimeout(() => e.currentTarget.blur(), 150)}
+            />
+          </div>
+        </div>
+
+        <CarouselContent className="-ml-4 sm:-ml-5">
+          {(featuredProducts.length ? featuredProducts : newArrivals).map((product) => {
+            const card = mapToCard(product);
+            const to = `/product/${card.id}`;
+            return (
+              <CarouselItem
+                key={String(product._id || product.id)}
+                className="pl-4 sm:pl-5 basis-1/2 md:basis-1/3 lg:basis-1/4"
+              >
+                <ProductCard {...card} to={to} />
+              </CarouselItem>
+            );
+          })}
+        </CarouselContent>
+
+        {/* Mobile nav — inside Carousel context ✓ */}
+        <div className="flex sm:hidden justify-center gap-3 mt-8">
+          <CarouselPrevious
+            className="coll-nav-btn"
+            onTouchEnd={(e) => setTimeout(() => e.currentTarget.blur(), 150)}
+          />
+          <CarouselNext
+            className="coll-nav-btn"
+            onTouchEnd={(e) => setTimeout(() => e.currentTarget.blur(), 150)}
+          />
+        </div>
+
+      </Carousel>
+    )}
+
+  </div>
+</section>
+
+      {/* Categories grid with product showcase */}
+      <section
+  style={{ backgroundColor: '#F5F0E8' }}
+  className="mx-auto px-4 sm:px-8 pb-10 sm:pb-16 pt-8 sm:pt-12"
+>
+  {/* Header */}
+  <div className="text-center mb-10">
+    <span
+      className="inline-block text-xs font-semibold uppercase tracking-[0.2em] mb-3 px-4 py-1 rounded-full"
+      style={{ background: '#e8d5bc', color: '#6b4423' }}
+    >
+      Explore
+    </span>
+    <h2
+      className="text-3xl md:text-5xl font-extrabold tracking-tight"
+      style={{ color: '#2d6a4f' }}
+    >
+      Shop By Categories
+    </h2>
+    <div
+      className="mx-auto mt-3 h-1 w-16 rounded-full"
+      style={{ background: 'linear-gradient(90deg, #2d6a4f, #6b4423)' }}
+    />
+  </div>
+
+  <style>{`
+    .cat-pill {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .cat-img-ring {
+      position: relative;
+      border-radius: 50%;
+      padding: 3px;
+      background: linear-gradient(135deg, #2d6a4f 0%, #6b4423 100%);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .cat-pill:hover .cat-img-ring {
+      transform: scale(1.08) translateY(-3px);
+      box-shadow: 0 12px 28px rgba(45,106,79,0.25);
+    }
+    .cat-img-inner {
+      border-radius: 50%;
+      background: #faf3eb;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .cat-img-inner img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 10px;
+      transition: transform 0.4s ease;
+    }
+    .cat-pill:hover .cat-img-inner img {
+      transform: scale(1.1);
+    }
+    .cat-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-align: center;
+      letter-spacing: 0.3px;
+      color: #3d3d3d;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      transition: color 0.2s;
+    }
+    .cat-pill:hover .cat-label {
+      color: #2d6a4f;
+    }
+
+    /* Mobile carousel nav buttons */
+    .cat-nav-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid #d4c5b0;
+      background: #fff;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .cat-nav-btn:hover {
+      border-color: #2d6a4f;
+      box-shadow: 0 4px 16px rgba(45,106,79,0.2);
+    }
+  `}</style>
+
+  {catsLoading ? (
+    <div className="flex justify-center gap-6 flex-wrap">
+      {Array.from({ length: 8 }).map((_, i) => (
+        <div key={i} className="flex flex-col items-center gap-2">
+          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-stone-200 animate-pulse" />
+          <div className="w-16 h-3 rounded bg-stone-200 animate-pulse" />
+        </div>
+      ))}
+    </div>
+  ) : catsError ? (
+    <div className="text-center text-sm text-muted-foreground mb-12">{catsError}</div>
+  ) : (
+    <>
+      {/* Mobile Carousel */}
+      <div className="block sm:hidden">
         <Carousel opts={{ align: "start", loop: true }} className="w-full">
-          <CarouselContent className="-ml-4 sm:-ml-6">
-            {(featuredProducts.length
-              ? featuredProducts
-              : newArrivals
-            ).map((product) => {
-              const card = mapToCard(product);
-              const to = `/product/${card.id}`;
+          <CarouselContent className="-ml-3">
+            {topCats.slice(0, 8).map((c) => {
+              const to = `/collection/${c.slug || slugify(c.name || "")}`;
               return (
                 <CarouselItem
-                  key={String(product._id || product.id)}
-                  className="pl-4 sm:pl-6 basis-1/2 md:basis-1/3 lg:basis-1/4"
+                  key={String(c._id || c.id || c.slug || c.name)}
+                  className="pl-3 basis-1/3"
                 >
-                  <ProductCard {...card} to={to} />
+                  <Link to={to} className="cat-pill">
+                    <div className="cat-img-ring">
+                      <div className="cat-img-inner w-[72px] h-[72px]">
+                        <img
+                          src={resolveImage(c.imageUrl || "/placeholder.svg")}
+                          alt={c.name}
+                          loading="lazy"
+                        />
+                      </div>
+                    </div>
+                    <span className="cat-label w-20">{c.name}</span>
+                  </Link>
                 </CarouselItem>
               );
             })}
           </CarouselContent>
-          
-          {/* Navigation Buttons - Desktop */}
-          <div className="hidden sm:flex gap-2 absolute -top-[72px] right-0">
-            <CarouselPrevious 
-              className="static translate-y-0 h-10 w-10 rounded-full border-2 border-gray-300 bg-white hover:border-[#ba8c5c] hover:bg-white hover:shadow-xl transition-all duration-200 shadow-md focus:outline-none focus:ring-0 active:scale-90 active:bg-gray-100 active:border-[#ba8c5c]" 
-              onMouseDown={(e) => setTimeout(() => e.currentTarget.blur(), 150)}
-            />
-            <CarouselNext 
-              className="static translate-y-0 h-10 w-10 rounded-full border-2 border-gray-300 bg-white hover:border-[#ba8c5c] hover:bg-white hover:shadow-xl transition-all duration-200 shadow-md focus:outline-none focus:ring-0 active:scale-90 active:bg-gray-100 active:border-[#ba8c5c]" 
-              onMouseDown={(e) => setTimeout(() => e.currentTarget.blur(), 150)}
-            />
-          </div>
-          
-          {/* Navigation Buttons - Mobile */}
-          <div className="flex sm:hidden justify-center gap-2 mt-6">
-            <CarouselPrevious 
-              className="static translate-y-0 h-10 w-10 rounded-full border-2 border-gray-300 bg-white hover:border-[#ba8c5c] hover:bg-white hover:shadow-xl transition-all duration-200 shadow-md focus:outline-none focus:ring-0 active:scale-90 active:bg-gray-100 active:border-[#ba8c5c]" 
+          <div className="flex justify-center gap-3 mt-7">
+            <CarouselPrevious
+              className="cat-nav-btn static translate-y-0"
               onTouchEnd={(e) => setTimeout(() => e.currentTarget.blur(), 150)}
             />
-            <CarouselNext 
-              className="static translate-y-0 h-10 w-10 rounded-full border-2 border-gray-300 bg-white hover:border-[#ba8c5c] hover:bg-white hover:shadow-xl transition-all duration-200 shadow-md focus:outline-none focus:ring-0 active:scale-90 active:bg-gray-100 active:border-[#ba8c5c]" 
+            <CarouselNext
+              className="cat-nav-btn static translate-y-0"
               onTouchEnd={(e) => setTimeout(() => e.currentTarget.blur(), 150)}
             />
           </div>
         </Carousel>
       </div>
-    )}
-  </div>
-</section>
 
-      {/* Categories grid with product showcase */}
-        <section style={{ backgroundColor: '#F5F0E8' }} className="mx-auto px-2 sm:px-4 pb-6 sm:pb-12 pt-6 sm:pt-10">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-foreground"
-          style={{ color: '#6b4423' }}>
-            Shop By Categories
-          </h2>
-        </div>
-
-        {catsLoading ? (
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 sm:gap-6 mb-8 sm:mb-12 mt-6">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div
-                key={i}
-                className="aspect-square rounded-lg bg-muted/40 animate-pulse"
-              />
-            ))}
-          </div>
-        ) : catsError ? (
-          <div className="text-center text-sm text-muted-foreground mb-12">
-            {catsError}
-          </div>
-        ) : (
-          <>
-            {/* Mobile Carousel View */}
-            <div className="block sm:hidden">
-              <Carousel opts={{ align: "start", loop: true }} className="w-full">
-                <CarouselContent className="-ml-2">
-                  {topCats.slice(0, 8).map((c) => {
-                    const catId = c.slug || c.name || "";
-                    const prod = categoryProducts.get(catId);
-                    const to = `/collection/${c.slug || slugify(c.name || "")}`;
-
-                    return (
-                      <CarouselItem
-                        key={String(c._id || c.id || c.slug || c.name)}
-                        className="pl-2 basis-1/3"
-                      >
-                        <Link
-                          to={to}
-                          className="flex flex-col items-center justify-center space-y-1.5 group"
-                        >
-                          <div className="w-20 h-20 rounded-xl bg-primary-foreground flex items-center justify-center shadow-md transition-all duration-300 hover:scale-105 group-hover:shadow-lg">
-                            <img
-                              src={resolveImage(c.imageUrl || "/placeholder.svg")}
-                              alt={c.name}
-                              className="w-full h-full object-contain p-1"
-                            />
-                          </div>
-                          <span className="text-[10px] font-medium text-center line-clamp-2">
-                            {c.name}
-                          </span>
-                        </Link>
-                      </CarouselItem>
-                    );
-                  })}
-                </CarouselContent>
-                
-                {/* Mobile Navigation - positioned below carousel */}
-                <div className="flex justify-center gap-2 mt-6">
-                  <CarouselPrevious
-                    className="static translate-y-0 h-10 w-10 rounded-full border-2 border-gray-300 bg-white hover:border-[#ba8c5c] hover:shadow-xl transition-all duration-200 shadow-md active:scale-90"
-                    onTouchEnd={(e) =>
-                      setTimeout(() => e.currentTarget.blur(), 150)
-                    }
-                  />
-                  <CarouselNext
-                    className="static translate-y-0 h-10 w-10 rounded-full border-2 border-gray-300 bg-white hover:border-[#ba8c5c] hover:shadow-xl transition-all duration-200 shadow-md active:scale-90"
-                    onTouchEnd={(e) =>
-                      setTimeout(() => e.currentTarget.blur(), 150)
-                    }
+      {/* Desktop Grid */}
+      <div className="hidden sm:flex flex-wrap justify-center gap-6 md:gap-8">
+        {topCats.slice(0, 8).map((c) => {
+          const to = `/collection/${c.slug || slugify(c.name || "")}`;
+          return (
+            <Link
+              key={String(c._id || c.id || c.slug || c.name)}
+              to={to}
+              className="cat-pill"
+            >
+              <div className="cat-img-ring">
+                <div className="cat-img-inner w-24 h-24 md:w-28 md:h-28">
+                  <img
+                    src={resolveImage(c.imageUrl || "/placeholder.svg")}
+                    alt={c.name}
+                    loading="lazy"
                   />
                 </div>
-              </Carousel>
-            </div>
+              </div>
+              <span className="cat-label w-24 md:w-28">{c.name}</span>
+            </Link>
+          );
+        })}
+      </div>
+    </>
+  )}
+</section>
 
-            {/* Desktop Grid View */}
-            <div className="hidden sm:grid grid-cols-6 md:grid-cols-8 gap-3 md:gap-4">
-              {topCats.slice(0, 8).map((c) => {
-                const catId = c.slug || c.name || "";
-                const prod = categoryProducts.get(catId);
-                const to = `/collection/${c.slug || slugify(c.name || "")}`;
 
-                return (
-                  <Link
-                    key={String(c._id || c.id || c.slug || c.name)}
-                    to={to}
-                    className="flex flex-col items-center justify-center space-y-2 group"
-                  >
-                    <div className="w-24 h-24 md:w-32 md:h-32 rounded-xl bg-primary-foreground flex items-center justify-center shadow-md transition-all duration-300 hover:scale-105 group-hover:shadow-lg">
-                      <img
-                        src={resolveImage(c.imageUrl || "/placeholder.svg")}
-                        alt={c.name}
-                        className="w-full h-full object-contain p-1"
-                      />
-                    </div>
-                    <span className="text-xs font-medium text-center line-clamp-2">
-                      {c.name}
-                    </span>
-                  </Link>
-                );
-              })}
-            </div>
-          </>
-        )}
-      </section>
-
+  
+      {/* Best Seller Section */}
+      <BestSellerSection />
       {/* Shop By Region */}
-      <section style={{ backgroundColor: '#F5F0E8' }} className="mx-auto px-2 sm:px-4 pb-6 sm:pb-12 pt-6 sm:pt-10">
-  <div className="text-center mb-12">
-    <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-foreground"
-    style={{ color: '#6b4423' }}>
-      Shop By Region
-    </h2>
-  </div>
+  
+<section style={{ backgroundColor: '#F5F0E8' }} className="py-12 sm:py-16 overflow-hidden">
+  <style>{`
+    .region-section {
+      --green:     #2d6a4f;
+      --green-dark:#1b4332;
+      --brown:     #6b4423;
+      --brown-mid: #ba8c5c;
+      --cream:     #faf3eb;
+    }
 
-  {regionsLoading ? (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 mb-8 sm:mb-12 mt-6">
-      {Array.from({ length: 6 }).map((_, i) => (
-        <div
-          key={i}
-          className="aspect-square rounded-lg bg-muted/40 animate-pulse"
-        />
-      ))}
-    </div>
-  ) : regionsError ? (
-    <div className="text-center text-sm text-muted-foreground mb-12">
-      {regionsError}
-    </div>
-  ) : (
-    <div className="relative">
+    /* Region card */
+    .region-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    /* Gradient ring */
+    .region-ring {
+      padding: 3px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ba8c5c 0%, #2d6a4f 100%);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .region-card:hover .region-ring {
+      transform: scale(1.08) translateY(-3px);
+      box-shadow: 0 10px 28px rgba(45,106,79,0.22);
+    }
+
+    .region-inner {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    @media (min-width: 640px) {
+      .region-inner { width: 84px; height: 84px; }
+    }
+    .region-inner img {
+      width: 70%;
+      height: 70%;
+      object-fit: contain;
+      transition: transform 0.4s ease;
+    }
+    .region-card:hover .region-inner img {
+      transform: scale(1.1);
+    }
+
+    .region-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: #3d3d3d;
+      text-align: center;
+      letter-spacing: 0.2px;
+      transition: color 0.2s;
+      line-height: 1.3;
+    }
+    .region-card:hover .region-label { color: var(--green); }
+
+    /* Nav buttons */
+    .region-nav-btn {
+      width: 40px !important;
+      height: 40px !important;
+      border-radius: 50% !important;
+      border: 1.5px solid rgba(107,68,35,0.18) !important;
+      background: #fff !important;
+      box-shadow: 0 2px 10px rgba(45,106,79,0.08) !important;
+      transition: all 0.2s ease !important;
+      position: static !important;
+      transform: none !important;
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+    }
+    .region-nav-btn:hover {
+      border-color: #2d6a4f !important;
+      box-shadow: 0 4px 18px rgba(45,106,79,0.2) !important;
+      transform: scale(1.06) !important;
+      background: #fff !important;
+    }
+    .region-nav-btn:active  { transform: scale(0.93) !important; }
+    .region-nav-btn:focus   { outline: none !important; box-shadow: 0 2px 10px rgba(45,106,79,0.08) !important; }
+
+    /* Skeleton shimmer */
+    @keyframes region-shimmer {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    .region-shimmer {
+      background: linear-gradient(90deg, #ede8e0 25%, #f5f0e8 50%, #ede8e0 75%);
+      background-size: 200% 100%;
+      animation: region-shimmer 1.4s infinite;
+      border-radius: 50%;
+    }
+  `}</style>
+
+  <div className="region-section container mx-auto px-4 sm:px-6">
+
+    {regionsLoading ? (
+      <>
+        {/* Header */}
+        <div className="mb-10">
+          <span className="inline-block text-xs font-bold uppercase tracking-[0.2em] px-4 py-1 rounded-full mb-3"
+            style={{ background: 'rgba(107,68,35,0.08)', color: '#ba8c5c' }}>
+            Explore India
+          </span>
+          <h2 className="font-black tracking-tight mb-2" style={{ fontSize: 'clamp(1.8rem,4vw,3rem)', color: '#6b4423', letterSpacing: '-0.03em' }}>
+            Shop By <span style={{ color: '#2d6a4f' }}>Region</span>
+          </h2>
+          <div className="h-1 w-14 rounded-full" style={{ background: 'linear-gradient(90deg,#2d6a4f,#ba8c5c)' }} />
+        </div>
+        <div className="flex justify-center gap-6 flex-wrap">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="flex flex-col items-center gap-3">
+              <div className="region-shimmer" style={{ width: 78, height: 78 }} />
+              <div className="region-shimmer rounded-full" style={{ width: 60, height: 10 }} />
+            </div>
+          ))}
+        </div>
+      </>
+    ) : regionsError ? (
+      <div className="text-center text-sm py-12" style={{ color: '#a0a0a0' }}>{regionsError}</div>
+    ) : (
+      /* Carousel wraps header + nav to avoid context error */
       <Carousel opts={{ align: "start", loop: true }} className="w-full">
-        <CarouselContent className="-ml-2 sm:-ml-3">
-          {regions.map((region) => {
-            const to = `/collection/region/${
-              region.slug || slugify(region.name || "")
-            }`;
 
+        {/* Header row with desktop nav inside Carousel */}
+        <div className="flex items-end justify-between mb-10 sm:mb-12">
+          <div>
+            <span className="inline-block text-xs font-bold uppercase tracking-[0.2em] px-4 py-1 rounded-full mb-3"
+              style={{ background: 'rgba(107,68,35,0.08)', color: '#ba8c5c' }}>
+              Explore India
+            </span>
+            <h2 className="font-black tracking-tight mb-2"
+              style={{ fontSize: 'clamp(1.8rem,4vw,3rem)', color: '#6b4423', letterSpacing: '-0.03em' }}>
+              Shop By <span style={{ color: '#2d6a4f' }}>Region</span>
+            </h2>
+            <div className="h-1 w-14 rounded-full" style={{ background: 'linear-gradient(90deg,#2d6a4f,#ba8c5c)' }} />
+          </div>
+
+          {/* Desktop nav — inside Carousel ✓ */}
+          <div className="hidden sm:flex items-center gap-2">
+            <CarouselPrevious
+              className="region-nav-btn"
+              onMouseDown={(e) => setTimeout(() => e.currentTarget.blur(), 150)}
+            />
+            <CarouselNext
+              className="region-nav-btn"
+              onMouseDown={(e) => setTimeout(() => e.currentTarget.blur(), 150)}
+            />
+          </div>
+        </div>
+
+        <CarouselContent className="-ml-4 sm:-ml-6">
+          {regions.map((region) => {
+            const to = `/collection/region/${region.slug || slugify(region.name || "")}`;
             return (
               <CarouselItem
-                key={String(
-                  region._id || region.id || region.slug || region.name
-                )}
-                className="pl-2 sm:pl-3 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/6"
+                key={String(region._id || region.id || region.slug || region.name)}
+                className="pl-4 sm:pl-6 basis-1/3 sm:basis-1/4 md:basis-1/5 lg:basis-1/6"
               >
-                <Link
-                  to={to}
-                  className="group block h-full"
-                >
-                  <div className="relative z-10 flex flex-col items-center justify-center h-32">
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white/80 flex items-center justify-center mb-3 border-2 border-amber-300 shadow-sm">
+                <Link to={to} className="region-card py-2">
+                  <div className="region-ring">
+                    <div className="region-inner">
                       <img
-                        src={resolveImage(
-                          region.imageUrl || "/placeholder.svg"
-                        )}
+                        src={resolveImage(region.imageUrl || "/placeholder.svg")}
                         alt={region.name}
-                        className="w-12 h-12 sm:w-16 sm:h-16 object-contain"
+                        loading="lazy"
                       />
                     </div>
-
-                    <h3 className="text-sm sm:text-base font-bold text-center text-gray-800 group-hover:text-red-600 transition-colors">
-                      {region.name}
-                    </h3>
-
-                    {/* <p className="text-xs text-gray-600 text-center mt-1 font-medium">
-                      Authentic
-                    </p>
-
-                    <p className="text-xs text-gray-500 text-center">
-                      Products
-                    </p> */}
                   </div>
+                  <span className="region-label px-1">{region.name}</span>
                 </Link>
               </CarouselItem>
             );
           })}
         </CarouselContent>
 
-        {/* Desktop Navigation */}
-        <div className="hidden sm:flex gap-2 absolute -top-[72px] right-0">
+        {/* Mobile nav — inside Carousel ✓ */}
+        <div className="flex sm:hidden justify-center gap-3 mt-8">
           <CarouselPrevious
-            className="static translate-y-0 h-10 w-10 rounded-full border-2 border-gray-300 bg-white hover:border-[#ba8c5c] hover:shadow-xl transition-all duration-200 shadow-md active:scale-90"
-            onMouseDown={(e) =>
-              setTimeout(() => e.currentTarget.blur(), 150)
-            }
+            className="region-nav-btn"
+            onTouchEnd={(e) => setTimeout(() => e.currentTarget.blur(), 150)}
           />
           <CarouselNext
-            className="static translate-y-0 h-10 w-10 rounded-full border-2 border-gray-300 bg-white hover:border-[#ba8c5c] hover:shadow-xl transition-all duration-200 shadow-md active:scale-90"
-            onMouseDown={(e) =>
-              setTimeout(() => e.currentTarget.blur(), 150)
-            }
+            className="region-nav-btn"
+            onTouchEnd={(e) => setTimeout(() => e.currentTarget.blur(), 150)}
           />
         </div>
 
-        {/* Mobile Navigation */}
-        <div className="flex sm:hidden justify-center gap-2 mt-6">
-          <CarouselPrevious
-            className="static translate-y-0 h-10 w-10 rounded-full border-2 border-gray-300 bg-white hover:border-[#ba8c5c] hover:shadow-xl transition-all duration-200 shadow-md active:scale-90"
-            onTouchEnd={(e) =>
-              setTimeout(() => e.currentTarget.blur(), 150)
-            }
-          />
-          <CarouselNext
-            className="static translate-y-0 h-10 w-10 rounded-full border-2 border-gray-300 bg-white hover:border-[#ba8c5c] hover:shadow-xl transition-all duration-200 shadow-md active:scale-90"
-            onTouchEnd={(e) =>
-              setTimeout(() => e.currentTarget.blur(), 150)
-            }
-          />
-        </div>
       </Carousel>
-    </div>
-  )}
+    )}
+  </div>
 </section>
 
    {/* Banner Section */}
@@ -1326,73 +1623,180 @@ const Index = () => {
       
 
       {/* New Arrivals */}
-      <section style={{ backgroundColor: '#F5F0E8' }} className="container mx-auto px-4 py-12 md:py-12 bg-white rounded-xl shadow-sm">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-foreground"
-          style={{ color: '#6b4423' }}>
-            New Arrivals
-          </h2>
-         
+ <section
+  style={{ backgroundColor: '#F5F0E8' }}
+  className="container mx-auto px-4 py-12 md:py-16 rounded-xl"
+>
+  <style>{`
+    .na-section {
+      --green:     #2d6a4f;
+      --brown:     #6b4423;
+      --brown-mid: #ba8c5c;
+    }
+    .na-reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .na-reveal.na-in {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .na-d0 { transition-delay: 0.05s; }
+    .na-d1 { transition-delay: 0.15s; }
+    .na-d2 { transition-delay: 0.25s; }
+    .na-d3 { transition-delay: 0.35s; }
+    .na-eyebrow {
+      display: inline-block;
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 0.22em; text-transform: uppercase;
+      color: #ba8c5c;
+      background: rgba(107,68,35,0.08);
+      padding: 4px 14px; border-radius: 20px;
+      margin-bottom: 10px;
+    }
+    .na-title {
+      font-size: clamp(1.9rem, 4.5vw, 3.2rem);
+      font-weight: 900; letter-spacing: -0.03em; line-height: 1;
+      color: #6b4423; margin-bottom: 10px;
+    }
+    .na-title span { color: #2d6a4f; }
+    .na-underline {
+      height: 4px; width: 60px; border-radius: 4px;
+      background: linear-gradient(90deg, #2d6a4f, #ba8c5c);
+      margin: 0 auto 10px;
+    }
+    @keyframes na-pop {
+      0%   { transform: scale(0.7) rotate(-8deg); opacity: 0; }
+      65%  { transform: scale(1.1) rotate(2deg);  opacity: 1; }
+      100% { transform: scale(1) rotate(0deg);    opacity: 1; }
+    }
+    @keyframes na-star {
+      0%, 100% { transform: scale(1) rotate(0deg); }
+      50%       { transform: scale(1.35) rotate(20deg); }
+    }
+    .na-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: linear-gradient(135deg, #2d6a4f, #40916c);
+      color: #fff; font-size: 11px; font-weight: 700; letter-spacing: 0.4px;
+      padding: 5px 14px; border-radius: 20px;
+      box-shadow: 0 3px 12px rgba(45,106,79,0.35);
+      opacity: 0;
+    }
+    .na-badge.na-in {
+      animation: na-pop 0.55s cubic-bezier(0.34,1.56,0.64,1) 0.3s forwards;
+    }
+    .na-star { display: inline-block; animation: na-star 1.8s ease-in-out infinite; }
+    .na-nav-btn {
+      width: 40px !important; height: 40px !important;
+      border-radius: 50% !important;
+      border: 1.5px solid rgba(107,68,35,0.18) !important;
+      background: #fff !important;
+      box-shadow: 0 2px 10px rgba(45,106,79,0.08) !important;
+      transition: all 0.2s ease !important;
+      position: static !important; transform: none !important;
+    }
+    .na-nav-btn:hover {
+      border-color: #2d6a4f !important;
+      box-shadow: 0 4px 18px rgba(45,106,79,0.2) !important;
+      transform: scale(1.07) !important;
+    }
+    .na-nav-btn:active { transform: scale(0.92) !important; }
+    .na-nav-btn:focus  { outline: none !important; }
+    @keyframes na-shimmer {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    .na-shimmer {
+      background: linear-gradient(90deg,#ede8e0 25%,#f5f0e8 50%,#ede8e0 75%);
+      background-size: 200% 100%;
+      animation: na-shimmer 1.4s infinite;
+    }
+    .na-skel { background:#fff; border-radius:18px; overflow:hidden; box-shadow:0 2px 10px rgba(45,106,79,0.06); }
+  `}</style>
+
+  <div className="na-section" ref={naRef}>
+
+    <div className={`text-center mb-10 sm:mb-12 na-reveal ${naVisible ? "na-in" : ""}`}>
+      <span className="na-eyebrow">Just Landed</span>
+      <h2 className="na-title">New <span>Arrivals</span></h2>
+      <div className="na-underline" />
+      <span className={`na-badge ${naVisible ? "na-in" : ""}`}>
+        <span className="na-star">✦</span>
+        Fresh this week
+      </span>
+    </div>
+
+    {newArrivalsLoading ? (
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="na-skel">
+            <div className="aspect-square na-shimmer" />
+            <div className="p-4 space-y-3">
+              <div className="h-3 rounded-full na-shimmer" />
+              <div className="h-3 rounded-full na-shimmer w-3/4" />
+              <div className="h-3 rounded-full na-shimmer w-1/2" />
+            </div>
+          </div>
+        ))}
+      </div>
+    ) : newArrivalsError ? (
+      <div className="text-center py-12 text-sm" style={{ color: '#a0a0a0' }}>
+        {newArrivalsError}
+      </div>
+    ) : (
+      <Carousel opts={{ align: "start", loop: true }} className="w-full">
+        <div className="hidden sm:flex justify-end mb-4 gap-2">
+          <CarouselPrevious
+            className="na-nav-btn"
+            onMouseDown={(e) => setTimeout(() => e.currentTarget.blur(), 150)}
+          />
+          <CarouselNext
+            className="na-nav-btn"
+            onMouseDown={(e) => setTimeout(() => e.currentTarget.blur(), 150)}
+          />
         </div>
 
-        {newArrivalsLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 animate-pulse">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div
-                key={i}
-                className="aspect-square rounded-lg bg-gray-200"
-              />
-            ))}
-          </div>
-        ) : newArrivalsError ? (
-          <div className="text-center py-12 text-destructive-foreground">
-            {newArrivalsError}
-          </div>
-        ) : (
-          <div className="relative">
-            <Carousel opts={{ align: "start", loop: true }} className="w-full">
-              <CarouselContent className="-ml-4 sm:-ml-6">
-                {newArrivals.map((product) => {
-                  const card = mapToCard(product);
-                  const to = `/product/${card.id}`;
-                  return (
-                    <CarouselItem
-                      key={String(product._id || product.id)}
-                      className="pl-4 sm:pl-6 basis-1/2 md:basis-1/3 lg:basis-1/4"
-                    >
-                      <ProductCard {...card} to={to} />
-                    </CarouselItem>
-                  );
-                })}
-              </CarouselContent>
-              
-              {/* Navigation Buttons - Desktop */}
-              <div className="hidden sm:flex gap-2 absolute -top-[72px] right-0">
-                <CarouselPrevious 
-                  className="static translate-y-0 h-10 w-10 rounded-full border-2 border-gray-300 bg-white hover:border-[#ba8c5c] hover:bg-white hover:shadow-xl transition-all duration-200 shadow-md focus:outline-none focus:ring-0 active:scale-90 active:bg-gray-100 active:border-[#ba8c5c]" 
-                  onTouchEnd={(e) => setTimeout(() => e.currentTarget.blur(), 150)}
-                />
-                <CarouselNext 
-                  className="static translate-y-0 h-10 w-10 rounded-full border-2 border-gray-300 bg-white hover:border-[#ba8c5c] hover:bg-white hover:shadow-xl transition-all duration-200 shadow-md focus:outline-none focus:ring-0 active:scale-90 active:bg-gray-100 active:border-[#ba8c5c]" 
-                  onTouchEnd={(e) => setTimeout(() => e.currentTarget.blur(), 150)}
-                />
-              </div>
-            </Carousel>
-            
-          
-          </div>
-        )}
-      </section>
+        <CarouselContent className="-ml-4 sm:-ml-5">
+          {newArrivals.map((product, index) => {
+            const card = mapToCard(product);
+            const to = `/product/${card.id}`;
+            const delay = `na-d${Math.min(index, 3)}`;
+            return (
+              <CarouselItem
+                key={String(product._id || product.id)}
+                className={`pl-4 sm:pl-5 basis-1/2 md:basis-1/3 lg:basis-1/4 na-reveal ${delay} ${naVisible ? "na-in" : ""}`}
+              >
+                <ProductCard {...card} to={to} />
+              </CarouselItem>
+            );
+          })}
+        </CarouselContent>
 
-      {/* Best Seller Section */}
-      <BestSellerSection />
+        <div className="flex sm:hidden justify-center gap-3 mt-6">
+          <CarouselPrevious
+            className="na-nav-btn"
+            onTouchEnd={(e) => setTimeout(() => e.currentTarget.blur(), 150)}
+          />
+          <CarouselNext
+            className="na-nav-btn"
+            onTouchEnd={(e) => setTimeout(() => e.currentTarget.blur(), 150)}
+          />
+        </div>
+      </Carousel>
+    )}
+  </div>
+</section>
+
 
   
       {/* From these categories */}
       <InfluencerSection />
       <InfluencerImageGrid />
 
-      <AboutUsSection />
+      <div id="about-us">
+        <AboutUsSection />
+      </div>
       <WhyUsSection />
 
       <FeatureSection />
