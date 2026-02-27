@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { ChevronDown, RotateCcw, Clock, Package, CreditCard } from 'lucide-react';
+import { ChevronDown, RotateCcw, Clock, Package, CreditCard, Truck, Shield, AlertCircle, RefreshCw, ArrowLeftRight, FileText } from 'lucide-react';
 
 interface PolicySection {
   title: string;
@@ -16,11 +16,19 @@ interface ReturnPolicyData {
 }
 
 const iconMap: { [key: string]: any } = {
-  "Return Eligibility": RotateCcw,
+  "Return Eligibility": Shield,
   "Return Process": Clock,
   "Refund Policy": CreditCard,
-  "Exchange Policy": Package,
+  "Exchange Policy": ArrowLeftRight,
+  "Shipping": Truck,
+  "Eligibility": AlertCircle,
+  "How to Initiate": RefreshCw,
+  "Return": RotateCcw,
+  "Policy": FileText,
 };
+
+// Fallback icons based on index to ensure variety
+const fallbackIcons = [Shield, Clock, CreditCard, ArrowLeftRight, Truck, AlertCircle, RefreshCw, FileText, RotateCcw];
 
 export const ReturnPolicyPage = () => {
   const [policy, setPolicy] = useState<ReturnPolicyData | null>(null);
@@ -76,7 +84,7 @@ export const ReturnPolicyPage = () => {
             <div className="max-w-5xl mx-auto">
               <div className="flex items-center justify-center space-x-3 mt-10 mb-10">
                 <RotateCcw className="h-12 w-12 text-gray-800 animate-pulse" />
-                <h1 className="text-4xl md:text-5xl font-extrabold text-slate-800 tracking-tight">Return Policy</h1>
+                <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight" style={{color: 'hsl(var(--primary))'}}>Return Policy</h1>
               </div>
               <div className="bg-white rounded-2xl shadow-md p-8 animate-pulse">
                 <div className="h-8 bg-slate-200 rounded w-1/3 mb-6"></div>
@@ -98,7 +106,7 @@ export const ReturnPolicyPage = () => {
       <>
         <Navbar />
         <div className="min-h-screen bg-gray-100">
-          <div className="bg-gray-900 text-white py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+          <div className="text-white py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden" style={{backgroundColor: 'hsl(var(--primary))'}}>
             <div className="absolute inset-0 bg-black opacity-5 pattern-grid"></div>
             <div className="container mx-auto max-w-5xl relative z-10">
               <div className="flex items-center justify-center space-x-4 mt-10 mb-4">
@@ -130,7 +138,7 @@ export const ReturnPolicyPage = () => {
       <Navbar />
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
         {/* Hero Section */}
-          <div className="bg-gray-900 text-white py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden mt-8">
+          <div className="text-white py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden mt-8" style={{backgroundColor: 'hsl(var(--primary))'}}>
           <div className="absolute inset-0 bg-black opacity-5 pattern-grid"></div>
           <div className="container mx-auto max-w-5xl relative z-10">
             <div className="flex items-center justify-center space-x-4 mt-10 mb-4">
@@ -149,7 +157,23 @@ export const ReturnPolicyPage = () => {
             {policy?.sections && policy.sections.length > 0 ? (
               <div className="space-y-6">
                 {policy.sections.map((section, index) => {
-                  const Icon = iconMap[section.title] || RotateCcw;
+                  // Try to find icon by exact match first, then by partial match, then use fallback
+                  let Icon = iconMap[section.title];
+                  
+                  if (!Icon) {
+                    // Try partial matching
+                    const key = Object.keys(iconMap).find(k => 
+                      section.title.toLowerCase().includes(k.toLowerCase()) || 
+                      k.toLowerCase().includes(section.title.toLowerCase())
+                    );
+                    Icon = key ? iconMap[key] : null;
+                  }
+                  
+                  // Use fallback icon based on index if no match found
+                  if (!Icon) {
+                    Icon = fallbackIcons[index % fallbackIcons.length];
+                  }
+                  
                   const isOpen = openSections.includes(index);
                   
                   return (
@@ -165,7 +189,7 @@ export const ReturnPolicyPage = () => {
                           <div className="bg-gray-800 p-3 rounded-xl shadow-md">
                             <Icon className="h-6 w-6 text-white" />
                           </div>
-                          <h2 className="text-xl sm:text-2xl font-bold text-slate-800">
+                          <h2 className="text-xl sm:text-2xl font-bold" style={{color: 'hsl(var(--primary))'}}>
                             {section.title}
                           </h2>
                         </div>
@@ -197,7 +221,7 @@ export const ReturnPolicyPage = () => {
               <div className="text-center py-20">
                 <div className="bg-white rounded-2xl shadow-lg p-12 max-w-2xl mx-auto">
                   <RotateCcw className="h-20 w-20 text-gray-400 mx-auto mb-6" />
-                  <h2 className="text-3xl font-bold text-gray-800 mb-4">
+                  <h2 className="text-3xl font-bold mb-4" style={{color: 'hsl(var(--primary))'}}>
                     No Return Policy Available
                   </h2>
                   <p className="text-lg text-gray-700 mb-2">
@@ -217,7 +241,7 @@ export const ReturnPolicyPage = () => {
                   <RotateCcw className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-white mb-2">
+                  <h3 className="text-xl font-bold mb-2" style={{color: 'hsl(var(--primary))'}}>
                     Need Help with Returns?
                   </h3>
                   <p className="text-gray-300 leading-relaxed">

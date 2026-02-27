@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { Info, FileText, ChevronDown, CheckCircle } from 'lucide-react'; // Added CheckCircle for points
+import { Info, FileText, ChevronDown, CheckCircle, Shield, Lock, Eye, Database, Globe, Users, Mail, Phone, Key, AlertCircle, Settings, Trash2, Clock, Cookie } from 'lucide-react';
 
 interface Point {
   point: string;
@@ -53,6 +53,32 @@ interface PrivacyPolicyData {
   createdAt?: string;
   updatedAt?: string;
 }
+
+const iconMap: { [key: string]: any } = {
+  "Information": Database,
+  "Data": Database,
+  "Collection": Eye,
+  "Use": Globe,
+  "Sharing": Shield,
+  "Security": Lock,
+  "Protection": Users,
+  "Privacy": Mail,
+  "Rights": Phone,
+  "User": Key,
+  "Contact": Cookie,
+  "Support": Trash2,
+  "Access": Clock,
+  "Cookies": Settings,
+  "Storage": AlertCircle,
+  "Delete": Info,
+  "Retention": FileText,
+  "Policy": Shield,
+  "Settings": Eye,
+  "Alert": Lock,
+};
+
+// Fallback icons based on index to ensure variety - reordered for first three sections
+const fallbackIcons = [Database, Eye, Globe, Shield, Lock, Users, Mail, Phone, Key, AlertCircle, Settings, Trash2, Clock, Cookie, Info, FileText];
 
 export const PrivacyPolicyPage = () => {
   const [policy, setPolicy] = useState<PrivacyPolicyData | null>(null);
@@ -137,7 +163,7 @@ export const PrivacyPolicyPage = () => {
             <div className="max-w-none sm:max-w-5xl sm:mx-auto">
               <div className="flex items-center justify-center space-x-2 sm:space-x-3 mt-8 sm:mt-10 mb-8 sm:mb-10">
                 <FileText className="h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12 text-gray-800 animate-pulse" />
-                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-slate-800 tracking-tight">Privacy Policy</h1>
+                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight" style={{color: 'hsl(var(--primary))'}}>Privacy Policy</h1>
               </div>
               <div className="bg-white rounded-2xl shadow-md p-4 sm:p-6 lg:p-8 animate-pulse">
                 <div className="h-6 sm:h-8 bg-slate-200 rounded w-1/3 mb-4 sm:mb-6"></div>
@@ -159,7 +185,7 @@ export const PrivacyPolicyPage = () => {
       <>
         <Navbar />
         <div className="min-h-screen bg-gray-100">
-          <div className="bg-gray-900 text-white py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+          <div className="text-white py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden" style={{backgroundColor: 'hsl(var(--primary))'}}>
             <div className="absolute inset-0 bg-black opacity-5 pattern-grid"></div>
             <div className="container mx-auto relative z-10">
               <div className="flex items-center justify-center space-x-4 mt-10 mb-4">
@@ -191,7 +217,7 @@ export const PrivacyPolicyPage = () => {
       <Navbar />
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
         {/* Hero Section */}
-        <div className="bg-gray-900 text-white py-12 sm:py-16 mt-8 sm:mt-12 px-0 sm:px-4 lg:px-8 relative overflow-hidden">
+        <div className="text-white py-12 sm:py-16 mt-8 sm:mt-12 px-0 sm:px-4 lg:px-8 relative overflow-hidden" style={{backgroundColor: 'hsl(var(--primary))'}}>
           <div className="absolute inset-0 bg-black opacity-5 pattern-grid"></div>
           <div className="relative z-10">
             <div className="flex items-center justify-center space-x-3 sm:space-x-4 mt-8 sm:mt-10 mb-3 sm:mb-4">
@@ -232,6 +258,24 @@ export const PrivacyPolicyPage = () => {
                 {policy.section2.map((section, index) => {
                   const sectionId = `section2-${index}`;
                   const isOpen = openSections[sectionId];
+                  
+                  // Try to find icon by exact match first, then by partial match, then use fallback
+                  let Icon = iconMap[section.subHeading];
+                  
+                  if (!Icon) {
+                    // Try partial matching
+                    const key = Object.keys(iconMap).find(k => 
+                      section.subHeading.toLowerCase().includes(k.toLowerCase()) || 
+                      k.toLowerCase().includes(section.subHeading.toLowerCase())
+                    );
+                    Icon = key ? iconMap[key] : null;
+                  }
+                  
+                  // Use fallback icon based on index if no match found
+                  if (!Icon) {
+                    Icon = fallbackIcons[index % fallbackIcons.length];
+                  }
+                  
                   return (
                     <div
                       key={sectionId}
@@ -243,9 +287,9 @@ export const PrivacyPolicyPage = () => {
                       >
                         <div className="flex items-center space-x-4">
                           <div className="bg-gray-800 p-3 rounded-xl shadow-md">
-                            <Info className="h-6 w-6 text-white" />
+                            <Icon className="h-6 w-6 text-white" />
                           </div>
-                          <h2 className="text-xl sm:text-2xl font-bold text-gray-800">
+                          <h2 className="text-xl sm:text-2xl font-bold" style={{color: 'hsl(var(--primary))'}}>
                             {section.subHeading}
                           </h2>
                         </div>
@@ -277,6 +321,24 @@ export const PrivacyPolicyPage = () => {
                 {policy.section3.map((section, index) => {
                   const sectionId = `section3-${index}`;
                   const isOpen = openSections[sectionId];
+                  
+                  // Try to find icon by exact match first, then by partial match, then use fallback
+                  let Icon = iconMap[section.subHeading];
+                  
+                  if (!Icon) {
+                    // Try partial matching
+                    const key = Object.keys(iconMap).find(k => 
+                      section.subHeading.toLowerCase().includes(k.toLowerCase()) || 
+                      k.toLowerCase().includes(section.subHeading.toLowerCase())
+                    );
+                    Icon = key ? iconMap[key] : null;
+                  }
+                  
+                  // Use fallback icon based on index if no match found
+                  if (!Icon) {
+                    Icon = fallbackIcons[(index + 2) % fallbackIcons.length];
+                  }
+                  
                   return (
                     <div
                       key={sectionId}
@@ -288,9 +350,9 @@ export const PrivacyPolicyPage = () => {
                       >
                         <div className="flex items-center space-x-4">
                           <div className="bg-gray-800 p-3 rounded-xl shadow-md">
-                            <Info className="h-6 w-6 text-white" />
+                            <Icon className="h-6 w-6 text-white" />
                           </div>
-                          <h2 className="text-xl sm:text-2xl font-bold text-gray-800">
+                          <h2 className="text-xl sm:text-2xl font-bold" style={{color: 'hsl(var(--primary))'}}>
                             {section.subHeading}
                           </h2>
                         </div>
@@ -331,6 +393,24 @@ export const PrivacyPolicyPage = () => {
                 {policy.section4.map((section, index) => {
                   const sectionId = `section4-${index}`;
                   const isOpen = openSections[sectionId];
+                  
+                  // Try to find icon by exact match first, then by partial match, then use fallback
+                  let Icon = iconMap[section.subHeading];
+                  
+                  if (!Icon) {
+                    // Try partial matching
+                    const key = Object.keys(iconMap).find(k => 
+                      section.subHeading.toLowerCase().includes(k.toLowerCase()) || 
+                      k.toLowerCase().includes(section.subHeading.toLowerCase())
+                    );
+                    Icon = key ? iconMap[key] : null;
+                  }
+                  
+                  // Use fallback icon based on index if no match found
+                  if (!Icon) {
+                    Icon = fallbackIcons[(index + 4) % fallbackIcons.length];
+                  }
+                  
                   return (
                     <div
                       key={sectionId}
@@ -342,9 +422,9 @@ export const PrivacyPolicyPage = () => {
                       >
                         <div className="flex items-center space-x-4">
                           <div className="bg-gray-800 p-3 rounded-xl shadow-md">
-                            <Info className="h-6 w-6 text-white" />
+                            <Icon className="h-6 w-6 text-white" />
                           </div>
-                          <h2 className="text-xl sm:text-2xl font-bold text-gray-800">
+                          <h2 className="text-xl sm:text-2xl font-bold" style={{color: 'hsl(var(--primary))'}}>
                             {section.subHeading}
                           </h2>
                         </div>
@@ -385,6 +465,24 @@ export const PrivacyPolicyPage = () => {
                 {policy.section5.map((section, index) => {
                   const sectionId = `section5-${index}`;
                   const isOpen = openSections[sectionId];
+                  
+                  // Try to find icon by exact match first, then by partial match, then use fallback
+                  let Icon = iconMap[section.subHeading];
+                  
+                  if (!Icon) {
+                    // Try partial matching
+                    const key = Object.keys(iconMap).find(k => 
+                      section.subHeading.toLowerCase().includes(k.toLowerCase()) || 
+                      k.toLowerCase().includes(section.subHeading.toLowerCase())
+                    );
+                    Icon = key ? iconMap[key] : null;
+                  }
+                  
+                  // Use fallback icon based on index if no match found
+                  if (!Icon) {
+                    Icon = fallbackIcons[(index + 6) % fallbackIcons.length];
+                  }
+                  
                   return (
                     <div
                       key={sectionId}
@@ -396,9 +494,9 @@ export const PrivacyPolicyPage = () => {
                       >
                         <div className="flex items-center space-x-4">
                           <div className="bg-gray-800 p-3 rounded-xl shadow-md">
-                            <Info className="h-6 w-6 text-white" />
+                            <Icon className="h-6 w-6 text-white" />
                           </div>
-                          <h2 className="text-xl sm:text-2xl font-bold text-gray-800">
+                          <h2 className="text-xl sm:text-2xl font-bold" style={{color: 'hsl(var(--primary))'}}>
                             {section.subHeading}
                           </h2>
                         </div>
@@ -437,6 +535,24 @@ export const PrivacyPolicyPage = () => {
                 {policy.section6.map((section, index) => {
                   const sectionId = `section6-${index}`;
                   const isOpen = openSections[sectionId];
+                  
+                  // Try to find icon by exact match first, then by partial match, then use fallback
+                  let Icon = iconMap[section.subHeading];
+                  
+                  if (!Icon) {
+                    // Try partial matching
+                    const key = Object.keys(iconMap).find(k => 
+                      section.subHeading.toLowerCase().includes(k.toLowerCase()) || 
+                      k.toLowerCase().includes(section.subHeading.toLowerCase())
+                    );
+                    Icon = key ? iconMap[key] : null;
+                  }
+                  
+                  // Use fallback icon based on index if no match found
+                  if (!Icon) {
+                    Icon = fallbackIcons[(index + 8) % fallbackIcons.length];
+                  }
+                  
                   return (
                     <div
                       key={sectionId}
@@ -448,9 +564,9 @@ export const PrivacyPolicyPage = () => {
                       >
                         <div className="flex items-center space-x-4">
                           <div className="bg-gray-800 p-3 rounded-xl shadow-md">
-                            <Info className="h-6 w-6 text-white" />
+                            <Icon className="h-6 w-6 text-white" />
                           </div>
-                          <h2 className="text-xl sm:text-2xl font-bold text-gray-800">
+                          <h2 className="text-xl sm:text-2xl font-bold" style={{color: 'hsl(var(--primary))'}}>
                             {section.subHeading}
                           </h2>
                         </div>
@@ -484,7 +600,7 @@ export const PrivacyPolicyPage = () => {
                 {/* Input Fields */}
                 {policy.inputFields.length > 0 && (
                   <div className="bg-white rounded-2xl shadow-md p-4 sm:p-6 lg:p-8">
-                    <h3 className="text-xl sm:text-2xl font-bold text-slate-800 mb-3 sm:mb-4">Contact Information</h3>
+                    <h3 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4" style={{color: 'hsl(var(--primary))'}}>Contact Information</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 text-base sm:text-lg text-gray-700">
                       {policy.inputFields.map((field, index) => (
                         <div key={index}>
@@ -499,7 +615,7 @@ export const PrivacyPolicyPage = () => {
               <div className="text-center py-20">
                 <div className="bg-white rounded-2xl shadow-lg p-12 max-w-2xl mx-auto">
                   <FileText className="h-20 w-20 text-gray-400 mx-auto mb-6" />
-                  <h2 className="text-3xl font-bold text-gray-800 mb-4">
+                  <h2 className="text-3xl font-bold mb-4" style={{color: 'hsl(var(--primary))'}}>
                     No Privacy Policy Available
                   </h2>
                   <p className="text-lg text-gray-700 mb-2">
@@ -519,7 +635,7 @@ export const PrivacyPolicyPage = () => {
                   <Info className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-lg sm:text-xl font-bold text-white mb-2">
+                  <h3 className="text-lg sm:text-xl font-bold mb-2" style={{color: 'hsl(var(--primary))'}}>
                     Questions About Our Privacy Policy?
                   </h3>
                   <p className="text-gray-300 leading-relaxed text-sm sm:text-base">

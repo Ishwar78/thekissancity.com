@@ -76,7 +76,7 @@ export const ShippingPolicyPage = () => {
             <div className="max-w-5xl mx-auto">
               <div className="flex items-center justify-center space-x-3 mt-10 mb-10">
                 <Package className="h-12 w-12 text-gray-800 animate-pulse" />
-                <h1 className="text-4xl md:text-5xl font-extrabold text-slate-800 tracking-tight">Shipping Policy</h1>
+                <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight" style={{color: 'hsl(var(--primary))'}}>Shipping Policy</h1>
               </div>
               <div className="bg-white rounded-2xl shadow-md p-8 animate-pulse">
                 <div className="h-8 bg-slate-200 rounded w-1/3 mb-6"></div>
@@ -98,7 +98,7 @@ export const ShippingPolicyPage = () => {
       <>
         <Navbar />
         <div className="min-h-screen bg-gray-100">
-          <div className="bg-gray-900 text-white py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+          <div className="text-white py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden" style={{backgroundColor: 'hsl(var(--primary))'}}>
             <div className="absolute inset-0 bg-black opacity-5 pattern-grid"></div>
             <div className="container mx-auto max-w-5xl relative z-10">
               <div className="flex items-center justify-center space-x-4 mt-10 mb-4">
@@ -130,7 +130,7 @@ export const ShippingPolicyPage = () => {
       <Navbar />
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
         {/* Hero Section */}
-          <div className="bg-gray-900 text-white py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden mt-8">
+          <div className="text-white py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden mt-8" style={{backgroundColor: 'hsl(var(--primary))'}}>
           <div className="absolute inset-0 bg-black opacity-5 pattern-grid"></div>
           <div className="container mx-auto max-w-5xl relative z-10">
             <div className="flex items-center justify-center space-x-4 mt-10 mb-4">
@@ -165,7 +165,7 @@ export const ShippingPolicyPage = () => {
                           <div className="bg-gray-800 p-3 rounded-xl shadow-md">
                             <Icon className="h-6 w-6 text-white" />
                           </div>
-                          <h2 className="text-xl sm:text-2xl font-bold text-slate-800">
+                          <h2 className="text-xl sm:text-2xl font-bold" style={{color: 'hsl(var(--primary))'}}>
                             {section.title}
                           </h2>
                         </div>
@@ -197,7 +197,7 @@ export const ShippingPolicyPage = () => {
               <div className="text-center py-20">
                 <div className="bg-white rounded-2xl shadow-lg p-12 max-w-2xl mx-auto">
                   <Package className="h-20 w-20 text-gray-400 mx-auto mb-6" />
-                  <h2 className="text-3xl font-bold text-gray-800 mb-4">
+                  <h2 className="text-3xl font-bold mb-4" style={{color: 'hsl(var(--primary))'}}>
                     No Shipping Policy Available
                   </h2>
                   <p className="text-lg text-gray-700 mb-2">
@@ -217,7 +217,7 @@ export const ShippingPolicyPage = () => {
                   <Package className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-white mb-2">
+                  <h3 className="text-xl font-bold mb-2" style={{color: 'hsl(var(--primary))'}}>
                     Need Help with Your Order?
                   </h3>
                   <p className="text-gray-300 leading-relaxed">

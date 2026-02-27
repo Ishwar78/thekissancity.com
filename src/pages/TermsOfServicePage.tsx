@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { FileText, ChevronDown, CheckCircle, Info } from 'lucide-react';
+import { FileText, ChevronDown, CheckCircle, Info, Shield, Clock, CreditCard, ArrowLeftRight, Truck, AlertCircle, RefreshCw, Users, Gavel, Mail, Phone, Globe, Lock, Key } from 'lucide-react';
 
 // Interfaces matching the backend schema
 interface Paragraph {
@@ -35,6 +35,28 @@ interface TermsOfServiceData {
   createdAt?: string;
   updatedAt?: string;
 }
+
+const iconMap: { [key: string]: any } = {
+  "Terms": Gavel,
+  "Service": Users,
+  "User": Users,
+  "Account": Users,
+  "Privacy": Lock,
+  "Security": Shield,
+  "Payment": CreditCard,
+  "Refund": RefreshCw,
+  "Shipping": Truck,
+  "Contact": Mail,
+  "Support": Phone,
+  "Legal": Gavel,
+  "Agreement": FileText,
+  "License": Key,
+  "Data": Globe,
+  "Information": Info,
+};
+
+// Fallback icons based on index to ensure variety
+const fallbackIcons = [Gavel, Users, Shield, Lock, CreditCard, RefreshCw, Truck, Mail, Phone, Globe, Key, FileText, Info, Clock, ArrowLeftRight];
 
 export const TermsOfServicePage = () => {
   const [policy, setPolicy] = useState<TermsOfServiceData | null>(null);
@@ -88,7 +110,7 @@ export const TermsOfServicePage = () => {
             <div className="max-w-5xl mx-auto">
               <div className="flex items-center justify-center space-x-2 sm:space-x-3 mt-8 sm:mt-10 mb-8 sm:mb-10">
                 <FileText className="h-8 w-8 sm:h-12 sm:w-12 text-gray-800 animate-pulse" />
-                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-slate-800 tracking-tight break-words px-2">Terms of Service</h1>
+                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight break-words px-2" style={{color: 'hsl(var(--primary))'}}>Terms of Service</h1>
               </div>
               <div className="bg-white rounded-2xl shadow-md p-4 sm:p-6 lg:p-8 animate-pulse">
                 <div className="h-6 sm:h-8 bg-slate-200 rounded w-1/3 mb-4 sm:mb-6"></div>
@@ -110,7 +132,7 @@ export const TermsOfServicePage = () => {
       <>
         <Navbar />
         <div className="min-h-screen bg-gray-100">
-          <div className="bg-gray-900 text-white py-12 sm:py-16 px-3 sm:px-4 md:px-6 lg:px-8 relative overflow-hidden">
+          <div className="text-white py-12 sm:py-16 px-3 sm:px-4 md:px-6 lg:px-8 relative overflow-hidden" style={{backgroundColor: 'hsl(var(--primary))'}}>
             <div className="absolute inset-0 bg-black opacity-5 pattern-grid"></div>
             <div className="container mx-auto relative z-10">
               <div className="flex items-center justify-center space-x-3 sm:space-x-4 mt-8 sm:mt-10 mb-4">
@@ -142,7 +164,7 @@ export const TermsOfServicePage = () => {
       <Navbar />
       <div className="min-h-screen bg-gray-100">
         {/* Hero Section */}
-        <div className="bg-gray-900 text-white py-12 sm:py-16  px-3 sm:px-4 md:px-6 lg:px-8 relative overflow-hidden mt-10">
+        <div className="text-white py-12 sm:py-16  px-3 sm:px-4 md:px-6 lg:px-8 relative overflow-hidden mt-10" style={{backgroundColor: 'hsl(var(--primary))'}}>
           <div className="absolute inset-0 bg-black opacity-5 pattern-grid"></div>
           <div className="container mx-auto relative z-10  ">
             <div className="flex items-center justify-center space-x-3 sm:space-x-4 mt-8 sm:mt-10 mb-4">
@@ -163,6 +185,24 @@ export const TermsOfServicePage = () => {
                 {policy.sections.map((section, index) => {
                   const sectionId = `section-${index}`;
                   const isOpen = openSections[sectionId];
+                  
+                  // Try to find icon by exact match first, then by partial match, then use fallback
+                  let Icon = iconMap[section.heading];
+                  
+                  if (!Icon) {
+                    // Try partial matching
+                    const key = Object.keys(iconMap).find(k => 
+                      section.heading.toLowerCase().includes(k.toLowerCase()) || 
+                      k.toLowerCase().includes(section.heading.toLowerCase())
+                    );
+                    Icon = key ? iconMap[key] : null;
+                  }
+                  
+                  // Use fallback icon based on index if no match found
+                  if (!Icon) {
+                    Icon = fallbackIcons[index % fallbackIcons.length];
+                  }
+                  
                   return (
                     <div
                       key={sectionId}
@@ -174,9 +214,9 @@ export const TermsOfServicePage = () => {
                       >
                         <div className="flex items-center space-x-3 sm:space-x-4 flex-1 min-w-0">
                           <div className="bg-gray-800 p-2 sm:p-3 rounded-xl shadow-md flex-shrink-0">
-                            <Info className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+                            <Icon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                           </div>
-                          <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 break-words">
+                          <h2 className="text-lg sm:text-xl lg:text-2xl font-bold break-words" style={{color: 'hsl(var(--primary))'}}>
                             {section.heading}
                           </h2>
                         </div>
@@ -198,7 +238,7 @@ export const TermsOfServicePage = () => {
                         <div className="px-4 sm:px-6 lg:px-8 pb-6 sm:pb-8">
                           <div className="border-t border-slate-200 pt-4 sm:pt-6">
                             {section.subHeading && (
-                              <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 break-words">
+                              <h3 className="text-base sm:text-lg font-semibold mb-2 break-words" style={{color: 'hsl(var(--primary))'}}>
                                 {section.subHeading}
                               </h3>
                             )}
@@ -242,7 +282,7 @@ export const TermsOfServicePage = () => {
               <div className="text-center py-20">
                 <div className="bg-white rounded-2xl shadow-lg p-12 max-w-2xl mx-auto">
                   <FileText className="h-20 w-20 text-gray-400 mx-auto mb-6" />
-                  <h2 className="text-3xl font-bold text-gray-800 mb-4">
+                  <h2 className="text-3xl font-bold mb-4" style={{color: 'hsl(var(--primary))'}}>
                     No Terms of Service Available
                   </h2>
                   <p className="text-lg text-gray-700 mb-2">
@@ -262,7 +302,7 @@ export const TermsOfServicePage = () => {
                   <Info className="h-6 w-6 text-white" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-lg sm:text-xl font-bold text-white mb-2 break-words">
+                  <h3 className="text-lg sm:text-xl font-bold mb-2 break-words" style={{color: 'hsl(var(--primary))'}}>
                     Questions About Our Terms of Service?
                   </h3>
                   <p className="text-sm sm:text-base text-gray-300 leading-relaxed break-words">
