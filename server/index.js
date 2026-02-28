@@ -133,6 +133,7 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 
 /* -------------------------------- ROUTES -------------------------------- */
+const bulkCouponsRoutes = require('./routes/bulkCoupons');
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productsRoutes);
 app.use('/api/orders', ordersRoutes);
@@ -145,6 +146,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/support', supportRoutes);
 app.use('/api/inquiry', inquiryRoutes);
 app.use('/api/coupons', couponsRoutes);
+app.use('/api/bulk-coupons', bulkCouponsRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/tracking', trackingRoutes);
 app.use('/api/shipping', shippingRoutes);

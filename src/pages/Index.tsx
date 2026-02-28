@@ -1143,10 +1143,10 @@ const Index = () => {
     {featuredLoading ? (
       <>
         {/* Static header during loading */}
-        <div className="mb-10 sm:mb-12">
+        <div className="mb-10 sm:mb-12 text-center">
           <span className="coll-eyebrow">Our Products</span>
           <h2 className="coll-title">Featured <span>Collection</span></h2>
-          <div className="coll-title-underline" />
+          <div className="coll-title-underline mx-auto" />
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -1163,10 +1163,10 @@ const Index = () => {
       </>
     ) : featuredError ? (
       <>
-        <div className="mb-10">
+        <div className="mb-10 sm:mb-12 text-center">
           <span className="coll-eyebrow">Our Products</span>
           <h2 className="coll-title">Featured <span>Collection</span></h2>
-          <div className="coll-title-underline" />
+          <div className="coll-title-underline mx-auto" />
         </div>
         <div className="text-center py-16 text-gray-400 text-sm">{featuredError}</div>
       </>
@@ -1175,15 +1175,15 @@ const Index = () => {
       <Carousel opts={{ align: "start", loop: true }} className="w-full">
 
         {/* Header row with nav buttons INSIDE Carousel */}
-        <div className="flex items-end justify-between mb-10 sm:mb-12">
-          <div>
+        <div className="flex flex-col items-center mb-10 sm:mb-12">
+          <div className="text-center">
             <span className="coll-eyebrow">Our Products</span>
             <h2 className="coll-title">Featured <span>Collection</span></h2>
-            <div className="coll-title-underline" />
+            <div className="coll-title-underline mx-auto" />
           </div>
 
           {/* Desktop nav — inside Carousel context ✓ */}
-          <div className="hidden sm:flex items-center gap-2">
+          <div className="hidden sm:flex items-center gap-2 mt-4">
             <CarouselPrevious
               className="coll-nav-btn"
               onMouseDown={(e) => setTimeout(() => e.currentTarget.blur(), 150)}
@@ -1231,7 +1231,7 @@ const Index = () => {
       {/* Categories grid with product showcase */}
       <section
   style={{ backgroundColor: '#F5F0E8' }}
-  className="mx-auto px-4 sm:px-8 pb-10 sm:pb-16 pt-8 sm:pt-12"
+  className="mx-auto px-4 sm:px-8 pb-10 sm:pb-16 pt-4 sm:pt-4"
 >
   {/* Header */}
   <div className="text-center mb-10">
@@ -1415,7 +1415,7 @@ const Index = () => {
       <BestSellerSection />
       {/* Shop By Region */}
   
-<section style={{ backgroundColor: '#F5F0E8' }} className="py-12 sm:py-16 overflow-hidden">
+<section style={{ backgroundColor: '#F5F0E8' }} className="py-2 sm:py-4 overflow-hidden">
   <style>{`
     .region-section {
       --green:     #2d6a4f;
@@ -1522,8 +1522,8 @@ const Index = () => {
 
     {regionsLoading ? (
       <>
-        {/* Header */}
-        <div className="mb-10">
+        {/* Static header during loading */}
+        <div className="mb-10 text-center">
           <span className="inline-block text-xs font-bold uppercase tracking-[0.2em] px-4 py-1 rounded-full mb-3"
             style={{ background: 'rgba(107,68,35,0.08)', color: '#ba8c5c' }}>
             Explore India
@@ -1531,7 +1531,7 @@ const Index = () => {
           <h2 className="font-black tracking-tight mb-2" style={{ fontSize: 'clamp(1.8rem,4vw,3rem)', color: '#6b4423', letterSpacing: '-0.03em' }}>
             Shop By <span style={{ color: '#2d6a4f' }}>Region</span>
           </h2>
-          <div className="h-1 w-14 rounded-full" style={{ background: 'linear-gradient(90deg,#2d6a4f,#ba8c5c)' }} />
+          <div className="h-1 w-20 rounded-full mx-auto" style={{ background: 'linear-gradient(90deg, #2d6a4f, #ba8c5c)' }} />
         </div>
         <div className="flex justify-center gap-6 flex-wrap">
           {Array.from({ length: 6 }).map((_, i) => (
@@ -1549,8 +1549,8 @@ const Index = () => {
       <Carousel opts={{ align: "start", loop: true }} className="w-full">
 
         {/* Header row with desktop nav inside Carousel */}
-        <div className="flex items-end justify-between mb-10 sm:mb-12">
-          <div>
+        <div className="flex flex-col items-center mb-10 sm:mb-12">
+          <div className="text-center">
             <span className="inline-block text-xs font-bold uppercase tracking-[0.2em] px-4 py-1 rounded-full mb-3"
               style={{ background: 'rgba(107,68,35,0.08)', color: '#ba8c5c' }}>
               Explore India
@@ -1559,11 +1559,11 @@ const Index = () => {
               style={{ fontSize: 'clamp(1.8rem,4vw,3rem)', color: '#6b4423', letterSpacing: '-0.03em' }}>
               Shop By <span style={{ color: '#2d6a4f' }}>Region</span>
             </h2>
-            <div className="h-1 w-14 rounded-full" style={{ background: 'linear-gradient(90deg,#2d6a4f,#ba8c5c)' }} />
+            <div className="h-1 w-14 rounded-full mx-auto" style={{ background: 'linear-gradient(90deg,#2d6a4f,#ba8c5c)' }} />
           </div>
 
-          {/* Desktop nav — inside Carousel ✓ */}
-          <div className="hidden sm:flex items-center gap-2">
+          {/* Desktop nav */}
+          <div className="hidden sm:flex items-center gap-2 mt-4">
             <CarouselPrevious
               className="region-nav-btn"
               onMouseDown={(e) => setTimeout(() => e.currentTarget.blur(), 150)}
@@ -1625,7 +1625,7 @@ const Index = () => {
       {/* New Arrivals */}
  <section
   style={{ backgroundColor: '#F5F0E8' }}
-  className="container mx-auto px-4 py-12 md:py-16 rounded-xl"
+  className="container mx-auto px-4 py-6 md:py-8 rounded-xl"
 >
   <style>{`
     .na-section {

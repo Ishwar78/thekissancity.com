@@ -52,7 +52,7 @@ import {
     Video,
     SquarePen,
     FileText,
-    TrendingUp, ShoppingCart, Users, BarChartIcon, Image, MapPin,
+    TrendingUp, ShoppingCart, Users, BarChartIcon, Image, MapPin, Mail,
   } from 'lucide-react';
 import {
   Dialog,
@@ -69,6 +69,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/table';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ImageUploader } from '@/components/ImageUploader';
+import BulkCouponForm from '@/components/BulkCouponForm';
+import BulkCouponList from '@/components/BulkCouponList';
 import slugify from 'slugify';
 
 
@@ -134,6 +136,7 @@ const NAV_ITEMS = [
     { id: 'categories', label: 'Categories', icon: Tags },
     { id: 'regions', label: 'Regions', icon: MapPin },
     { id: 'coupons', label: 'Coupon Management', icon: Percent },
+    { id: 'bulk-coupons', label: 'Bulk Coupons', icon: Mail },
     { id: 'pages', label: 'Pages', icon: LayoutDashboard },
     { id: 'orders', label: 'Orders', icon: Receipt },
     { id: 'returns', label: 'Return Requests', icon: Receipt },
@@ -792,6 +795,11 @@ const Admin = () => {
   const [couponSaving, setCouponSaving] = useState(false);
   const [couponListKey, setCouponListKey] = useState(0);
 
+  // Bulk Coupon state
+  const [bulkCouponFormOpen, setBulkCouponFormOpen] = useState(false);
+  const [editingBulkCoupon, setEditingBulkCoupon] = useState<any | null>(null);
+  const [bulkCouponListKey, setBulkCouponListKey] = useState(0);
+
   // FAQ state
   const [faqs, setFaqs] = useState<any[]>([]);
   const [faqsLoading, setFaqsLoading] = useState(false);
@@ -815,6 +823,46 @@ const Admin = () => {
       setEditingFaq(null);
       setFaqForm({ question: '', answer: '', category: 'general', order: 0, isActive: true });
     }
+  };
+
+  const handleBulkCouponFormOpenChange = (open: boolean) => {
+    setBulkCouponFormOpen(open);
+    if (!open) {
+      setEditingBulkCoupon(null);
+    }
+  };
+
+  const handleBulkCouponSubmit = async (data: any) => {
+    try {
+      const endpoint = editingBulkCoupon 
+        ? `/api/bulk-coupons/${editingBulkCoupon._id}`
+        : '/api/bulk-coupons';
+      
+      const method = editingBulkCoupon ? 'PUT' : 'POST';
+      
+      const response = await api(endpoint, {
+        method,
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        toast.success(`Bulk coupon ${editingBulkCoupon ? 'updated' : 'created'} successfully`);
+        setBulkCouponFormOpen(false);
+        setEditingBulkCoupon(null);
+        setBulkCouponListKey(prev => prev + 1);
+      } else {
+        const errorMessage = response.json?.message || 'Failed to save bulk coupon';
+        toast.error(typeof errorMessage === 'string' ? errorMessage : JSON.stringify(errorMessage));
+      }
+    } catch (error) {
+      console.error('Error saving bulk coupon:', error);
+      toast.error('Failed to save bulk coupon');
+    }
+  };
+
+  const handleEditBulkCoupon = (coupon: any) => {
+    setEditingBulkCoupon(coupon);
+    setBulkCouponFormOpen(true);
   };
 
   const totalSalesFormatted = useMemo(
@@ -3098,19 +3146,59 @@ const handleProductSubmit = async (e: React.FormEvent) => {
 
 
 
+  );
 
+  const renderBulkCoupons = () => (
+    <div className="space-y-8 max-w-6xl mx-auto">
+      <div className="flex items-center justify-between">
+        <div className="space-y-2">
+          <h2 className="text-3xl font-bold" style={{ color: '#6b4423' }}>Bulk Coupons</h2>
+          <p className="text-base text-gray-600 leading-relaxed max-w-2xl">
+            Create and manage bulk discount coupons with email distribution
+          </p>
+        </div>
 
+        <Dialog open={bulkCouponFormOpen} onOpenChange={handleBulkCouponFormOpenChange}>
+          <DialogTrigger asChild>
+            <Button className="rounded-full h-12 px-6 text-base font-semibold btn-brown-gradient shadow-lg hover:shadow-xl transition-all duration-300">
+              <Plus className="h-5 w-5 mr-2" />
+              Create Bulk Coupon
+            </Button>
+          </DialogTrigger>
 
+          <DialogContent className="rounded-2xl max-w-4xl max-h-[90vh] overflow-y-auto" style={{ backgroundColor: '#faf3eb' }}>
+            <DialogHeader className="pb-6" style={{ borderBottom: '1px solid #e5d4c1' }}>
+              <DialogTitle className="text-2xl font-semibold" style={{ color: '#6b4423' }}>
+                {editingBulkCoupon ? 'Edit Bulk Coupon' : 'Create New Bulk Coupon'}
+              </DialogTitle>
+              <DialogDescription className="text-base" style={{ color: '#8b5a3c' }}>
+                {editingBulkCoupon ? 'Update your bulk coupon details' : 'Create targeted discount campaigns with email distribution'}
+              </DialogDescription>
+            </DialogHeader>
+
+            <BulkCouponForm
+              onSubmit={handleBulkCouponSubmit}
+              loading={false}
+              editingCoupon={editingBulkCoupon}
+            />
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      <BulkCouponList
+        onEdit={handleEditBulkCoupon}
+        refreshKey={bulkCouponListKey}
+      />
+    </div>
   );
 
 
-
-
-
   if (authLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="flex items-center gap-2 text-muted-foreground">
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="flex items-center gap-2 text-muted-foreground">
+        <Loader2 className="h-4 w-4 animate-spin" />
+        <p>Verifying admin access...</p>
           <Loader2 className="h-4 w-4 animate-spin" />
           <p>Verifying admin access...</p>
         </div>
@@ -6322,6 +6410,8 @@ const handleProductSubmit = async (e: React.FormEvent) => {
         return renderRegions();
       case 'coupons':
         return renderCoupons();
+      case 'bulk-coupons':
+        return renderBulkCoupons();
       case 'faqs':
         return renderFAQs();
       case 'pages':

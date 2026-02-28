@@ -79,8 +79,8 @@ export default function InfluencerImageSection() {
   }, [fetchInfluencerImages]);
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
+    <div className="px-3 pb-3">
+      <div className="flex justify-between items-center mb-3">
         <h2 className="text-2xl font-bold text-gray-800">Influencer Image Spotlight</h2>
         <Button onClick={() => setShowAddForm(!showAddForm)} className="rounded-full">
           {showAddForm ? (editingItem ? 'Cancel Edit' : 'Cancel Add') : 'Add New Image'}
@@ -88,7 +88,7 @@ export default function InfluencerImageSection() {
       </div>
 
       {showAddForm && (
-        <div className="mb-8">
+        <div className="mb-4">
           <AdminAddInfluencerImage 
             editingItem={editingItem}
             onImageAdded={() => { 
@@ -114,9 +114,9 @@ export default function InfluencerImageSection() {
           No influencer images found.
         </div>
       ) : (
-        <div className="masonry-grid" style={{ columnCount: 3, columnGap: '1.5rem' }}>
+        <div className="masonry-grid" style={{ columnCount: 3, columnGap: '1rem' }}>
           {influencerImages.map((item) => (
-            <div key={item._id} className="bg-white rounded-lg shadow-md overflow-hidden transform transition duration-300 hover:scale-105 relative group" style={{ breakInside: 'avoid-column', marginBottom: '1.5rem' }}>
+            <div key={item._id} className="bg-white rounded-lg shadow-md overflow-hidden transform transition duration-300 hover:scale-105 relative group" style={{ breakInside: 'avoid-column', marginBottom: '0.75rem' }}>
               {/* Action buttons */}
               <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-2">
                 <Button

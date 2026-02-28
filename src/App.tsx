@@ -7,6 +7,8 @@ import { useEffect, useLayoutEffect } from "react";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { WishlistProvider } from "@/contexts/WishlistContext";
+import CouponPopup from "@/components/CouponPopup";
+import { useCouponPopup } from "@/hooks/useCouponPopup";
 import "@/styles/inputs.css";
 
 import Index from "./pages/Index";
@@ -52,7 +54,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 0, // Data is stale immediately
-      cacheTime: 0, // Don't cache data
+      gcTime: 0, // Don't cache data (replacing deprecated cacheTime)
       refetchOnWindowFocus: true, // Refetch when window gains focus
       refetchOnReconnect: true, // Refetch when reconnecting
       retry: 1, // Only retry once
@@ -123,6 +125,65 @@ function ScrollManager() {
   return null;
 }
 
+const AppContent = () => {
+  const { isOpen, closePopup, coupons } = useCouponPopup();
+
+  return (
+    <>
+      <ScrollManager />
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/shop" element={<Shop />} />
+        <Route path="/shop/new-arrivals" element={<NewArrivals />} />
+        <Route path="/products/:slug" element={<ProductDetail />} />
+        <Route path="/products" element={<Products />} />
+        <Route path="/collection/:slug" element={<CollectionDetail />} />
+        <Route path="/all-influencers" element={<AllInfluencersPage />} />
+        <Route path="/influencer-collections/:id" element={<InfluencerImageDetailPage />} />
+        <Route path="/videos" element={<AllVideosPage />} />
+        <Route path="/product/:id" element={<ProductRedirect />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/checkout" element={<CheckoutPayment />} />
+        <Route path="/orders/success" element={<OrderSuccess />} />
+        <Route path="/auth" element={<Auth />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/wishlist" element={<Wishlist />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/help-center" element={<HelpCenter />} />
+        <Route path="/support" element={<SupportTickets />} />
+        <Route path="/support/new" element={<NewTicket />} />
+        <Route path="/account/support" element={<SupportTickets />} />
+        <Route path="/account/support/new" element={<NewTicket />} />
+        <Route path="/account/shipments" element={<AccountShipments />} />
+        <Route path="/account/profile" element={<AccountProfile />} />
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin" element={<Admin />} />
+        <Route path="/admin/support" element={<SupportCenter />} />
+        <Route path="/admin/returns" element={<AdminReturns />} />
+        <Route path="/admin/tracking" element={<AdminTracking />} />
+        <Route path="/admin/orders/:id/invoice" element={<InvoicePage />} />
+        <Route path="/account/orders/:id/invoice" element={<InvoicePage />} />
+        <Route path="/my-orders" element={<MyOrders />} />
+        <Route path="/page/:slug" element={<PageDetail />} />
+        <Route path="/shipping-policy" element={<ShippingPolicyPage />} />
+        <Route path="/return-policy" element={<ReturnPolicyPage />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+        <Route path="/terms-of-service" element={<TermsOfServicePage />} />
+        <Route path="/best-sellers" element={<BestSellerProducts />} />
+        <Route path="/collection/region/:slug" element={<RegionProducts />} />
+        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/shipping" element={<HelpCenter />} />
+        <Route path="/returns" element={<HelpCenter />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+      
+      {/* Coupon Popup */}
+      <CouponPopup isOpen={isOpen} onClose={closePopup} coupons={coupons} />
+    </>
+  );
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
@@ -132,61 +193,13 @@ const App = () => (
           <Sonner />
           <CartProvider>
             <BrowserRouter>
-            {/* Scroll fixer mounted once under Router */}
-            <ScrollManager />
-
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/shop" element={<Shop />} />
-              <Route path="/shop/new-arrivals" element={<NewArrivals />} />
-              <Route path="/products/:slug" element={<ProductDetail />} />
-              <Route path="/products" element={<Products />} />
-              <Route path="/collection/:slug" element={<CollectionDetail />} />
-              <Route path="/all-influencers" element={<AllInfluencersPage />} />
-              <Route path="/influencer-collections/:id" element={<InfluencerImageDetailPage />} />
-              <Route path="/videos" element={<AllVideosPage />} />
-              <Route path="/product/:id" element={<ProductRedirect />} />
-              <Route path="/cart" element={<Cart />} />
-              <Route path="/checkout" element={<CheckoutPayment />} />
-              <Route path="/orders/success" element={<OrderSuccess />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/wishlist" element={<Wishlist />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/help-center" element={<HelpCenter />} />
-              <Route path="/support" element={<SupportTickets />} />
-              <Route path="/support/new" element={<NewTicket />} />
-              <Route path="/account/support" element={<SupportTickets />} />
-              <Route path="/account/support/new" element={<NewTicket />} />
-              <Route path="/account/shipments" element={<AccountShipments />} />
-              <Route path="/account/profile" element={<AccountProfile />} />
-              <Route path="/admin/login" element={<AdminLogin />} />
-              <Route path="/admin" element={<Admin />} />
-              <Route path="/admin/support" element={<SupportCenter />} />
-              <Route path="/admin/returns" element={<AdminReturns />} />
-              <Route path="/admin/tracking" element={<AdminTracking />} />
-              <Route path="/admin/orders/:id/invoice" element={<InvoicePage />} />
-              <Route path="/account/orders/:id/invoice" element={<InvoicePage />} />
-              <Route path="/my-orders" element={<MyOrders />} />
-              <Route path="/page/:slug" element={<PageDetail />} />
-              <Route path="/shipping-policy" element={<ShippingPolicyPage />} />
-              <Route path="/return-policy" element={<ReturnPolicyPage />} />
-              <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-              <Route path="/terms-of-service" element={<TermsOfServicePage />} />
-              <Route path="/best-sellers" element={<BestSellerProducts />} />
-              <Route path="/collection/region/:slug" element={<RegionProducts />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/shipping" element={<HelpCenter />} />
-              <Route path="/returns" element={<HelpCenter />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </CartProvider>
-      </TooltipProvider>
-    </WishlistProvider>
-  </AuthProvider>
-</QueryClientProvider>
+              <AppContent />
+            </BrowserRouter>
+          </CartProvider>
+        </TooltipProvider>
+      </WishlistProvider>
+    </AuthProvider>
+  </QueryClientProvider>
 );
 
 export default App;

@@ -1,7 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { User, Package, ArrowRight, Sparkles } from 'lucide-react';
-import { api } from '@/lib/api';
+import { User, Package, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+
+// You need to define or import the api function
+// If api is imported from '@/lib/api', make sure the path is correct
+// If not, you might need to define it or import it properly
+import { api } from '@/lib/api';
 
 interface Product {
   _id: string;
@@ -202,8 +206,7 @@ export default function InfluencerImageGrid() {
         .iig-view-all:hover svg { transform: translateX(3px); }
       `}</style>
 
-      <div className="container mx-auto px-4 sm:px-6">
-
+      <div className="container px-4 sm:px-6 -mt-14">
         {/* Header */}
         <div className="text-center mb-10 sm:mb-12">
           <span className="iig-eyebrow">As Seen On</span>
@@ -231,7 +234,7 @@ export default function InfluencerImageGrid() {
           </div>
         ) : (
           <div className="iig-grid">
-            {influencerImages.slice(0, -2).map((item, index) => {
+            {influencerImages.slice(0, 8).map((item, index) => {
               const isTall = index % 3 === 0;
               return (
                 <div

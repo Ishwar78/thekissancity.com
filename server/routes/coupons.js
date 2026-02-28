@@ -3,6 +3,34 @@ const router = express.Router();
 const Coupon = require('../models/Coupon');
 const { requireAuth, requireAdmin } = require('../middleware/auth');
 
+// Public: GET /api/coupons/latest - Get latest active coupon for popup
+router.get('/latest', async (req, res) => {
+  try {
+    const coupons = await Coupon.find({ 
+      isActive: true, 
+      expiryDate: { $gt: new Date() } 
+    })
+    .sort({ createdAt: -1 })
+    .limit(1) // Show only 1 latest coupon
+    .lean();
+    
+    const normalized = coupons.map((c) => ({
+      id: String(c._id),
+      code: String(c.code || ''),
+      discount: Number(c.discount || 0),
+      expiryDate: c.expiryDate ? new Date(c.expiryDate).toISOString().split('T')[0] : '',
+      offerText: String(c.offerText || ''),
+      description: String(c.description || ''),
+      termsAndConditions: String(c.termsAndConditions || ''),
+    }));
+    
+    return res.json({ ok: true, data: normalized });
+  } catch (e) {
+    console.error('Failed to get latest coupons:', e);
+    return res.status(500).json({ ok: false, message: 'Server error' });
+  }
+});
+
 // Admin: GET /api/coupons/admin/list - List all coupons
 router.get('/admin/list', requireAuth, requireAdmin, async (req, res) => {
   try {

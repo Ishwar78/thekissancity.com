@@ -267,12 +267,21 @@ export const ProductCard = ({
           color: var(--green);
           line-height: 1.4;
           margin-bottom: 8px;
+          /* Force single line with ellipsis */
           display: -webkit-box;
-          -webkit-line-clamp: 2;
+          -webkit-line-clamp: 1;
+          line-clamp: 1;
           -webkit-box-orient: vertical;
+          box-orient: vertical;
           overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
           letter-spacing: 0.2px;
           transition: color 0.2s;
+          /* Fallback for better browser support */
+          max-width: 100%;
+          word-wrap: break-word;
+          hyphens: auto;
         }
         .pc3-card:hover .pc3-name { color: var(--green-dark); }
 
