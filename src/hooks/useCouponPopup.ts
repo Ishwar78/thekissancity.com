@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { api } from '@/lib/api';
 
 interface Coupon {
@@ -15,8 +16,14 @@ export const useCouponPopup = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [loading, setLoading] = useState(true);
+  const location = useLocation();
 
   useEffect(() => {
+    // Only show popup on home page
+    if (location.pathname !== '/') {
+      return;
+    }
+
     const fetchLatestCoupons = async () => {
       try {
         setLoading(true);
@@ -35,7 +42,7 @@ export const useCouponPopup = () => {
     };
 
     fetchLatestCoupons();
-  }, []);
+  }, [location.pathname]);
 
   const closePopup = () => {
     setIsOpen(false);

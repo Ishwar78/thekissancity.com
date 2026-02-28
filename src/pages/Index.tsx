@@ -16,7 +16,7 @@ import AboutUsSection from "@/components/AboutUsSection";
 import WhyUsSection from "@/components/WhyUsSection";
 import { FeatureSection } from "@/components/FeatureSection";
 import RecentReviewsSection from "@/components/RecentReviewsSection";
-import FAQSection from "@/components/FAQSection";
+import InfoSection from "@/components/infoSection";
 import BestSellerSection from "@/components/BestSellerSection";
 
 
@@ -1799,7 +1799,8 @@ const Index = () => {
       </div>
       <WhyUsSection />
 
-      <FeatureSection />
+     <FeatureSection/>
+ <InfoSection/>
 
       <RecentReviewsSection />
 

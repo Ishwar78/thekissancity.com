@@ -188,6 +188,7 @@ export const Navbar = ({ cartItemCount = 0 }: NavbarProps) => {
                 { to: "/", label: "Home" },
                 { to: "/shop", label: "Shop" },
                 { to: "/shop/new-arrivals", label: "New Arrivals", isNew: true },
+                { to: "/about", label: "About" },
               ].map((item) => (
                 <Link
                   key={item.to}
@@ -317,7 +318,7 @@ export const Navbar = ({ cartItemCount = 0 }: NavbarProps) => {
   {user ? (
     <>
       {/* Support: pehle se hi sirf md+ pe dikh raha tha */}
-      <Link to="/account/support" className="hidden md:block">
+      {/* <Link to="/account/support" className="hidden md:block">
         <Button
           variant="link"
           size="sm"
@@ -326,7 +327,7 @@ export const Navbar = ({ cartItemCount = 0 }: NavbarProps) => {
         >
           Support
         </Button>
-      </Link>
+      </Link> */}
       {/* Dashboard / User Profile */}
       <Link to="/dashboard">
         <Button
@@ -390,6 +391,7 @@ export const Navbar = ({ cartItemCount = 0 }: NavbarProps) => {
                 { to: "/", label: "Home" },
                 { to: "/shop", label: "Shop" },
                 { to: "/shop/new-arrivals", label: "New Arrivals", isNew: true },
+                { to: "/about", label: "About" },
               ].map((item) => (
                 <Link
                   key={item.to}

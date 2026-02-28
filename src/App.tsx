@@ -12,6 +12,7 @@ import { useCouponPopup } from "@/hooks/useCouponPopup";
 import "@/styles/inputs.css";
 
 import Index from "./pages/Index";
+import About from "./pages/About";
 import Shop from "./pages/Shop";
 import NewArrivals from "./pages/NewArrivals";
 import CollectionDetail from "./pages/CollectionDetail";
@@ -133,6 +134,7 @@ const AppContent = () => {
       <ScrollManager />
       <Routes>
         <Route path="/" element={<Index />} />
+        <Route path="/about" element={<About />} />
         <Route path="/shop" element={<Shop />} />
         <Route path="/shop/new-arrivals" element={<NewArrivals />} />
         <Route path="/products/:slug" element={<ProductDetail />} />
