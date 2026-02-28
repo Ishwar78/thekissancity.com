@@ -38,9 +38,10 @@ interface Review {
 interface ReviewsListProps {
   productId: string;
   onReviewCountChange?: (count: number) => void;
+  onAverageRatingChange?: (average: number) => void;
 }
 
-export const ReviewsList = ({ productId, onReviewCountChange }: ReviewsListProps) => {
+export const ReviewsList = ({ productId, onReviewCountChange, onAverageRatingChange }: ReviewsListProps) => {
   const { toast } = useToast();
   const { user } = useAuth();
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -51,6 +52,11 @@ export const ReviewsList = ({ productId, onReviewCountChange }: ReviewsListProps
     text: ""
   });
   const [showReviewForm, setShowReviewForm] = useState(false);
+
+  // Calculate average rating from reviews
+  const averageRating = reviews.length > 0 
+    ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length 
+    : 0;
 
   useEffect(() => {
     fetchReviews();
@@ -64,6 +70,12 @@ export const ReviewsList = ({ productId, onReviewCountChange }: ReviewsListProps
         setReviews(json.data);
         // Notify parent component of review count change
         onReviewCountChange?.(json.data.length);
+        
+        // Calculate and notify parent component of average rating change
+        const average = json.data.length > 0 
+          ? json.data.reduce((sum: number, review: Review) => sum + review.rating, 0) / json.data.length 
+          : 0;
+        onAverageRatingChange?.(average);
       }
     } catch (error) {
       console.error('Error fetching reviews:', error);
@@ -167,7 +179,7 @@ export const ReviewsList = ({ productId, onReviewCountChange }: ReviewsListProps
           <h3 className="text-lg font-semibold">Customer Reviews</h3>
           <div className="flex items-center gap-2 mt-1">
             <div className="flex items-center">
-              <Rating value={4.5} readonly />
+              <Rating value={averageRating} onChange={() => {}} maxStars={5} size={4} />
             </div>
             <span className="text-sm text-gray-600">
               {reviews.length} {reviews.length === 1 ? 'Review' : 'Reviews'}
@@ -238,7 +250,7 @@ export const ReviewsList = ({ productId, onReviewCountChange }: ReviewsListProps
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <span className="font-medium">{review.username}</span>
-                    <Rating value={review.rating} readonly size="sm" />
+                    <Rating value={review.rating} onChange={() => {}} maxStars={5} size={3} />
                   </div>
                   <p className="text-sm text-gray-500">
                     {formatDate(review.createdAt)}

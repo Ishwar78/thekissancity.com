@@ -33,7 +33,12 @@ const Auth = () => {
   useEffect(() => {
     if (user) {
       const added = handleIntent();
-      navigate(added ? '/cart' : '/dashboard', { replace: true });
+      // Redirect admin users to /admin, others to dashboard or cart
+      if (user.role === 'admin') {
+        navigate('/admin', { replace: true });
+      } else {
+        navigate(added ? '/cart' : '/dashboard', { replace: true });
+      }
     }
   }, [user, navigate]);
 

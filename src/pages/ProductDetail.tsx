@@ -86,6 +86,7 @@ export default function ProductDetail() {
   );
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
   const [actualReviewCount, setActualReviewCount] = useState<number>(0);
+  const [averageRating, setAverageRating] = useState<number>(0);
   const [showSizeChart, setShowSizeChart] = useState(false);
   const [showSizeChartTable, setShowSizeChartTable] = useState(false);
 
@@ -122,6 +123,17 @@ export default function ProductDetail() {
           const pid = d._id || d.id;
           if (pid) addRecentlyViewed({ id: String(pid), slug: d.slug });
           setSelectedOption(""); setQuantity(1);
+          
+          // Fetch actual review count
+          try {
+            const { ok: reviewOk, json: reviewJson } = await api(`/api/reviews/product/${pid}`);
+            if (reviewOk && reviewJson?.data) {
+              setActualReviewCount(reviewJson.data.length);
+            }
+          } catch (reviewError) {
+            console.error('Failed to fetch review count:', reviewError);
+            // Keep the initial count (0) if fetch fails
+          }
         }
       } catch (e: any) {
         if (!ignore) toast({ title: e?.message || "Failed to load product", variant: "destructive" });
@@ -335,7 +347,7 @@ export default function ProductDetail() {
                   rounded-full">
     
     <span className="text-lg font-semibold text-gray-800 leading-none">
-      {product?.averageRating || 4.2}
+      {averageRating > 0 ? averageRating.toFixed(1) : "0.0"}
     </span>
 
     <Star
@@ -457,7 +469,8 @@ export default function ProductDetail() {
                           setOpenFaqIndex={setOpenFaqIndex} reviewKey={reviewKey}
                           isVerifiedBuyer={isVerifiedBuyer}
                           onReviewSubmitted={() => { setReviewKey(p => p + 1); refetchProduct(); }}
-                          onReviewCountChange={setActualReviewCount} />
+                          onReviewCountChange={setActualReviewCount}
+                          onAverageRatingChange={setAverageRating} />
                       </div>
                     )}
                   </div>
@@ -483,7 +496,8 @@ export default function ProductDetail() {
                     setOpenFaqIndex={setOpenFaqIndex} reviewKey={reviewKey}
                     isVerifiedBuyer={isVerifiedBuyer}
                     onReviewSubmitted={() => { setReviewKey(p => p + 1); refetchProduct(); }}
-                    onReviewCountChange={setActualReviewCount} />
+                    onReviewCountChange={setActualReviewCount}
+                    onAverageRatingChange={setAverageRating} />
                 </div>
               </div>
             </div>
@@ -514,9 +528,9 @@ export default function ProductDetail() {
 }
 
 // ── Tab Content ───────────────────────────────────────────────────────────────
-function TabContent({ id, product, openFaqIndex, setOpenFaqIndex, reviewKey, isVerifiedBuyer, onReviewSubmitted, onReviewCountChange }: {
+function TabContent({ id, product, openFaqIndex, setOpenFaqIndex, reviewKey, isVerifiedBuyer, onReviewSubmitted, onReviewCountChange, onAverageRatingChange }: {
   id: string; product: P; openFaqIndex: number | null; setOpenFaqIndex: (i: number | null) => void;
-  reviewKey: number; isVerifiedBuyer: boolean; onReviewSubmitted: () => void; onReviewCountChange: (n: number) => void;
+  reviewKey: number; isVerifiedBuyer: boolean; onReviewSubmitted: () => void; onReviewCountChange: (n: number) => void; onAverageRatingChange: (avg: number) => void;
 }) {
   if (id === "description") return (
     <div>
@@ -592,6 +606,7 @@ function TabContent({ id, product, openFaqIndex, setOpenFaqIndex, reviewKey, isV
         isVerifiedBuyer={isVerifiedBuyer}
         onReviewSubmitted={onReviewSubmitted}
         onReviewCountChange={onReviewCountChange}
+        onAverageRatingChange={onAverageRatingChange}
       />
     </div>
   );
