@@ -182,7 +182,7 @@ const Auth = () => {
           <CardHeader>
             <CardTitle>{isLogin ? 'Sign In' : 'Create Account'}</CardTitle>
             <CardDescription>
-              {isLogin ? 'Welcome back to UNI10' : 'Join UNI10 today'}
+              {isLogin ? 'Welcome back to KissanCity' : 'Join KissanCity today'}
             </CardDescription>
           </CardHeader>
           <CardContent>
