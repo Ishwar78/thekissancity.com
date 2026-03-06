@@ -153,16 +153,7 @@ const Auth = () => {
           setLoading(false);
           return;
         }
-        if (!otpSent || !otpVerified) {
-          toast.error('Please verify your phone number with OTP first');
-          setLoading(false);
-          return;
-        }
-        if (!otp || otp.length !== 6) {
-          toast.error('Please enter the OTP');
-          setLoading(false);
-          return;
-        }
+        // OTP is now optional - proceed with or without OTP verification
         const { error, user: signedUpUser } = await signUp(email, password, name, phone, otp);
         if (error) throw new Error(error?.message ?? JSON.stringify(error));
         toast.success('Account created successfully!');
@@ -236,6 +227,9 @@ const Auth = () => {
                     )}
                     {otpVerified && (
                       <p className="text-xs text-green-600">✓ Phone number verified</p>
+                    )}
+                    {!otpSent && (
+                      <p className="text-xs text-muted-foreground">OTP verification is optional - you can skip this step</p>
                     )}
                   </div>
                   {otpSent && !otpVerified && (
