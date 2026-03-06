@@ -203,6 +203,15 @@ export const Navbar = ({ cartItemCount = 0 }: NavbarProps) => {
                 </Link>
               ))}
               
+              {/* Explore Our Story Link */}
+              <Link
+                to="/#about-us"
+                className="text-sm font-semibold px-3 py-2 rounded-full hover:bg-amber-50 transition relative"
+                style={{ color: '#6b4423' }}
+              >
+                Explore Our Story
+              </Link>
+              
               {/* Men Dropdown */}
               {/* <Dropdown title="Men" gender="male">
                 {(() => {
@@ -406,6 +415,16 @@ export const Navbar = ({ cartItemCount = 0 }: NavbarProps) => {
                   {item.label}
                 </Link>
               ))}
+              
+              {/* Mobile Explore Our Story Link */}
+              <Link
+                to="/about#about-us"
+                className="text-base font-semibold px-3 py-3 rounded-md hover:bg-amber-50 transition-colors relative"
+                style={{ color: '#907258' }}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Explore Our Story
+              </Link>
               
               {/* Mobile Men Dropdown */}
               <MobileDropdown 
