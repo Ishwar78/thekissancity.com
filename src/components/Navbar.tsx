@@ -205,7 +205,7 @@ export const Navbar = ({ cartItemCount = 0 }: NavbarProps) => {
               
               {/* Explore Our Story Link */}
               <Link
-                to="/#about-us"
+                to="/#us"
                 className="text-sm font-semibold px-3 py-2 rounded-full hover:bg-amber-50 transition relative"
                 style={{ color: '#6b4423' }}
                 onClick={() => console.log('Navbar Explore Our Story clicked, navigating to:', '/about#about-us')}

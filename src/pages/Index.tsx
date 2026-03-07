@@ -1797,9 +1797,16 @@ const Index = () => {
       <div id="about-us">
         <AboutUsSection />
       </div>
-      <WhyUsSection />
 
-     <FeatureSection/>
+           <div id="us">
+            <WhyUsSection />
+           </div>
+     
+      
+
+         <FeatureSection/>
+  
+     
  <InfoSection/>
 
       <RecentReviewsSection />
