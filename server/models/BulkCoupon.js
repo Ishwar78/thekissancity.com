@@ -120,6 +120,10 @@ const bulkCouponSchema = new mongoose.Schema(
       ref: 'User',
       required: true,
     },
+    applicableProducts: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Product',
+    }],
     createdAt: {
       type: Date,
       default: Date.now,

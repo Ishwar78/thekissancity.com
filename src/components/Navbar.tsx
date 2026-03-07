@@ -208,6 +208,7 @@ export const Navbar = ({ cartItemCount = 0 }: NavbarProps) => {
                 to="/#about-us"
                 className="text-sm font-semibold px-3 py-2 rounded-full hover:bg-amber-50 transition relative"
                 style={{ color: '#6b4423' }}
+                onClick={() => console.log('Navbar Explore Our Story clicked, navigating to:', '/about#about-us')}
               >
                 Explore Our Story
               </Link>
@@ -421,7 +422,10 @@ export const Navbar = ({ cartItemCount = 0 }: NavbarProps) => {
                 to="/about#about-us"
                 className="text-base font-semibold px-3 py-3 rounded-md hover:bg-amber-50 transition-colors relative"
                 style={{ color: '#907258' }}
-                onClick={() => setIsMenuOpen(false)}
+                onClick={() => {
+                  console.log('Mobile Explore Our Story clicked, navigating to:', '/about#about-us');
+                  setIsMenuOpen(false);
+                }}
               >
                 Explore Our Story
               </Link>

@@ -860,8 +860,24 @@ const Admin = () => {
     }
   };
 
-  const handleEditBulkCoupon = (coupon: any) => {
-    setEditingBulkCoupon(coupon);
+  const handleEditBulkCoupon = async (coupon: any) => {
+    try {
+      // Fetch the complete coupon data including applicableProducts
+      const response = await fetch(`/api/bulk-coupons/${coupon._id}`);
+      if (response.ok) {
+        const fullCouponData = await response.json();
+        console.log('Full coupon data for editing:', fullCouponData);
+        setEditingBulkCoupon(fullCouponData.data || fullCouponData);
+      } else {
+        // Fallback to basic coupon data if detailed fetch fails
+        console.log('Using basic coupon data as fallback');
+        setEditingBulkCoupon(coupon);
+      }
+    } catch (error) {
+      console.error('Error fetching full coupon data:', error);
+      // Fallback to basic coupon data
+      setEditingBulkCoupon(coupon);
+    }
     setBulkCouponFormOpen(true);
   };
 

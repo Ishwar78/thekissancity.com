@@ -14,6 +14,8 @@ export type CartItem = {
 export type AppliedCoupon = {
   code: string;
   discount: number;
+  applicableProducts?: string[];
+  eligibleItems?: string[];
 };
 
 type CartContextType = {
@@ -73,13 +75,28 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [items]);
 
   const addToCart = (item: Omit<CartItem, "qty">, qty = 1) => {
+    console.log('=== ADD TO CART START ===');
+    console.log('Input item:', item);
+    console.log('Input item price:', item.price, 'type:', typeof item.price);
+    
     setItems((prev) => {
+      console.log('Current cart items before add:', prev);
+      
       const cartKey = generateCartKey(item.id, item.meta);
       const existing = prev.find((p) => p.cartKey === cartKey);
+      
       if (existing) {
-        return prev.map((p) => (p.cartKey === cartKey ? { ...p, qty: p.qty + qty } : p));
+        const result = prev.map((p) => (p.cartKey === cartKey ? { ...p, qty: p.qty + qty } : p));
+        console.log('Updated existing item:', result.find(p => p.cartKey === cartKey));
+        return result;
       }
-      return [...prev, { ...item, qty, cartKey }];
+      
+      const newItem = { ...item, qty, cartKey };
+      console.log('New item to add:', newItem);
+      
+      const result = [...prev, newItem];
+      console.log('Final cart items after add:', result);
+      return result;
     });
   };
 
@@ -105,11 +122,36 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const count = useMemo(() => items.reduce((s, it) => s + it.qty, 0), [items]);
-  const subtotal = useMemo(() => items.reduce((s, it) => s + it.qty * Number(it.price || 0), 0), [items]);
+  const subtotal = useMemo(() => items.reduce((s, it) => s + it.qty * Number(Number(it.price) || 0), 0), [items]);
   const discountAmount = useMemo(() => {
     if (!appliedCoupon) return 0;
-    return Math.round((subtotal * appliedCoupon.discount) / 100);
-  }, [subtotal, appliedCoupon]);
+    
+    console.log('=== DISCOUNT CALCULATION START ===');
+    console.log('Coupon:', appliedCoupon);
+    console.log('Cart items:', items);
+    console.log('Subtotal:', subtotal);
+    
+    // If coupon has applicable products, only apply discount to eligible items
+    if (appliedCoupon.applicableProducts && Array.isArray(appliedCoupon.applicableProducts) && appliedCoupon.applicableProducts.length > 0) {
+      console.log('Bulk coupon logic - applicableProducts:', appliedCoupon.applicableProducts);
+      const eligibleItems = items.filter(item => appliedCoupon.applicableProducts?.includes(item.id));
+      console.log('Eligible items:', eligibleItems);
+      const eligibleSubtotal = items
+        .filter(item => appliedCoupon.applicableProducts?.includes(item.id))
+        .reduce((s, it) => s + it.qty * Number(it.price || 0), 0);
+      const discount = Math.ceil((eligibleSubtotal * appliedCoupon.discount) / 100);
+      console.log('Bulk coupon discount calculation - eligibleSubtotal:', eligibleSubtotal, 'discount:', discount);
+      console.log('=== DISCOUNT CALCULATION END ===');
+      return discount;
+    }
+    
+    // Otherwise apply to entire cart (for common coupons or coupons without product restrictions)
+    console.log('Common coupon logic - applying to entire cart');
+    const discount = Math.ceil((subtotal * appliedCoupon.discount) / 100);
+    console.log('Common coupon discount calculation - subtotal:', subtotal, 'discount:', discount);
+    console.log('=== DISCOUNT CALCULATION END ===');
+    return discount;
+  }, [items, subtotal, appliedCoupon]);
   const total = useMemo(() => Math.max(0, subtotal - discountAmount), [subtotal, discountAmount]);
 
   const placeOrder = async (payload: any) => {

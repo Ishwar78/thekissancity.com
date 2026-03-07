@@ -213,7 +213,7 @@ router.get('/active', async (req, res) => {
 // User: POST /api/coupons/validate - Validate and apply coupon
 router.post('/validate', requireAuth, async (req, res) => {
   try {
-    const { code } = req.body || {};
+    const { code, items } = req.body || {};
 
     if (!code || !code.trim()) {
       return res.status(400).json({ ok: false, message: 'Coupon code is required' });
@@ -240,11 +240,24 @@ router.post('/validate', requireAuth, async (req, res) => {
       return res.status(400).json({ ok: false, message: 'Coupon has expired' });
     }
 
+    // Calculate cart subtotal from items if provided
+    let cartSubtotal = 0;
+    if (items && Array.isArray(items)) {
+      cartSubtotal = items.reduce((total, item) => {
+        const itemPrice = Number(item.price) || 0;
+        const itemQty = Number(item.qty) || 1;
+        return total + (itemPrice * itemQty);
+      }, 0);
+    }
+
+    console.log('Common coupon validation - Code:', coupon.code, 'Cart Subtotal:', cartSubtotal);
+
     return res.json({
       ok: true,
       data: {
         code: coupon.code,
         discount: coupon.discount,
+        cartSubtotal: cartSubtotal,
       },
     });
   } catch (e) {

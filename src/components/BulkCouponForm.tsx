@@ -50,14 +50,18 @@ export default function BulkCouponForm({ onSubmit, loading = false, editingCoupo
     isPublic: false,
     sendToUsers: false,
     recipientEmails: [] as string[],
+    applicableProducts: [] as string[],
   });
 
   const [emailInput, setEmailInput] = useState('');
   const [showPreview, setShowPreview] = useState(false);
+  const [products, setProducts] = useState<any[]>([]);
+  const [productsLoading, setProductsLoading] = useState(false);
 
   // Populate form when editing coupon
   useEffect(() => {
     if (editingCoupon) {
+      const applicableProductsArray = editingCoupon.applicableProducts?.map((p: any) => p._id || p.id || p) || editingCoupon.products || [];
       setFormData({
         code: editingCoupon.code || '',
         name: editingCoupon.name || '',
@@ -74,28 +78,42 @@ export default function BulkCouponForm({ onSubmit, loading = false, editingCoupo
         isPublic: editingCoupon.isPublic || false,
         sendToUsers: false,
         recipientEmails: [],
-      });
-    } else {
-      // Reset form for new coupon
-      setFormData({
-        code: '',
-        name: '',
-        discountType: 'percentage',
-        discountValue: '',
-        minOrderAmount: '0',
-        maxDiscountAmount: '',
-        usageLimit: '',
-        usageLimitPerUser: '1',
-        offerText: '',
-        description: '',
-        termsAndConditions: '',
-        expiryDate: '',
-        isPublic: false,
-        sendToUsers: false,
-        recipientEmails: [],
+        applicableProducts: applicableProductsArray,
       });
     }
-  }, [editingCoupon]);
+  }, [editingCoupon]); // Only depend on editingCoupon
+
+  // Fetch products for selection
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setProductsLoading(true);
+      try {
+        const { api } = await import('@/lib/api');
+        const { ok, json } = await api('/api/products?limit=100');
+        if (ok && json?.data && Array.isArray(json.data)) {
+          console.log('Products loaded:', json.data); // Debug log
+          setProducts(json.data);
+        } else {
+          console.error('Invalid response format:', json);
+          toast({
+            title: 'Error',
+            description: 'Failed to load products - invalid response format',
+            variant: 'destructive',
+          });
+        }
+      } catch (error) {
+        console.error('Failed to fetch products:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to fetch products for selection',
+          variant: 'destructive',
+        });
+      } finally {
+        setProductsLoading(false);
+      }
+    };
+    fetchProducts();
+  }, [toast]);
 
   const handleInputChange = (field: string, value: any) => {
     setFormData(prev => ({
@@ -393,6 +411,76 @@ export default function BulkCouponForm({ onSubmit, loading = false, editingCoupo
                     onChange={(e) => handleInputChange('offerText', e.target.value)}
                     placeholder="e.g., Get 20% off on your first order!"
                   />
+                </div>
+
+                {/* Product Selection */}
+                <div className="space-y-2">
+                  <Label>Applicable Products</Label>
+                  <div className="border rounded-lg p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm text-muted-foreground">
+                        Select products this coupon can be applied to. Leave empty to apply to all products.
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground">
+                          {formData.applicableProducts.length} selected
+                        </span>
+                        {formData.applicableProducts.length > 0 && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleInputChange('applicableProducts', [])}
+                          >
+                            Clear All
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {productsLoading ? (
+                      <div className="text-center py-4">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
+                        <p className="text-sm text-muted-foreground mt-2">Loading products...</p>
+                      </div>
+                    ) : products.length === 0 ? (
+                      <div className="text-center py-4">
+                        <p className="text-sm text-muted-foreground">No products found</p>
+                        <p className="text-xs text-muted-foreground mt-1">Please check if products are available in the system</p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 max-h-60 overflow-y-auto">
+                        {products.map((product) => {
+                          const productId = product.id || product._id;
+                          const isChecked = formData.applicableProducts.includes(productId);
+                          return (
+                          <div key={productId} className="flex items-center space-x-2 p-2 border rounded hover:bg-muted/50">
+                            <input
+                              type="checkbox"
+                              id={`product-${productId}`}
+                              checked={isChecked}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  handleInputChange('applicableProducts', [...formData.applicableProducts, productId]);
+                                } else {
+                                  handleInputChange('applicableProducts', formData.applicableProducts.filter(id => id !== productId));
+                                }
+                              }}
+                              className="rounded"
+                            />
+                            <label
+                              htmlFor={`product-${productId}`}
+                              className="text-sm cursor-pointer flex-1 truncate"
+                              title={product.title || product.name || 'Unknown Product'}
+                            >
+                              {product.title || product.name || 'Unknown Product'}
+                            </label>
+                          </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </TabsContent>
 

@@ -19,8 +19,9 @@ export const useCouponPopup = () => {
   const location = useLocation();
 
   useEffect(() => {
-    // Only show popup on home page
-    if (location.pathname !== '/') {
+    // Only show popup on home page and when there's no hash in the URL
+    if (location.pathname !== '/' || location.hash !== '') {
+      setIsOpen(false);
       return;
     }
 
@@ -31,8 +32,10 @@ export const useCouponPopup = () => {
         
         if (response.ok && response.json && response.json.data && response.json.data.length > 0) {
           setCoupons(response.json.data);
-          // Show popup only if there are coupons
-          setIsOpen(true);
+          // Show popup only if there are coupons and we're on home page with no hash
+          if (location.pathname === '/' && location.hash === '') {
+            setIsOpen(true);
+          }
         }
       } catch (error) {
         console.error('Failed to fetch latest coupons:', error);
@@ -42,7 +45,7 @@ export const useCouponPopup = () => {
     };
 
     fetchLatestCoupons();
-  }, [location.pathname]);
+  }, [location.pathname, location.hash]);
 
   const closePopup = () => {
     setIsOpen(false);

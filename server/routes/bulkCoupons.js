@@ -135,6 +135,7 @@ router.post('/', [requireAuth, requireAdmin], async (req, res) => {
       isPublic = false,
       sendToUsers = false,
       recipientEmails = [],
+      applicableProducts = [],
     } = req.body;
 
     // Validate input
@@ -190,6 +191,7 @@ router.post('/', [requireAuth, requireAdmin], async (req, res) => {
       termsAndConditions,
       expiryDate,
       isPublic,
+      applicableProducts,
       createdBy: req.user.id,
     });
 
@@ -269,6 +271,7 @@ router.get('/', [requireAuth, requireAdmin], async (req, res) => {
     const coupons = await BulkCoupon.find(query)
       .populate('createdBy', 'name email')
       .populate('sentTo.userId', 'name email')
+      .populate('applicableProducts', 'title name')
       .sort({ createdAt: -1 })
       .limit(limit * 1)
       .skip((page - 1) * limit);
@@ -300,7 +303,8 @@ router.get('/:id', [requireAuth, requireAdmin], async (req, res) => {
     const coupon = await BulkCoupon.findById(req.params.id)
       .populate('createdBy', 'name email')
       .populate('sentTo.userId', 'name email')
-      .populate('usedBy.userId', 'name email');
+      .populate('usedBy.userId', 'name email')
+      .populate('applicableProducts', 'title name');
 
     if (!coupon) {
       return res.status(404).json({
@@ -338,7 +342,7 @@ router.put('/:id', [requireAuth, requireAdmin], async (req, res) => {
       'name', 'discountType', 'discountValue', 'minOrderAmount', 
       'maxDiscountAmount', 'usageLimit', 'usageLimitPerUser', 
       'offerText', 'description', 'termsAndConditions', 
-      'expiryDate', 'isActive', 'isPublic'
+      'expiryDate', 'isActive', 'isPublic', 'applicableProducts'
     ];
 
     const updates = {};
@@ -350,6 +354,9 @@ router.put('/:id', [requireAuth, requireAdmin], async (req, res) => {
 
     Object.assign(coupon, updates);
     await coupon.save();
+    
+    // Populate applicableProducts for the response
+    await coupon.populate('applicableProducts', 'title name');
 
     res.json({
       success: true,
@@ -632,6 +639,164 @@ router.post('/apply', requireAuth, async (req, res) => {
     });
   } catch (error) {
     console.error('Error applying coupon:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+    });
+  }
+});
+
+// GET /api/bulk-coupons/inspect/:couponCode - Inspect a specific coupon
+router.get('/inspect/:couponCode', async (req, res) => {
+  try {
+    const { couponCode } = req.params;
+    const coupon = await BulkCoupon.findOne({ code: couponCode.toUpperCase() }).populate('applicableProducts', 'title name');
+
+    if (!coupon) {
+      return res.status(404).json({ success: false, message: 'Coupon not found' });
+    }
+
+    res.json({ success: true, data: coupon });
+  } catch (error) {
+    console.error('Error inspecting coupon:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// GET /api/bulk-coupons/check-applicability/:productId - Check coupon applicability and get alternatives
+router.get('/check-applicability/:productId', async (req, res) => {
+  try {
+    const { productId } = req.params;
+    const { couponCode } = req.query;
+
+    console.log('Checking coupon applicability for productId:', productId, 'couponCode:', couponCode);
+
+    // Find the product to validate it exists
+    const Product = require('../models/Product');
+    const product = await Product.findById(productId);
+    if (!product) {
+      console.log('Product not found:', productId);
+      return res.status(404).json({
+        success: false,
+        message: 'Product not found',
+      });
+    }
+
+    let couponApplicable = false;
+    let couponDetails = null;
+
+    // Check specific coupon if provided
+    if (couponCode) {
+      console.log('Checking specific coupon:', couponCode);
+      const coupon = await BulkCoupon.findOne({ 
+        code: couponCode.toUpperCase(), 
+        isActive: true,
+        expiryDate: { $gt: new Date() }
+      }).populate('applicableProducts', 'title name');
+
+      if (coupon) {
+        console.log('Found coupon:', coupon);
+        // Check if coupon applies to this product
+        const applicableProductIds = coupon.applicableProducts.map(p => p._id.toString());
+        couponApplicable = applicableProductIds.length === 0 || applicableProductIds.includes(productId);
+        console.log('Applicable product IDs:', applicableProductIds);
+        console.log('Coupon applicable:', couponApplicable);
+        
+        couponDetails = {
+          code: coupon.code,
+          name: coupon.name,
+          discountType: coupon.discountType,
+          discountValue: coupon.discountValue,
+          offerText: coupon.offerText,
+          applicable: couponApplicable,
+        };
+      } else {
+        console.log('Coupon not found or inactive');
+      }
+    }
+
+    // Get alternative coupons (show common coupons if no bulk coupons available)
+    console.log('Fetching alternative coupons...');
+    const query = {
+      isActive: true,
+      expiryDate: { $gt: new Date() },
+      // Show coupons that apply to ALL products (empty applicableProducts array)
+      applicableProducts: { $size: 0 }
+    };
+    
+    console.log('Alternative coupons query:', JSON.stringify(query, null, 2));
+    
+    const alternativeCoupons = await BulkCoupon.find(query)
+    .populate('applicableProducts', 'title name')
+    .select('code name discountType discountValue offerText applicableProducts')
+    .limit(5)
+    .lean();
+
+    console.log('Found alternative coupons:', alternativeCoupons.length, alternativeCoupons);
+
+    // If no bulk coupons found, include common coupons in response
+    if (alternativeCoupons.length === 0) {
+      console.log('No bulk coupons found, checking for common coupons...');
+      try {
+        const Coupon = require('../models/Coupon');
+        const commonCoupons = await Coupon.find({
+          isActive: true,
+          expiryDate: { $gt: new Date() }
+        })
+        .select('code discount expiryDate offerText description termsAndConditions')
+        .limit(5)
+        .lean();
+
+        console.log('Found common coupons:', commonCoupons);
+
+        // Format common coupons to match bulk coupon structure
+        const formattedCommonCoupons = commonCoupons.map(coupon => ({
+          code: coupon.code,
+          name: coupon.offerText || coupon.description || 'Discount Coupon',
+          discountType: 'percentage',
+          discountValue: coupon.discount,
+          offerText: coupon.offerText,
+          appliesToAllProducts: true,
+        }));
+
+        console.log('Formatted common coupons:', formattedCommonCoupons);
+
+        res.json({
+          success: true,
+          data: {
+            productId,
+            couponChecked: couponDetails,
+            applicableCoupons: formattedCommonCoupons,
+            showCommonCoupons: true,
+          },
+        });
+        return;
+      } catch (error) {
+        console.error('Error fetching common coupons:', error);
+      }
+    }
+
+    const formattedAlternatives = alternativeCoupons.map(coupon => ({
+      code: coupon.code,
+      name: coupon.name,
+      discountType: coupon.discountType,
+      discountValue: coupon.discountValue,
+      offerText: coupon.offerText,
+      appliesToAllProducts: coupon.applicableProducts.length === 0,
+    }));
+
+    console.log('Formatted alternatives:', formattedAlternatives);
+
+    res.json({
+      success: true,
+      data: {
+        productId,
+        couponChecked: couponDetails,
+        applicableCoupons: formattedAlternatives,
+      },
+    });
+  } catch (error) {
+    console.error('Error checking coupon applicability:', error);
     res.status(500).json({
       success: false,
       message: 'Internal server error',

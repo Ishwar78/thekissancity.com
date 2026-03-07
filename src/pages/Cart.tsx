@@ -117,23 +117,163 @@ const Cart = () => {
       };
       if (token) headers["Authorization"] = `Bearer ${token}`;
 
-      const response = await fetch("/api/coupons/validate", {
+      // First try to validate as common coupon
+      console.log('Trying common coupon validation for:', couponCode);
+      console.log('Token available:', !!token);
+      console.log('Cart items:', items);
+      
+      const commonCouponResponse = await fetch("/api/coupons/validate", {
         method: "POST",
         headers,
         credentials: "include",
-        body: JSON.stringify({ code: couponCode }),
+        body: JSON.stringify({ 
+          code: couponCode,
+          items: items.map(item => ({
+            id: item.id,
+            title: item.title,
+            price: item.price,
+            qty: item.qty
+          }))
+        }),
       });
 
-      const data = await response.json();
+      const commonCouponData = await commonCouponResponse.json();
+      console.log('Common coupon response:', commonCouponResponse.status, commonCouponData);
 
-      if (response.ok && data.ok) {
-        applyCoupon({ code: data.data.code, discount: data.data.discount });
+      if (commonCouponResponse.ok && commonCouponData.ok) {
+        // Common coupon applied successfully
+        console.log('Common coupon validated:', commonCouponData.data);
+        const couponData = {
+          code: commonCouponData.data.code,
+          discount: commonCouponData.data.discount,
+          discountType: 'percentage',
+          applicableProducts: [], // Empty means applies to all products
+          eligibleItems: items.map(item => item.id) // All items are eligible
+        };
+        console.log('Applying common coupon with data:', couponData);
+        applyCoupon(couponData);
         setCouponCode("");
-        toast({ title: `Coupon applied! ${data.data.discount}% off` });
+        
+        toast({ 
+          title: `Coupon applied!`, 
+          description: `${commonCouponData.data.discount}% off on all items` 
+        });
+      } else if (commonCouponResponse.status === 400 && commonCouponData.message && commonCouponData.message.includes('already used')) {
+        // Coupon already used - show alternatives
+        console.log('Coupon already used, showing alternatives...');
+        
+        // Show common coupons as alternatives
+        try {
+          const alternativesResponse = await fetch("/api/coupons/active", {
+            method: "GET",
+            headers,
+            credentials: "include",
+          });
+
+          if (alternativesResponse.ok) {
+            const alternativesData = await alternativesResponse.json();
+            if (alternativesData.ok && alternativesData.data.length > 0) {
+              const availableCoupons = alternativesData.data.filter((c: any) => c.code !== couponCode.trim().toUpperCase());
+              const alternativeList = availableCoupons.slice(0, 3).map((c: any) => 
+                `${c.code} (${c.discount}%)`
+              ).join(', ');
+              
+              if (alternativeList.length > 0) {
+                setCouponError(`You already used this coupon. Try these other coupons: ${alternativeList}`);
+              } else {
+                setCouponError("You already used this coupon. No other coupons available.");
+              }
+            } else {
+              setCouponError("You already used this coupon. No other coupons available.");
+            }
+          } else {
+            setCouponError("You already used this coupon. Failed to fetch alternatives.");
+          }
+        } catch (error) {
+          console.error('Error fetching alternatives:', error);
+          setCouponError("You already used this coupon. Failed to fetch alternatives.");
+        }
       } else {
-        setCouponError(data.message || "Invalid coupon");
+        // If common coupon validation fails, try bulk coupon validation
+        const cartItemIds = items.map(item => item.id);
+        let applicableCoupon = null;
+        let eligibleItems = [];
+
+        // Check each cart item to see if bulk coupon applies
+        for (const itemId of cartItemIds) {
+          const response = await fetch(`/api/bulk-coupons/check-applicability/${itemId}?couponCode=${encodeURIComponent(couponCode.trim())}`, {
+            method: "GET",
+            headers,
+            credentials: "include",
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            if (data.success && data.data.couponChecked && data.data.couponChecked.applicable) {
+              applicableCoupon = data.data.couponChecked;
+              eligibleItems.push(itemId);
+            }
+          }
+        }
+
+        if (applicableCoupon) {
+          const couponData = {
+            code: applicableCoupon.code,
+            discount: applicableCoupon.discountType === 'percentage' ? applicableCoupon.discountValue : applicableCoupon.discountValue,
+            discountType: applicableCoupon.discountType,
+            applicableProducts: eligibleItems,
+            eligibleItems: eligibleItems
+          };
+          applyCoupon(couponData);
+          setCouponCode("");
+          
+          const eligibleCount = eligibleItems.length;
+          toast({ 
+            title: `Coupon applied!`, 
+            description: `${applicableCoupon.discountType === 'percentage' ? applicableCoupon.discountValue + '%' : '₹' + applicableCoupon.discountValue} off on ${eligibleCount} eligible item${eligibleCount > 1 ? 's' : ''}` 
+          });
+        } else {
+          // If neither common nor bulk coupons work, show alternatives
+          const firstItemId = cartItemIds[0];
+          if (firstItemId) {
+            const alternativesResponse = await fetch(`/api/bulk-coupons/check-applicability/${firstItemId}`, {
+              method: "GET",
+              headers,
+              credentials: "include",
+            });
+
+            if (alternativesResponse.ok) {
+              const alternativesData = await alternativesResponse.json();
+              
+              if (alternativesData.success) {
+                const coupons = alternativesData.data.applicableCoupons || [];
+                
+                if (coupons.length > 0) {
+                  const alternativeList = coupons.slice(0, 3).map((c: any) => 
+                    `${c.code} (${c.discountType === 'percentage' ? c.discountValue + '%' : '₹' + c.discountValue})`
+                  ).join(', ');
+                  
+                  const message = alternativesData.data.showCommonCoupons 
+                    ? `Coupon not valid. Try these common coupons: ${alternativeList}`
+                    : `Coupon not applicable to cart items. Try: ${alternativeList}`;
+                  
+                  setCouponError(message);
+                } else {
+                  setCouponError("No available coupons for this product. Create some in admin panel!");
+                }
+              } else {
+                setCouponError("Failed to fetch alternative coupons.");
+              }
+            } else {
+              setCouponError("Failed to fetch alternative coupons.");
+            }
+          } else {
+            setCouponError("No items in cart to check coupon applicability.");
+          }
+        }
       }
     } catch (error) {
+      console.error('Coupon validation error:', error);
       setCouponError("Failed to validate coupon");
     } finally {
       setCouponLoading(false);
@@ -177,7 +317,20 @@ const Cart = () => {
                   <div className="flex items-center gap-2 sm:gap-4">
                     {item.image && <img src={getColorImage(item)} alt={item.title} className="w-16 sm:w-20 h-16 sm:h-20 object-cover rounded flex-shrink-0" />}
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-xs sm:text-base line-clamp-2">{item.title}</h3>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-semibold text-xs sm:text-base line-clamp-2">{item.title}</h3>
+                        {appliedCoupon?.applicableProducts && appliedCoupon.applicableProducts.length > 0 && (
+                          appliedCoupon.applicableProducts.includes(item.id) ? (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                              ✓ Eligible
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400">
+                              Not eligible
+                            </span>
+                          )
+                        )}
+                      </div>
                       <div className="flex flex-col gap-1">
                         {item.meta?.size && <p className="text-xs sm:text-sm text-muted-foreground">Size: {item.meta.size}</p>}
                         {item.meta?.color && <p className="text-xs sm:text-sm text-muted-foreground">Color: {item.meta.color}</p>}
