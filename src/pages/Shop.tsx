@@ -167,6 +167,7 @@ const Shop = ({ sortBy = "all", collectionSlug }: ShopPageProps = {}) => {
   const [isMobile, setIsMobile] = useState(false);
   const [productUpdateKey, setProductUpdateKey] = useState(0); // New state variable for triggering updates
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(true);
+const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
 
 
   const [isQuantityOpen, setIsQuantityOpen] = useState(true);
@@ -578,7 +579,7 @@ const fetchProducts = async () => {
 
             {/* Mobile Filter Trigger - Right side in mobile */}
             <div className="lg:hidden">
-              <Sheet>
+              <Sheet open={isFilterSheetOpen} onOpenChange={setIsFilterSheetOpen}>
                 <SheetTrigger asChild>
                   <Button variant="outline" className="flex items-center">
                     <Filter className="w-4 h-4 mr-2" /> Filters
@@ -612,6 +613,7 @@ const fetchProducts = async () => {
                           onClick={() => {
                             setSelectedCategory(category);
                             setCurrentPage(1);
+                            setIsFilterSheetOpen(false); // Close filter sheet after selection
                           }}
                           className="w-full justify-start"
                       style={{ color: '#6b4423' }}
