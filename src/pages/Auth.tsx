@@ -169,7 +169,76 @@ const Auth = () => {
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
       <main className="flex-1 flex justify-center items-center px-4 pt-32 pb-12 md:pb-16">
-        <Card className="max-w-sm w-full mx-auto">
+        <style>{`
+          .auth-card {
+            width: 100% !important;
+            max-width: 400px !important;
+            margin: 0 auto !important;
+          }
+          @media (max-width: 640px) {
+            .auth-card {
+              max-width: 350px !important;
+              margin: 0 16px !important;
+            }
+          }
+          @media (max-width: 480px) {
+            .auth-card {
+              max-width: 320px !important;
+              margin: 0 12px !important;
+            }
+          }
+          .auth-submit-btn {
+            background: linear-gradient(135deg, hsl(25 35% 30%), hsl(25 35% 40%)) !important;
+            color: hsl(var(--primary-foreground)) !important;
+            border: none !important;
+            border-radius: 0.75rem !important;
+            font-weight: 600 !important;
+            font-size: 0.95rem !important;
+            letter-spacing: 0.025em !important;
+            padding: 0.5rem 1rem !important;
+            margin-top: 1rem !important;
+            box-shadow: 0 4px 14px 0 hsl(25 35% 35% / 0.3), 0 2px 6px 0 hsl(25 35% 35% / 0.2) !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            position: relative !important;
+            overflow: hidden !important;
+            transform: translateZ(0) !important;
+          }
+          .auth-submit-btn::before {
+            content: '' !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: -100% !important;
+            width: 100% !important;
+            height: 100% !important;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent) !important;
+            transition: left 0.6s ease !important;
+          }
+          .auth-submit-btn:hover {
+            background: linear-gradient(135deg, hsl(25 35% 35%), hsl(25 35% 45%)) !important;
+            transform: translateY(-2px) scale(1.02) !important;
+            box-shadow: 0 8px 20px 0 hsl(25 35% 35% / 0.4), 0 4px 10px 0 hsl(25 35% 35% / 0.3) !important;
+          }
+          .auth-submit-btn:hover::before {
+            left: 100% !important;
+          }
+          .auth-submit-btn:active {
+            transform: translateY(-1px) scale(1.01) !important;
+            box-shadow: 0 4px 12px 0 hsl(25 35% 35% / 0.3), 0 2px 6px 0 hsl(25 35% 35% / 0.2) !important;
+            transition: all 0.1s ease !important;
+          }
+          .auth-submit-btn:disabled {
+            background: linear-gradient(135deg, hsl(25 35% 25%), hsl(25 35% 30%)) !important;
+            color: hsl(var(--primary-foreground)) !important;
+            opacity: 0.7 !important;
+            transform: none !important;
+            box-shadow: 0 2px 6px 0 hsl(25 35% 35% / 0.2) !important;
+            cursor: not-allowed !important;
+          }
+          .auth-submit-btn:disabled::before {
+            display: none !important;
+          }
+        `}</style>
+        <Card className="auth-card">
           <CardHeader>
             <CardTitle>{isLogin ? 'Sign In' : 'Create Account'}</CardTitle>
             <CardDescription>
@@ -300,9 +369,9 @@ const Auth = () => {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full" disabled={loading}>
+              <button type="submit" className="w-full auth-submit-btn" disabled={loading}>
                 {loading ? 'Loading...' : isLogin ? 'Sign In' : 'Sign Up'}
-              </Button>
+              </button>
             </form>
 
             <div className="mt-4 space-y-3">

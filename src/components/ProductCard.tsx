@@ -85,7 +85,6 @@ export const ProductCard = ({
   const handleWishlistClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!user) { navigate('/auth'); return; }
     toggleWishlist(id);
   };
 
@@ -241,6 +240,22 @@ export const ProductCard = ({
           box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
         }
 
+        /* Mobile responsive - reduce size for discount badge and wishlist */
+        @media (max-width: 640px) {
+          .pc3-badge {
+            font-size: 8px;
+            padding: 2px 6px;
+            top: 6px;
+            left: 6px;
+          }
+          .pc3-wishlist-btn {
+            width: 26px;
+            height: 26px;
+            top: 6px;
+            right: 6px;
+          }
+        }
+
         /* Divider */
         .pc3-divider {
           height: 1px;
@@ -259,6 +274,11 @@ export const ProductCard = ({
           letter-spacing: 0.8px;
           opacity: 0.7;
           margin-bottom: 3px;
+          /* Prevent text wrapping */
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          display: block;
         }
 
         .pc3-name {
@@ -376,19 +396,17 @@ export const ProductCard = ({
                 {originalPrice && originalPrice > price && (
                   <span className="pc3-original">₹{originalPrice.toLocaleString('en-IN')}</span>
                 )}
-                {!!discountPercentage && discountPercentage > 0 && (
-                  <span className="pc3-savings">Save {discountPercentage}%</span>
-                )}
+                {/* Savings text removed */}
               </div>
 
               {quantityOptions && quantityOptions.length > 0 && (
                 <div className="pc3-qty-row">
-                  {quantityOptions.slice(0, 3).map((opt) => (
-                    <span key={opt.id} className="pc3-qty-tag">{opt.displayLabel}</span>
-                  ))}
-                  {quantityOptions.length > 3 && (
-                    <span className="pc3-qty-tag">+{quantityOptions.length - 3}</span>
-                  )}
+                  {quantityOptions
+                    .filter(opt => opt && opt.displayLabel && opt.displayLabel.trim())
+                    .slice(0, 3)
+                    .map((opt) => (
+                      <span key={opt.id} className="pc3-qty-tag">{opt.displayLabel}</span>
+                    ))}
                 </div>
               )}
             </div>

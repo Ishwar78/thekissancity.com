@@ -185,9 +185,8 @@ const ProductDetail = () => {
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [reviewKey, setReviewKey] = useState(0);
   const [isVerifiedBuyer, setIsVerifiedBuyer] = useState(false);
-  const [activeTab, setActiveTab] = useState<"description" | "additional" | "faq" | "reviews">(
-    typeof window !== 'undefined' && window.innerWidth >= 768 ? "description" : ""
-  );
+  const [activeTab, setActiveTab] = useState<"description" | "additional" | "faq" | "reviews">("");
+  const [desktopActiveTab, setDesktopActiveTab] = useState<"description" | "additional" | "faq" | "reviews">("description");
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
 
   const descriptionRef = useRef<HTMLDivElement>(null);
@@ -1017,16 +1016,16 @@ const ProductDetail = () => {
                     <button
                       key={id}
                       type="button"
-                      onClick={() => setActiveTab(id as any)}
+                      onClick={() => setDesktopActiveTab(id as any)}
                       className={cn(
                         "w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all flex items-center justify-between group",
-                        activeTab === id
+                        desktopActiveTab === id
                           ? "bg-gray-900 text-white"
                           : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                       )}
                     >
                       {label}
-                      <ArrowRight className={cn("h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity", activeTab === id && "opacity-100")} />
+                      <ArrowRight className={cn("h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity", desktopActiveTab === id && "opacity-100")} />
                     </button>
                   ))}
                 </div>
@@ -1034,7 +1033,7 @@ const ProductDetail = () => {
 
               {/* Tab Content */}
               <div className="flex-1 p-6 sm:p-8 min-w-0">
-                {activeTab === "description" && (
+                {desktopActiveTab === "description" && (
                   <div ref={descriptionRef} className="animate-in fade-in duration-200">
                     <h3 className="text-xl font-black tracking-tight text-gray-900 mb-1">Product Description</h3>
                     <div className="h-0.5 w-10 bg-gray-900 rounded-full mb-5" />
@@ -1055,7 +1054,7 @@ const ProductDetail = () => {
                   </div>
                 )}
 
-                {activeTab === "additional" && (
+                {desktopActiveTab === "additional" && (
                   <div className="animate-in fade-in duration-200 space-y-8">
                     <div>
                       <h3 className="text-xl font-black tracking-tight text-gray-900 mb-1">Additional Information</h3>
@@ -1094,7 +1093,7 @@ const ProductDetail = () => {
                   </div>
                 )}
 
-                {activeTab === "faq" && product?.faq?.length > 0 && (
+                {desktopActiveTab === "faq" && product?.faq?.length > 0 && (
                   <div className="animate-in fade-in duration-200">
                     <h3 className="text-xl font-black tracking-tight text-gray-900 mb-1">Frequently Asked Questions</h3>
                     <div className="h-0.5 w-10 bg-gray-900 rounded-full mb-5" />
@@ -1123,7 +1122,7 @@ const ProductDetail = () => {
                   </div>
                 )}
 
-                {activeTab === "reviews" && (
+                {desktopActiveTab === "reviews" && (
                   <div className="animate-in fade-in duration-200">
                     <div className="flex items-center gap-3 mb-1">
                       <h3 className="text-xl font-black tracking-tight text-gray-900">Customer Reviews</h3>
