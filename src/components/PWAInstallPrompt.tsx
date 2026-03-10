@@ -262,8 +262,8 @@ export const PWAInstallPrompt = () => {
       <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-in fade-in-0">
         <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 animate-in slide-in-from-bottom-10">
           <div className="text-center">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Download className="h-8 w-8 text-green-600" />
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 overflow-hidden">
+              <img src="/icon-192.png" alt="Kisaan City" className="w-10 h-10 object-contain" />
             </div>
             
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
@@ -343,8 +343,8 @@ export const PWAInstallPrompt = () => {
   return (
     <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:max-w-md z-50 animate-in slide-in-from-bottom-5">
       <div className="bg-card border-border rounded-lg shadow-lg p-4 flex items-center gap-4">
-        <div className="flex-shrink-0 w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
-          <Download className="h-6 w-6 text-primary-foreground" />
+        <div className="flex-shrink-0 w-12 h-12 bg-primary rounded-lg flex items-center justify-center overflow-hidden">
+          <img src="/icon-192.png" alt="Kisaan City" className="w-8 h-8 object-contain" />
         </div>
 
         <div className="flex-1">
