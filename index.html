@@ -61,12 +61,8 @@
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker
-            .register('/sw.js?v=10')
-            .then((registration) => {
-              console.log('SW registered');
-              // Force update to ensure latest version
-              registration.update();
-            })
+            .register('/sw.js?v=8')
+            .then(() => console.log('SW registered'))
             .catch(() => console.log('SW registration failed'));
         });
       }
