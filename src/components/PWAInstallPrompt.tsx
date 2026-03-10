@@ -68,6 +68,26 @@ export const PWAInstallPrompt = () => {
         console.log("  - HTTPS/localhost:", window.location.protocol === 'https:' || window.location.hostname === 'localhost');
         console.log("  - Not already installed:", !isInstalledPWA());
         
+        // For HTTPS domains - check engagement timer
+        if (window.location.protocol === 'https:' && window.location.hostname !== 'localhost') {
+          console.log(" PWA Debug: HTTPS domain detected - checking engagement");
+          
+          // Check if user has been engaged (30+ seconds or interaction)
+          const hasEngagement = performance.now() > 30000 || document.hidden === false;
+          console.log(" PWA Debug: Engagement check:", {
+            timeOnPage: performance.now(),
+            hasEngagement,
+            documentHidden: document.hidden
+          });
+          
+          // For testing - bypass engagement timer
+          if (!hasEngagement) {
+            console.log(" PWA Debug: No engagement yet - showing prompt for testing");
+            setShowPrompt(true);
+            return;
+          }
+        }
+        
         // For HTTP localhost testing - show prompt manually
         if (window.location.protocol === 'http:' && window.location.hostname === 'localhost') {
           console.log(" PWA Debug: HTTP localhost detected - showing prompt for testing");
@@ -186,6 +206,12 @@ export const PWAInstallPrompt = () => {
     console.log("🚀 PWA Debug: User Agent:", navigator.userAgent);
     
     if (!deferredPrompt) {
+      // For HTTPS domains - show manual instructions if no prompt
+      if (window.location.protocol === 'https:' && window.location.hostname !== 'localhost') {
+        console.log("📱 PWA Debug: HTTPS domain - showing manual install instructions");
+        setMobileInstructions(true);
+        return;
+      }
       // For HTTP localhost testing - show manual instructions
       if (window.location.protocol === 'http:' && window.location.hostname === 'localhost') {
         console.log("📱 PWA Debug: HTTP localhost - showing manual install instructions");
@@ -279,10 +305,14 @@ export const PWAInstallPrompt = () => {
             <div className="text-left mb-6 space-y-3">
               <div className="bg-blue-50 rounded-lg p-3">
                 <div className="font-semibold text-blue-800 mb-1">
-                  🧪 HTTP Localhost Testing Mode
+                  {window.location.protocol === 'https:' && window.location.hostname !== 'localhost' 
+                    ? '🌐 HTTPS Domain - Manual Install Required' 
+                    : '🧪 HTTP Localhost Testing Mode'}
                 </div>
                 <div className="text-sm text-blue-600">
-                  Chrome doesn't show PWA install prompt on HTTP. For testing:
+                  {window.location.protocol === 'https:' && window.location.hostname !== 'localhost'
+                    ? 'Chrome engagement timer not met. For testing:'
+                    : 'Chrome doesn\'t show PWA install prompt on HTTP. For testing:'}
                 </div>
               </div>
               
