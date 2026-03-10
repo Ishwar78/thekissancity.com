@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
-import { Download, X } from "lucide-react";
+import { Download, X, CheckCircle, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 export const PWAInstallPrompt = () => {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showPrompt, setShowPrompt] = useState(false);
+  const [installStatus, setInstallStatus] = useState<'idle' | 'installing' | 'installed' | 'failed'>('idle');
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
   // ✅ Reliable PWA detection (ONLY correct signals)
   const isInstalledPWA = () => {
@@ -91,6 +94,18 @@ export const PWAInstallPrompt = () => {
       console.log("✅ PWA Debug: App installed event");
       setDeferredPrompt(null);
       setShowPrompt(false);
+      setInstallStatus('installed');
+      setShowSuccessMessage(true);
+      toast.success("Kissan City App installed successfully!", {
+        description: "You can now find it on your home screen",
+        duration: 5000,
+        icon: <CheckCircle className="h-4 w-4" />
+      });
+      
+      // Hide success message after 5 seconds
+      setTimeout(() => {
+        setShowSuccessMessage(false);
+      }, 5000);
     };
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
@@ -105,22 +120,78 @@ export const PWAInstallPrompt = () => {
   const handleInstall = async () => {
     if (!deferredPrompt) return;
 
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
+    setInstallStatus('installing');
+    
+    try {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
 
-    if (outcome === "accepted") {
-      setDeferredPrompt(null);
-      setShowPrompt(false);
+      if (outcome === "accepted") {
+        setDeferredPrompt(null);
+        setShowPrompt(false);
+        setInstallStatus('installed');
+        
+        // Show immediate feedback
+        toast.success("Installing Kissan City App...", {
+          description: "The app will appear on your home screen shortly",
+          duration: 3000
+        });
+      } else {
+        setInstallStatus('idle');
+        toast.info("Installation cancelled", {
+          duration: 2000
+        });
+      }
+    } catch (error) {
+      setInstallStatus('failed');
+      toast.error("Installation failed", {
+        description: "Please try again or contact support",
+        duration: 4000
+      });
+      console.error("PWA installation error:", error);
     }
   };
 
   const handleDismiss = () => {
     setShowPrompt(false);
+    toast.info("Install prompt dismissed", {
+      description: "You can install later from the browser menu",
+      duration: 3000
+    });
   };
 
   // ❌ Never render inside installed app
   console.log("🔍 PWA Debug: Render check - showPrompt:", showPrompt, "isInstalled:", isInstalledPWA());
   if (!showPrompt || isInstalledPWA()) return null;
+
+  // Success message component
+  if (showSuccessMessage) {
+    return (
+      <div className="fixed top-4 left-4 right-4 md:left-auto md:right-4 md:max-w-md z-50 animate-in slide-in-from-top-5">
+        <div className="bg-green-50 border-green-200 rounded-lg shadow-lg p-4 flex items-center gap-4">
+          <div className="flex-shrink-0 w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
+            <CheckCircle className="h-6 w-6 text-white" />
+          </div>
+          
+          <div className="flex-1">
+            <h3 className="font-bold text-sm mb-1 text-green-800">Successfully Installed!</h3>
+            <p className="text-xs text-green-600">
+              Find Kissan City on your home screen for quick access
+            </p>
+          </div>
+          
+          <Button 
+            size="sm" 
+            variant="ghost" 
+            onClick={() => setShowSuccessMessage(false)}
+            className="text-green-600 hover:bg-green-100"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:max-w-md z-50 animate-in slide-in-from-bottom-5">
@@ -137,10 +208,28 @@ export const PWAInstallPrompt = () => {
         </div>
 
         <div className="flex gap-2">
-          <Button size="sm" onClick={handleInstall} className="text-xs btn-green-gradient">
-            Install
+          <Button 
+            size="sm" 
+            onClick={handleInstall} 
+            className="text-xs btn-green-gradient"
+            disabled={installStatus === 'installing'}
+          >
+            {installStatus === 'installing' ? (
+              <>
+                <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-1" />
+                Installing...
+              </>
+            ) : (
+              'Install'
+            )}
           </Button>
-          <Button size="sm" variant="ghost" onClick={handleDismiss} className="text-muted-foreground hover:bg-accent">
+          <Button 
+            size="sm" 
+            variant="ghost" 
+            onClick={handleDismiss} 
+            className="text-muted-foreground hover:bg-accent"
+            disabled={installStatus === 'installing'}
+          >
             <X className="h-4 w-4" />
           </Button>
         </div>

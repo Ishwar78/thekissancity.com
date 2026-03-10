@@ -1,20 +1,52 @@
 {
-  "name": "Kissan City - Premium Quality Goods",
+  "name": "Kissan City - Farm Fresh Goodness",
   "short_name": "Kissan City",
-  "description": "Discover exclusive streetwear and lifestyle products at Kissan City",
-  "start_url": "/",
+  "description": "Premium quality farm-fresh goods and lifestyle products delivered to your doorstep",
+  "start_url": "/?installed=true",
   "display": "standalone",
-  "background_color": "#000000",
-  "theme_color": "#000000",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "background_color": "#ffffff",
+  "theme_color": "#22c55e",
   "orientation": "portrait-primary",
   "scope": "/",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["shopping", "lifestyle", "food"],
   "icons": [
-    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
-    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
   ],
-  "categories": ["shopping", "lifestyle"],
-  "screenshots": [],
-  "id": "/?v=9"
+  "screenshots": [
+    {
+      "src": "/screenshot-mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Kissan City mobile experience"
+    },
+    {
+      "src": "/screenshot-desktop.png", 
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Kissan City desktop experience"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Shop Now",
+      "short_name": "Shop",
+      "description": "Browse our premium products",
+      "url": "/shop?shortcut=true",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "My Orders",
+      "short_name": "Orders",
+      "description": "View your order history",
+      "url": "/orders?shortcut=true",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "id": "/?v=10"
 }

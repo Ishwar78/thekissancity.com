@@ -4,6 +4,7 @@ import { RunningText } from "@/components/RunningText";
 import { ProductCard } from "@/components/ProductCard";
 import { FeatureRow } from "@/components/FeatureRow";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
+import { PostInstallExperience } from "@/components/PostInstallExperience";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
@@ -1813,6 +1814,7 @@ const Index = () => {
 
       <Footer />
       <PWAInstallPrompt />
+      <PostInstallExperience />
       <WhatsAppButton phoneNumber="+91 12345678" />
     </div>
   );
