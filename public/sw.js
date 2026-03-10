@@ -15,8 +15,7 @@ const BYPASS_PATHS = [
   '/icon-192.png',
   '/icon-512.png',
   '/logo.jpeg',
-  '/manifest.json',
-  '/app-manifest.json'
+  '/manifest.json'
 ];
 
 self.addEventListener('install', (event) => {
@@ -28,29 +27,6 @@ self.addEventListener('install', (event) => {
     })
   );
 });
-
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    (async () => {
-      // Clean old caches
-      const keys = await caches.keys();
-      await Promise.all(keys.map((k) => (k !== CACHE_NAME ? caches.delete(k) : null)));
-      await self.clients.claim();
-    })()
-  );
-});
-
-// Utility: should bypass caching for this request?
-function shouldBypass(url) {
-  const p = url.pathname;
-  if (BYPASS_PATHS.some(x => p.endsWith(x))) return true;
-  // Also bypass any icon files with querystrings (cache-busted)
-  if (/\/favicon\.(ico|png)$/.test(p)) return true;
-  if (/\/icon-(192|512)\.png$/.test(p)) return true;
-  if (/\/apple-touch-icon\.png$/.test(p)) return true;
-  if (/\/logo\.(png|jpg|jpeg|webp)$/.test(p)) return true;
-  return false;
-}
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(

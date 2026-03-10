@@ -50,7 +50,7 @@ export const PWAInstallPrompt = () => {
         console.log("🔍 PWA Debug: Service worker ready:", !!registration);
         
         // Check manifest
-        const manifestResponse = await fetch('/manifest.json');
+        const manifestResponse = await fetch('/app-manifest.json');
         const manifest = await manifestResponse.json();
         console.log("🔍 PWA Debug: Manifest loaded:", manifest);
         console.log("🔍 PWA Debug: Manifest icons:", manifest.icons);
@@ -123,14 +123,14 @@ export const PWAInstallPrompt = () => {
         hasPrompt: !!promptEvent.prompt
       });
       
-      // On mobile, show instructions instead of auto-prompt
-      if (isMobile) {
-        console.log("📱 PWA Debug: Mobile detected - showing instructions");
-        setMobileInstructions(true);
-      } else {
-        console.log("💻 PWA Debug: Desktop detected - showing install prompt");
-        setShowPrompt(true);
-      }
+      // Check mobile directly inside handler (fix stale closure)
+      const ua = navigator.userAgent;
+      const mobile = /android|iphone|ipad/i.test(ua);
+      console.log("📱 PWA Debug: Mobile check inside handler:", mobile, ua);
+      
+      // Show install prompt for both mobile and desktop (fix Bug 2)
+      console.log("� PWA Debug: Showing install prompt (works on both mobile and desktop)");
+      setShowPrompt(true);
       
       console.log("🔍 PWA Debug: Install prompt should show now");
     };
@@ -254,7 +254,7 @@ export const PWAInstallPrompt = () => {
 
   // ❌ Never render inside installed app
   console.log("🔍 PWA Debug: Render check - showPrompt:", showPrompt, "isInstalled:", isInstalledPWA());
-  if (!showPrompt && !mobileInstructions || isInstalledPWA()) return null;
+  if ((!showPrompt && !mobileInstructions) || isInstalledPWA()) return null;
 
   // Mobile instructions modal
   if (mobileInstructions && isMobile) {

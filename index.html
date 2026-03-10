@@ -62,7 +62,10 @@
         window.addEventListener('load', () => {
           navigator.serviceWorker
             .register('/sw.js?v=8')
-            .then(() => console.log('SW registered'))
+            .then((reg) => {
+              console.log('SW registered');
+              reg.update(); // Force SW to check for new version
+            })
             .catch(() => console.log('SW registration failed'));
         });
       }
