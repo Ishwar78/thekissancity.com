@@ -9,17 +9,48 @@ import { products } from "@/data/products";
 import { ChevronLeft, ChevronRight, ShoppingBag, BookOpen } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import Autoplay from "embla-carousel-autoplay";
+import { productSliderService } from "@/services/productSliderService";
+import { ProductSliderItem } from "@/types/productSlider";
 
 export const ProductSlider = ({ className }: { className?: string }) => {
   const [currentSlide, setCurrentSlide] = React.useState(0);
   const [api, setApi] = React.useState<CarouselApi>();
-  const total = products.length;
+  const [sliderItems, setSliderItems] = React.useState<ProductSliderItem[]>([]);
+  const [loading, setLoading] = React.useState(true);
   const navigate = useNavigate();
   const location = useLocation();
 
   const autoplayPlugin = React.useRef(
     Autoplay({ delay: 4000, stopOnInteraction: true, stopOnMouseEnter: true })
   );
+
+  // Fetch slider data from API
+  React.useEffect(() => {
+    const fetchSliderData = async () => {
+      try {
+        setLoading(true);
+        const items = await productSliderService.getActiveSliders();
+        
+        if (items.length > 0) {
+          setSliderItems(items);
+        } else {
+          // Fallback to products if no slider data available
+          console.log('No slider data found, using product fallback');
+        }
+      } catch (error) {
+        console.error('Failed to fetch slider data:', error);
+        console.log('Using product fallback due to error');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSliderData();
+  }, []);
+
+  // Get current slide data (fallback to product if no slider data)
+  const currentSlideData = sliderItems[currentSlide] || null;
+  const total = sliderItems.length > 0 ? sliderItems.length : products.length;
 
   React.useEffect(() => {
     if (!api) return;
@@ -41,6 +72,18 @@ export const ProductSlider = ({ className }: { className?: string }) => {
       aboutUsElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }, [navigate, location.pathname]);
+
+  const handleButtonClick = React.useCallback((link: string) => {
+    if (!link) return; // Add null check
+    
+    if (link.startsWith('/')) {
+      navigate(link);
+    } else if (link.startsWith('http')) {
+      window.open(link, '_blank');
+    } else {
+      navigate(`/${link}`);
+    }
+  }, [navigate]);
 
   return (
     <div className={`relative w-full group ${className ?? ""}`}>
@@ -625,17 +668,36 @@ export const ProductSlider = ({ className }: { className?: string }) => {
           plugins={[autoplayPlugin.current]}
         >
           <CarouselContent>
-            {products.map((product, index) => (
-              <CarouselItem key={product.id}>
-                <div className="ps-img-container">
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className={`ps-img ${index === currentSlide ? "active" : ""}`}
-                  />
-                </div>
-              </CarouselItem>
-            ))}
+            {sliderItems.length > 0 ? (
+              sliderItems.map((item, index) => (
+                <CarouselItem key={item.id}>
+                  <div className="ps-img-container">
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      className={`ps-img ${index === currentSlide ? "active" : ""}`}
+                      onError={(e) => {
+                        // Fallback to placeholder if image fails to load
+                        (e.target as HTMLImageElement).src = "/api/uploads/placeholder-slider.jpg";
+                      }}
+                    />
+                  </div>
+                </CarouselItem>
+              ))
+            ) : (
+              // Fallback to products if no slider data
+              products.map((product, index) => (
+                <CarouselItem key={product.id}>
+                  <div className="ps-img-container">
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className={`ps-img ${index === currentSlide ? "active" : ""}`}
+                    />
+                  </div>
+                </CarouselItem>
+              ))
+            )}
           </CarouselContent>
         </Carousel>
 
@@ -646,22 +708,26 @@ export const ProductSlider = ({ className }: { className?: string }) => {
         {/* ── HERO TEXT ── */}
         <div className="ps-hero">
           <h1 className="ps-headline">
-            Farm Fresh<br />
-            <em>Goodness</em>
+            {currentSlideData?.title || "Farm Fresh<br />Goodness"}
           </h1>
           <p className="ps-subtext">
-            KissanCity brings you handcrafted pickles, chutneys & murabbas — made from farm-fresh organic ingredients, delivered to your doorstep.
+            {currentSlideData?.subtitle || "KissanCity brings you handcrafted pickles, chutneys & murabbas — made from farm-fresh organic ingredients, delivered to your doorstep."}
           </p>
-          <div className="ps-cta-row">
-            <Link to="/products" className="ps-shop-btn">
-              <ShoppingBag size={window.innerWidth <= 480 ? 12 : 14} />
-              Shop Now
-            </Link>
-            <button onClick={handleAboutUsClick} className="ps-story-btn">
-              <BookOpen size={window.innerWidth <= 480 ? 12 : 14} />
-              Explore Our Story
-            </button>
-          </div>
+          {currentSlideData?.buttonText && currentSlideData?.buttonLink && (
+            <div className="ps-cta-row">
+              <button 
+                onClick={() => handleButtonClick(currentSlideData.buttonLink!)}
+                className="ps-shop-btn"
+              >
+                <ShoppingBag size={window.innerWidth <= 480 ? 12 : 14} />
+                {currentSlideData.buttonText}
+              </button>
+              <button onClick={handleAboutUsClick} className="ps-story-btn">
+                <BookOpen size={window.innerWidth <= 480 ? 12 : 14} />
+                Explore Our Story
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Slide counter */}
@@ -687,7 +753,7 @@ export const ProductSlider = ({ className }: { className?: string }) => {
 
         {/* Dots */}
         <div className="ps-dots">
-          {products.map((_, i) => (
+          {(sliderItems.length > 0 ? sliderItems : products).map((_, i) => (
             <button
               key={i}
               className={`ps-dot ${i === currentSlide ? "active" : ""}`}
@@ -700,19 +766,19 @@ export const ProductSlider = ({ className }: { className?: string }) => {
         {/* ── STATS BAR ── */}
         <div className="ps-stats">
           <div className="ps-stat">
-            <span className="ps-stat-num">200+</span>
+            <span className="ps-stat-num">{currentSlideData?.stats?.products || "200+"}</span>
             <span className="ps-stat-label">Products</span>
           </div>
           <div className="ps-stat">
-            <span className="ps-stat-num">50K+</span>
+            <span className="ps-stat-num">{currentSlideData?.stats?.customers || "50K+"}</span>
             <span className="ps-stat-label">Happy Customers</span>
           </div>
           <div className="ps-stat">
-            <span className="ps-stat-num">100%</span>
+            <span className="ps-stat-num">{currentSlideData?.stats?.quality || "100%"}</span>
             <span className="ps-stat-label">Premium Quality</span>
           </div>
           <div className="ps-stat">
-            <span className="ps-stat-num">4.8★</span>
+            <span className="ps-stat-num">{currentSlideData?.stats?.rating || "4.8★"}</span>
             <span className="ps-stat-label">Avg. Rating</span>
           </div>
         </div>

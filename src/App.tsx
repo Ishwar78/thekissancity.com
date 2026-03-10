@@ -44,6 +44,7 @@ import AdminReturns from "./pages/AdminReturns";
 import OrderSuccess from "./pages/OrderSuccess";
 import AdminTracking from "./pages/AdminTracking";
 import ProductRedirect from "./pages/ProductRedirect";
+import ProductSliderManagement from "./pages/admin/ProductSliderManagement";
 import { ShippingPolicyPage } from "./pages/ShippingPolicyPage";
 import { PrivacyPolicyPage } from "./pages/PrivacyPolicyPage";
 import { TermsOfServicePage } from "./pages/TermsOfServicePage";
@@ -163,6 +164,7 @@ const AppContent = () => {
         <Route path="/admin/support" element={<SupportCenter />} />
         <Route path="/admin/returns" element={<AdminReturns />} />
         <Route path="/admin/tracking" element={<AdminTracking />} />
+        <Route path="/admin/product-slider" element={<ProductSliderManagement />} />
         <Route path="/admin/orders/:id/invoice" element={<InvoicePage />} />
         <Route path="/account/orders/:id/invoice" element={<InvoicePage />} />
         <Route path="/my-orders" element={<MyOrders />} />

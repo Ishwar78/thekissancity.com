@@ -78,6 +78,7 @@ const seoRoutes = require('./routes/seo');
 const influencerImageRoutes = require('./routes/influencerImage');
 const faqsRoutes = require('./routes/faqs');
 const regionsRoutes = require('./routes/regions');
+const productSliderRoutes = require('./routes/productSlider');
 
 const app = express();
 const PORT = process.env.PORT || 10000;
@@ -159,6 +160,7 @@ app.use('/api', influencerDataRoutes);
 app.use('/api', influencerImageRoutes);
 app.use('/api/faqs', faqsRoutes);
 app.use('/api/regions', regionsRoutes);
+app.use('/api/product-slider', productSliderRoutes);
 
 
 /* ------------------- SERVER-SIDE SEO META TAG INJECTION ------------------- */

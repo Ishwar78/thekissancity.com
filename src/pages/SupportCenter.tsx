@@ -66,6 +66,7 @@ const NAV_ITEMS = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard },
   { id: 'products', label: 'Products', icon: Package },
   { id: 'categories', label: 'Categories', icon: Tags },
+  { id: 'productSlider', label: 'Product Slider', icon: LayoutDashboard },
   { id: 'coupons', label: 'Coupon Management', icon: Percent },
   { id: 'pages', label: 'Pages', icon: LayoutDashboard },
   { id: 'orders', label: 'Orders', icon: Receipt },
@@ -293,6 +294,9 @@ export default function SupportCenter() {
                           setIsSidebarOpen(false);
                         } else if (item.id === 'returns') {
                           navigate('/admin/returns');
+                          setIsSidebarOpen(false);
+                        } else if (item.id === 'productSlider') {
+                          navigate('/admin/product-slider');
                           setIsSidebarOpen(false);
                         } else {
                           navigate('/admin');
