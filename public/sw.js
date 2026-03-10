@@ -1,9 +1,9 @@
-// sw.js (Kissan City) — v9
-const CACHE_NAME = 'kissancity-v9';
+// sw.js (Kissan City) — v13
+const CACHE_NAME = 'kissancity-v13';
 const PRECACHE_URLS = [
   '/',               // HTML shell
   '/index.html',
-  '/manifest.json?v=9'
+  '/app-manifest.json'
 ];
 
 // Files we NEVER want cached (always network-first)
@@ -15,7 +15,8 @@ const BYPASS_PATHS = [
   '/icon-192.png',
   '/icon-512.png',
   '/logo.jpeg',
-  '/manifest.json'
+  '/manifest.json',
+  '/app-manifest.json'
 ];
 
 self.addEventListener('install', (event) => {
