@@ -62,14 +62,20 @@ export const PWAInstallPrompt = () => {
         }
         
         // Check if site meets criteria manually
-        console.log("🔍 PWA Debug: Installability check:");
+        console.log(" PWA Debug: Installability check:");
         console.log("  - Service worker:", !!registration);
         console.log("  - Manifest exists:", !!manifest);
-        console.log("  - HTTPS/localhost:", window.isSecureContext || window.location.hostname === 'localhost');
+        console.log("  - HTTPS/localhost:", window.location.protocol === 'https:' || window.location.hostname === 'localhost');
         console.log("  - Not already installed:", !isInstalledPWA());
         
+        // For HTTP localhost testing - show prompt manually
+        if (window.location.protocol === 'http:' && window.location.hostname === 'localhost') {
+          console.log(" PWA Debug: HTTP localhost detected - showing prompt for testing");
+          setShowPrompt(true);
+        }
+        
       } catch (error) {
-        console.error("❌ PWA Debug: Installability check failed:", error);
+        console.error(" PWA Debug: Installability check failed:", error);
       }
     };
     
@@ -180,9 +186,9 @@ export const PWAInstallPrompt = () => {
     console.log("🚀 PWA Debug: User Agent:", navigator.userAgent);
     
     if (!deferredPrompt) {
-      // For mobile, show browser-specific instructions
-      if (isMobile) {
-        console.log("📱 PWA Debug: Showing mobile instructions");
+      // For HTTP localhost testing - show manual instructions
+      if (window.location.protocol === 'http:' && window.location.hostname === 'localhost') {
+        console.log("📱 PWA Debug: HTTP localhost - showing manual install instructions");
         setMobileInstructions(true);
         return;
       }
@@ -262,8 +268,8 @@ export const PWAInstallPrompt = () => {
       <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-in fade-in-0">
         <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 animate-in slide-in-from-bottom-10">
           <div className="text-center">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 overflow-hidden">
-              <img src="/icon-192.png" alt="Kisaan City" className="w-10 h-10 object-contain" />
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Download className="h-8 w-8 text-green-600" />
             </div>
             
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
@@ -273,19 +279,19 @@ export const PWAInstallPrompt = () => {
             <div className="text-left mb-6 space-y-3">
               <div className="bg-blue-50 rounded-lg p-3">
                 <div className="font-semibold text-blue-800 mb-1">
-                  {/android/i.test(navigator.userAgent) ? '🤖 Android (Chrome)' : '🍎 iPhone (Safari)'}
+                  🧪 HTTP Localhost Testing Mode
                 </div>
                 <div className="text-sm text-blue-600">
-                  {/android/i.test(navigator.userAgent) 
-                    ? 'Tap the menu (⋮) in Chrome, then "Add to Home screen"'
-                    : 'Tap the Share (⎋) button, then "Add to Home Screen"'}
+                  Chrome doesn't show PWA install prompt on HTTP. For testing:
                 </div>
               </div>
               
               <div className="bg-amber-50 rounded-lg p-3">
-                <div className="font-semibold text-amber-800 mb-1">💡 Pro Tip</div>
+                <div className="font-semibold text-amber-800 mb-1">💡 Manual Install Steps</div>
                 <div className="text-sm text-amber-600">
-                  Look for the app icon on your home screen after installation
+                  1. Click the menu (⋮) in Chrome<br/>
+                  2. Select "Add to Home screen"<br/>
+                  3. Tap "Add" to install
                 </div>
               </div>
             </div>
@@ -315,14 +321,14 @@ export const PWAInstallPrompt = () => {
   if (showSuccessMessage) {
     return (
       <div className="fixed top-4 left-4 right-4 md:left-auto md:right-4 md:max-w-md z-50 animate-in slide-in-from-top-5">
-        <div className="bg-green-50 border-green-200 rounded-lg shadow-lg p-4 flex items-center gap-4">
-          <div className="flex-shrink-0 w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
-            <CheckCircle className="h-6 w-6 text-white" />
+        <div className="bg-green-500 rounded-lg shadow-lg p-4 flex items-center gap-4">
+          <div className="flex-shrink-0 w-12 h-12 bg-white rounded-full flex items-center justify-center">
+            <CheckCircle className="h-6 w-6 text-green-500" />
           </div>
           
           <div className="flex-1">
-            <h3 className="font-bold text-sm mb-1 text-green-800">Successfully Installed!</h3>
-            <p className="text-xs text-green-600">
+            <h3 className="font-bold text-sm mb-1 text-white">Successfully Installed!</h3>
+            <p className="text-xs text-white">
               Find Kissan City on your home screen for quick access
             </p>
           </div>
@@ -331,7 +337,7 @@ export const PWAInstallPrompt = () => {
             size="sm" 
             variant="ghost" 
             onClick={() => setShowSuccessMessage(false)}
-            className="text-green-600 hover:bg-green-100"
+            className="text-white hover:bg-green-600"
           >
             <X className="h-4 w-4" />
           </Button>
@@ -343,8 +349,8 @@ export const PWAInstallPrompt = () => {
   return (
     <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:max-w-md z-50 animate-in slide-in-from-bottom-5">
       <div className="bg-card border-border rounded-lg shadow-lg p-4 flex items-center gap-4">
-        <div className="flex-shrink-0 w-12 h-12 bg-primary rounded-lg flex items-center justify-center overflow-hidden">
-          <img src="/icon-192.png" alt="Kisaan City" className="w-8 h-8 object-contain" />
+        <div className="flex-shrink-0 w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
+          <Download className="h-6 w-6 text-primary-foreground" />
         </div>
 
         <div className="flex-1">
