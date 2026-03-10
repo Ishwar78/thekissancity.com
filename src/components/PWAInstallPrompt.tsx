@@ -32,11 +32,15 @@ export const PWAInstallPrompt = () => {
     setIsMobile(mobileCheck);
     
     console.log("🔍 PWA Debug: Component mounted");
+    console.log("🔍 PWA Debug: User Agent:", userAgent);
     console.log("🔍 PWA Debug: Is mobile?", mobileCheck);
     console.log("🔍 PWA Debug: Is installed?", isInstalledPWA());
     console.log("🔍 PWA Debug: Current URL:", window.location.href);
     console.log("🔍 PWA Debug: Is secure context?", window.isSecureContext);
     console.log("🔍 PWA Debug: Protocol:", window.location.protocol);
+    console.log("🔍 PWA Debug: Display mode:", window.matchMedia("(display-mode: standalone)").matches);
+    console.log("🔍 PWA Debug: iOS standalone:", (window.navigator as any).standalone);
+    console.log("🔍 PWA Debug: Referrer:", document.referrer);
     
     // Check PWA installability criteria
     const checkInstallability = async () => {
@@ -74,12 +78,20 @@ export const PWAInstallPrompt = () => {
     // 🔥 DEBUG: Check if beforeinstallprompt fires
     window.addEventListener("beforeinstallprompt", (e) => {
       console.log("🔥 beforeinstallprompt FIRED - Install is possible!", e);
-      console.log("🔥 beforeinstallprompt FIRED - Install is possible!", e);
+      console.log("🔥 beforeinstallprompt details:", {
+        platforms: (e as any).platforms,
+        userChoice: !!(e as any).userChoice,
+        prompt: !!(e as any).prompt
+      });
     });
 
     window.addEventListener("appinstalled", () => {
       console.log("✅ appinstalled - App was installed!");
-      console.log("✅ appinstalled - App was installed!");
+      console.log("✅ appinstalled details:", {
+        timestamp: new Date().toISOString(),
+        url: window.location.href,
+        userAgent: navigator.userAgent
+      });
     });
 
     // ❌ Do NOT show prompt inside installed app
@@ -92,13 +104,31 @@ export const PWAInstallPrompt = () => {
 
     const handleBeforeInstallPrompt = (e: Event) => {
       console.log("🔍 PWA Debug: handleBeforeInstallPrompt called", e);
+      console.log("🔍 PWA Debug: Event details:", {
+        type: e.type,
+        bubbles: e.bubbles,
+        cancelable: e.cancelable,
+        timeStamp: e.timeStamp
+      });
+      
       e.preventDefault();
       setDeferredPrompt(e);
       
+      // Log prompt capabilities
+      const promptEvent = e as any;
+      console.log("🔍 PWA Debug: Prompt capabilities:", {
+        hasPlatforms: !!promptEvent.platforms,
+        platforms: promptEvent.platforms,
+        hasUserChoice: !!promptEvent.userChoice,
+        hasPrompt: !!promptEvent.prompt
+      });
+      
       // On mobile, show instructions instead of auto-prompt
       if (isMobile) {
+        console.log("📱 PWA Debug: Mobile detected - showing instructions");
         setMobileInstructions(true);
       } else {
+        console.log("💻 PWA Debug: Desktop detected - showing install prompt");
         setShowPrompt(true);
       }
       
@@ -106,11 +136,22 @@ export const PWAInstallPrompt = () => {
     };
 
     const handleAppInstalled = () => {
-      console.log("✅ PWA Debug: App installed event");
+      console.log("✅ PWA Debug: App installed event fired!");
+      console.log("✅ PWA Debug: Installation successful - checking display mode:", window.matchMedia("(display-mode: standalone)").matches);
+      console.log("✅ PWA Debug: iOS standalone check:", (window.navigator as any).standalone);
+      console.log("✅ PWA Debug: Current URL after install:", window.location.href);
+      
       setDeferredPrompt(null);
       setShowPrompt(false);
       setInstallStatus('installed');
       setShowSuccessMessage(true);
+      
+      // Force a re-check after a delay
+      setTimeout(() => {
+        console.log("🔍 PWA Debug: Post-install check - Display mode:", window.matchMedia("(display-mode: standalone)").matches);
+        console.log("🔍 PWA Debug: Post-install check - iOS standalone:", (window.navigator as any).standalone);
+      }, 1000);
+      
       toast.success("Kissan City App installed successfully!", {
         description: "You can now find it on your home screen",
         duration: 5000,
@@ -133,26 +174,47 @@ export const PWAInstallPrompt = () => {
   }, []);
 
   const handleInstall = async () => {
+    console.log("🚀 PWA Debug: Install button clicked");
+    console.log("🚀 PWA Debug: DeferredPrompt available:", !!deferredPrompt);
+    console.log("🚀 PWA Debug: Is mobile:", isMobile);
+    console.log("🚀 PWA Debug: User Agent:", navigator.userAgent);
+    
     if (!deferredPrompt) {
       // For mobile, show browser-specific instructions
       if (isMobile) {
+        console.log("📱 PWA Debug: Showing mobile instructions");
         setMobileInstructions(true);
         return;
       }
+      console.log("❌ PWA Debug: No deferred prompt available");
       return;
     }
 
     setInstallStatus('installing');
+    console.log("⏳ PWA Debug: Starting installation process...");
     
     try {
+      console.log("📱 PWA Debug: Prompting user for installation...");
       deferredPrompt.prompt();
+      
+      console.log("⏳ PWA Debug: Waiting for user choice...");
       const { outcome } = await deferredPrompt.userChoice;
+      
+      console.log("📊 PWA Debug: User choice:", outcome);
+      console.log("📊 PWA Debug: User choice details:", { outcome, accepted: outcome === "accepted" });
 
       if (outcome === "accepted") {
+        console.log("✅ PWA Debug: User accepted installation");
         setDeferredPrompt(null);
         setShowPrompt(false);
         setMobileInstructions(false);
         setInstallStatus('installed');
+        
+        // Check if appinstalled event fires
+        setTimeout(() => {
+          console.log("🔍 PWA Debug: Checking if appinstalled event fired (5s timeout)");
+          console.log("🔍 PWA Debug: Current display mode:", window.matchMedia("(display-mode: standalone)").matches);
+        }, 5000);
         
         // Show immediate feedback
         toast.success("Installing Kissan City App...", {
@@ -160,18 +222,24 @@ export const PWAInstallPrompt = () => {
           duration: 3000
         });
       } else {
+        console.log("❌ PWA Debug: User cancelled installation");
         setInstallStatus('idle');
         toast.info("Installation cancelled", {
           duration: 2000
         });
       }
     } catch (error) {
+      console.error("❌ PWA Debug: Installation error:", error);
+      console.error("❌ PWA Debug: Error details:", {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
       setInstallStatus('failed');
       toast.error("Installation failed", {
         description: "Please try again or contact support",
         duration: 4000
       });
-      console.error("PWA installation error:", error);
     }
   };
 
