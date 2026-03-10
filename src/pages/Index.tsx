@@ -1051,7 +1051,7 @@ const Index = () => {
         }
       `}</style>
       <Navbar />
-      <RunningText />
+      {/* <RunningText /> */}
 
       {/* Ticker line – header ke niche */}
 

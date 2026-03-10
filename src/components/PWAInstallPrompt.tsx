@@ -8,6 +8,8 @@ export const PWAInstallPrompt = () => {
   const [showPrompt, setShowPrompt] = useState(false);
   const [installStatus, setInstallStatus] = useState<'idle' | 'installing' | 'installed' | 'failed'>('idle');
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [mobileInstructions, setMobileInstructions] = useState(false);
 
   // ✅ Reliable PWA detection (ONLY correct signals)
   const isInstalledPWA = () => {
@@ -24,7 +26,13 @@ export const PWAInstallPrompt = () => {
   };
 
   useEffect(() => {
+    // Detect mobile device
+    const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
+    const mobileCheck = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
+    setIsMobile(mobileCheck);
+    
     console.log("🔍 PWA Debug: Component mounted");
+    console.log("🔍 PWA Debug: Is mobile?", mobileCheck);
     console.log("🔍 PWA Debug: Is installed?", isInstalledPWA());
     console.log("🔍 PWA Debug: Current URL:", window.location.href);
     console.log("🔍 PWA Debug: Is secure context?", window.isSecureContext);
@@ -86,7 +94,14 @@ export const PWAInstallPrompt = () => {
       console.log("🔍 PWA Debug: handleBeforeInstallPrompt called", e);
       e.preventDefault();
       setDeferredPrompt(e);
-      setShowPrompt(true); // show ONLY when install is possible
+      
+      // On mobile, show instructions instead of auto-prompt
+      if (isMobile) {
+        setMobileInstructions(true);
+      } else {
+        setShowPrompt(true);
+      }
+      
       console.log("🔍 PWA Debug: Install prompt should show now");
     };
 
@@ -118,7 +133,14 @@ export const PWAInstallPrompt = () => {
   }, []);
 
   const handleInstall = async () => {
-    if (!deferredPrompt) return;
+    if (!deferredPrompt) {
+      // For mobile, show browser-specific instructions
+      if (isMobile) {
+        setMobileInstructions(true);
+        return;
+      }
+      return;
+    }
 
     setInstallStatus('installing');
     
@@ -129,6 +151,7 @@ export const PWAInstallPrompt = () => {
       if (outcome === "accepted") {
         setDeferredPrompt(null);
         setShowPrompt(false);
+        setMobileInstructions(false);
         setInstallStatus('installed');
         
         // Show immediate feedback
@@ -154,6 +177,7 @@ export const PWAInstallPrompt = () => {
 
   const handleDismiss = () => {
     setShowPrompt(false);
+    setMobileInstructions(false);
     toast.info("Install prompt dismissed", {
       description: "You can install later from the browser menu",
       duration: 3000
@@ -162,7 +186,62 @@ export const PWAInstallPrompt = () => {
 
   // ❌ Never render inside installed app
   console.log("🔍 PWA Debug: Render check - showPrompt:", showPrompt, "isInstalled:", isInstalledPWA());
-  if (!showPrompt || isInstalledPWA()) return null;
+  if (!showPrompt && !mobileInstructions || isInstalledPWA()) return null;
+
+  // Mobile instructions modal
+  if (mobileInstructions && isMobile) {
+    return (
+      <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-in fade-in-0">
+        <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 animate-in slide-in-from-bottom-10">
+          <div className="text-center">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Download className="h-8 w-8 text-green-600" />
+            </div>
+            
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              Install Kissan City App
+            </h2>
+            
+            <div className="text-left mb-6 space-y-3">
+              <div className="bg-blue-50 rounded-lg p-3">
+                <div className="font-semibold text-blue-800 mb-1">
+                  {/android/i.test(navigator.userAgent) ? '🤖 Android (Chrome)' : '🍎 iPhone (Safari)'}
+                </div>
+                <div className="text-sm text-blue-600">
+                  {/android/i.test(navigator.userAgent) 
+                    ? 'Tap the menu (⋮) in Chrome, then "Add to Home screen"'
+                    : 'Tap the Share (⎋) button, then "Add to Home Screen"'}
+                </div>
+              </div>
+              
+              <div className="bg-amber-50 rounded-lg p-3">
+                <div className="font-semibold text-amber-800 mb-1">💡 Pro Tip</div>
+                <div className="text-sm text-amber-600">
+                  Look for the app icon on your home screen after installation
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <Button 
+                onClick={() => setMobileInstructions(false)}
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+              >
+                Got it!
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={handleDismiss}
+                className="flex-1"
+              >
+                Maybe Later
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Success message component
   if (showSuccessMessage) {
@@ -220,7 +299,7 @@ export const PWAInstallPrompt = () => {
                 Installing...
               </>
             ) : (
-              'Install'
+              isMobile ? 'Show Instructions' : 'Install'
             )}
           </Button>
           <Button 
