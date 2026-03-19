@@ -65,7 +65,7 @@ export default function InfluencerImageGrid() {
           margin-bottom: 10px;
         }
         .iig-title {
-          font-size: clamp(1.9rem, 4.5vw, 3.2rem);
+          font-size: clamp(1.5rem, 4.5vw, 3.2rem);
           font-weight: 900; letter-spacing: -0.03em; line-height: 1;
           color: var(--brown); margin-bottom: 10px;
         }

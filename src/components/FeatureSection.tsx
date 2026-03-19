@@ -102,9 +102,10 @@ export const FeatureSection = () => {
           margin-bottom: 10px;
         }
         .fs-title {
-          font-size: clamp(1.9rem, 4.5vw, 3.2rem);
+          font-size: clamp(1.5rem, 4vw, 2.5rem);
           font-weight: 900; letter-spacing: -0.03em; line-height: 1;
           color: var(--brown); margin-bottom: 10px;
+          white-space: nowrap;
         }
         .fs-title span { color: var(--green); }
         .fs-underline {
@@ -140,6 +141,8 @@ export const FeatureSection = () => {
           transition: all 0.4s cubic-bezier(0.4, 0, 0.2);
           overflow: hidden;
           cursor: pointer;
+          /* Ensure cards in same row have equal height */
+          height: 100%;
         }
         .fs-feature:hover {
           transform: translateY(-8px) scale(1.02);
@@ -280,13 +283,60 @@ export const FeatureSection = () => {
         .fs-particle:nth-child(4) { --x: 20px; --y: 20px; bottom: 30%; right: 20%; }
 
         /* Mobile optimizations */
-        @media (max-width: 768px) {
+        @media (max-width: 639px) {
+          .fs-feature {
+            padding: 20px 16px;
+          }
+          
           .fs-feature:hover {
-            transform: translateY(-6px) scale(1.01);
+            transform: translateY(-4px) scale(1.01);
           }
+          
           .fs-icon-wrap {
-            width: 56px; height: 56px;
+            width: 48px; 
+            height: 48px;
+            margin-bottom: 16px;
           }
+          
+          .fs-icon-wrap svg {
+            width: 20px;
+            height: 20px;
+          }
+          
+          .fs-stat {
+            font-size: 20px;
+            margin-bottom: 2px;
+          }
+          
+          .fs-stat-label {
+            font-size: 9px;
+            margin-bottom: 12px;
+          }
+          
+          .fs-divider {
+            width: 28px;
+            margin-bottom: 12px;
+          }
+          
+          .fs-feature:hover .fs-divider { 
+            width: 40px; 
+          }
+          
+          .fs-title-text {
+            font-size: 14px;
+            margin-bottom: 6px;
+          }
+          
+          .fs-desc {
+            font-size: 11px;
+            line-height: 1.5;
+          }
+          
+          /* Adjust particle positions for smaller cards */
+          .fs-particle:nth-child(1) { --x: -15px; --y: -15px; }
+          .fs-particle:nth-child(2) { --x: 15px; --y: -15px; }
+          .fs-particle:nth-child(3) { --x: -15px; --y: 15px; }
+          .fs-particle:nth-child(4) { --x: 15px; --y: 15px; }
         }
       `}</style>
 
@@ -299,8 +349,8 @@ export const FeatureSection = () => {
           <div className="fs-underline" />
         </div>
 
-        {/* Features Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+        {/* Features Grid - Updated for 2 columns on mobile */}
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
           {features.map((feature, index) => {
             const Icon = feature.icon;
             return (

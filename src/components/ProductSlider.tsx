@@ -143,29 +143,30 @@ export const ProductSlider = ({ className }: { className?: string }) => {
         /* Mobile landscape */
         @media (max-width: 768px) {
           .ps-hero { 
-            max-width: 85%; 
-            padding: 0 5%; 
-            transform: translateY(-60%); 
+            max-width: 75%; 
+            padding: 0 4%; 
+            transform: translateY(-60%);
+            top: 44%;
           }
         }
 
         /* Mobile portrait */
         @media (max-width: 640px) {
           .ps-hero { 
-            max-width: 92%; 
-            padding: 0 16px; 
+            max-width: 80%; 
+            padding: 0 12px; 
             transform: translateY(-62%);
-            top: 45%;
+            top: 42%;
           }
         }
 
         /* Small mobile */
         @media (max-width: 480px) {
           .ps-hero { 
-            max-width: 100%; 
-            padding: 0 16px; 
+            max-width: 85%; 
+            padding: 0 12px; 
             transform: translateY(-60%);
-            top: 42%;
+            top: 38%;
           }
         }
 
@@ -182,24 +183,24 @@ export const ProductSlider = ({ className }: { className?: string }) => {
 
         @media (max-width: 768px) {
           .ps-headline {
-            font-size: clamp(22px, 6vw, 48px);
-            margin-bottom: 10px;
+            font-size: clamp(14px, 4vw, 26px);
+            margin-bottom: 4px;
           }
         }
 
         @media (max-width: 640px) {
           .ps-headline {
-            font-size: clamp(20px, 7vw, 40px);
-            margin-bottom: 8px;
-            letter-spacing: -0.2px;
+            font-size: clamp(13px, 4vw, 22px);
+            margin-bottom: 3px;
+            letter-spacing: -0.1px;
           }
         }
 
         @media (max-width: 480px) {
           .ps-headline {
-            font-size: clamp(18px, 8vw, 32px);
-            line-height: 1.15;
-            margin-bottom: 6px;
+            font-size: clamp(12px, 4.5vw, 18px);
+            line-height: 1.2;
+            margin-bottom: 2px;
           }
         }
 
@@ -222,29 +223,30 @@ export const ProductSlider = ({ className }: { className?: string }) => {
 
         @media (max-width: 768px) {
           .ps-subtext {
-            font-size: 13px;
-            margin-bottom: 18px;
-            line-height: 1.5;
-          }
-        }
-
-        @media (max-width: 640px) {
-          .ps-subtext {
-            font-size: 12px;
-            margin-bottom: 16px;
+            font-size: 10px;
+            margin-bottom: 8px;
+            line-height: 1.4;
             display: -webkit-box;
-            -webkit-line-clamp: 3;
+            -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
           }
         }
 
+        @media (max-width: 640px) {
+          .ps-subtext {
+            font-size: 9px;
+            margin-bottom: 6px;
+            -webkit-line-clamp: 2;
+          }
+        }
+
         @media (max-width: 480px) {
           .ps-subtext {
-            font-size: 11px;
-            line-height: 1.4;
-            margin-bottom: 14px;
-            -webkit-line-clamp: 3;
+            font-size: 8px;
+            line-height: 1.3;
+            margin-bottom: 5px;
+            -webkit-line-clamp: 2;
           }
         }
 
@@ -257,12 +259,17 @@ export const ProductSlider = ({ className }: { className?: string }) => {
           flex-wrap: wrap;
         }
 
+        @media (max-width: 768px) {
+          .ps-cta-row {
+            gap: 6px;
+          }
+        }
+
         @media (max-width: 480px) {
           .ps-cta-row {
-            gap: 8px;
-            flex-direction: column;
-            align-items: flex-start;
-            width: 100%;
+            gap: 5px;
+            flex-direction: row;
+            align-items: center;
           }
         }
 
@@ -285,25 +292,23 @@ export const ProductSlider = ({ className }: { className?: string }) => {
 
         @media (max-width: 768px) {
           .ps-shop-btn {
-            padding: 8px 20px;
-            font-size: 12px;
+            padding: 5px 12px;
+            font-size: 9px;
+            gap: 4px;
           }
         }
 
         @media (max-width: 640px) {
           .ps-shop-btn {
-            padding: 8px 18px;
-            font-size: 11px;
+            padding: 4px 10px;
+            font-size: 8px;
           }
         }
 
         @media (max-width: 480px) {
           .ps-shop-btn {
-            padding: 10px 20px;
-            font-size: 12px;
-            white-space: normal;
-            width: 100%;
-            justify-content: center;
+            padding: 4px 10px;
+            font-size: 8px;
           }
         }
 
@@ -334,25 +339,23 @@ export const ProductSlider = ({ className }: { className?: string }) => {
 
         @media (max-width: 768px) {
           .ps-story-btn {
-            padding: 8px 20px;
-            font-size: 12px;
+            padding: 5px 12px;
+            font-size: 9px;
+            gap: 4px;
           }
         }
 
         @media (max-width: 640px) {
           .ps-story-btn {
-            padding: 8px 18px;
-            font-size: 11px;
+            padding: 4px 10px;
+            font-size: 8px;
           }
         }
 
         @media (max-width: 480px) {
           .ps-story-btn {
-            padding: 10px 20px;
-            font-size: 12px;
-            white-space: normal;
-            width: 100%;
-            justify-content: center;
+            padding: 4px 10px;
+            font-size: 8px;
           }
         }
 
@@ -381,24 +384,19 @@ export const ProductSlider = ({ className }: { className?: string }) => {
 
         @media (max-width: 768px) {
           .ps-stats {
-            padding: 8px 2%;
+            padding: 4px 2%;
           }
         }
 
         @media (max-width: 640px) {
           .ps-stats {
-            flex-wrap: wrap;
-            padding: 8px 12px;
-            gap: 6px;
+            padding: 3px 8px;
           }
         }
 
         @media (max-width: 480px) {
           .ps-stats {
-            position: relative;
-            background: rgba(0,0,0,0.7);
-            padding: 10px 8px;
-            gap: 4px;
+            padding: 3px 6px;
           }
         }
 
@@ -408,31 +406,12 @@ export const ProductSlider = ({ className }: { className?: string }) => {
           position: relative;
         }
 
-        @media (max-width: 640px) {
-          .ps-stat {
-            flex: 1 1 40%;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .ps-stat {
-            flex: 1 1 45%;
-          }
-        }
-
         .ps-stat + .ps-stat::before {
           content: '';
           position: absolute;
           left: 0; top: 15%; bottom: 15%;
           width: 1px;
           background: rgba(255,255,255,0.2);
-        }
-
-        @media (max-width: 640px) {
-          .ps-stat:nth-child(2)::before,
-          .ps-stat:nth-child(4)::before {
-            display: none;
-          }
         }
 
         .ps-stat-num {
@@ -447,19 +426,20 @@ export const ProductSlider = ({ className }: { className?: string }) => {
 
         @media (max-width: 768px) {
           .ps-stat-num {
-            font-size: 18px;
+            font-size: 11px;
+            margin-bottom: 1px;
           }
         }
 
         @media (max-width: 640px) {
           .ps-stat-num {
-            font-size: 16px;
+            font-size: 10px;
           }
         }
 
         @media (max-width: 480px) {
           .ps-stat-num {
-            font-size: 14px;
+            font-size: 9px;
           }
         }
 
@@ -475,19 +455,19 @@ export const ProductSlider = ({ className }: { className?: string }) => {
 
         @media (max-width: 768px) {
           .ps-stat-label {
-            font-size: 10px;
+            font-size: 7px;
           }
         }
 
         @media (max-width: 640px) {
           .ps-stat-label {
-            font-size: 9px;
+            font-size: 6px;
           }
         }
 
         @media (max-width: 480px) {
           .ps-stat-label {
-            font-size: 8px;
+            font-size: 6px;
           }
         }
 
@@ -531,21 +511,20 @@ export const ProductSlider = ({ className }: { className?: string }) => {
 
         @media (max-width: 768px) {
           .ps-btn { 
-            width: 32px; 
-            height: 32px;
+            width: 24px; 
+            height: 24px;
           }
-          .ps-btn-prev { left: 8px; }
-          .ps-btn-next { right: 8px; }
+          .ps-btn-prev { left: 6px; }
+          .ps-btn-next { right: 6px; }
         }
 
         @media (max-width: 480px) {
           .ps-btn { 
-            width: 28px; 
-            height: 28px;
-            top: 50%;
+            width: 22px; 
+            height: 22px;
           }
-          .ps-btn-prev { left: 6px; }
-          .ps-btn-next { right: 6px; }
+          .ps-btn-prev { left: 4px; }
+          .ps-btn-next { right: 4px; }
         }
 
         /* Dots */
@@ -565,21 +544,21 @@ export const ProductSlider = ({ className }: { className?: string }) => {
 
         @media (max-width: 768px) {
           .ps-dots { 
-            bottom: 55px; 
+            bottom: 30px; 
+            gap: 3px;
           }
         }
 
         @media (max-width: 640px) {
           .ps-dots { 
-            bottom: 70px; 
-            display: flex;
+            bottom: 28px; 
           }
         }
 
         @media (max-width: 480px) {
           .ps-dots { 
-            bottom: 60px; 
-            gap: 4px;
+            bottom: 26px; 
+            gap: 3px;
           }
         }
 
@@ -592,8 +571,14 @@ export const ProductSlider = ({ className }: { className?: string }) => {
         }
         .ps-dot.active { background: #fff; width: 18px; }
 
+        @media (max-width: 768px) {
+          .ps-dot { height: 3px; width: 3px; }
+          .ps-dot.active { width: 10px; }
+        }
+
         @media (max-width: 480px) {
-          .ps-dot.active { width: 16px; }
+          .ps-dot { height: 3px; width: 3px; }
+          .ps-dot.active { width: 8px; }
         }
 
         .ps-dot:hover:not(.active) { background: rgba(255,255,255,0.75); }
@@ -612,12 +597,21 @@ export const ProductSlider = ({ className }: { className?: string }) => {
           border-radius: 20px;
         }
 
+        @media (max-width: 768px) {
+          .ps-counter {
+            top: 6px;
+            right: 6px;
+            font-size: 7px;
+            padding: 2px 6px;
+          }
+        }
+
         @media (max-width: 480px) {
           .ps-counter {
-            top: 10px;
-            right: 10px;
-            font-size: 9px;
-            padding: 3px 8px;
+            top: 5px;
+            right: 5px;
+            font-size: 7px;
+            padding: 2px 5px;
           }
         }
 
@@ -632,21 +626,28 @@ export const ProductSlider = ({ className }: { className?: string }) => {
           transition: transform 6s ease;
         }
 
+        /* Mobile: roughly half the desktop height */
         @media (max-width: 768px) {
           .ps-img {
-            min-height: 350px;
+            min-height: 175px;
+            max-height: 210px;
+            height: 175px;
           }
         }
 
         @media (max-width: 640px) {
           .ps-img {
-            min-height: 400px;
+            min-height: 170px;
+            max-height: 200px;
+            height: 170px;
           }
         }
 
         @media (max-width: 480px) {
           .ps-img {
-            min-height: 450px;
+            min-height: 160px;
+            max-height: 190px;
+            height: 160px;
           }
         }
 
@@ -719,11 +720,11 @@ export const ProductSlider = ({ className }: { className?: string }) => {
                 onClick={() => handleButtonClick(currentSlideData.buttonLink!)}
                 className="ps-shop-btn"
               >
-                <ShoppingBag size={window.innerWidth <= 480 ? 12 : 14} />
+                <ShoppingBag size={window.innerWidth <= 768 ? 10 : 14} />
                 {currentSlideData.buttonText}
               </button>
               <button onClick={handleAboutUsClick} className="ps-story-btn">
-                <BookOpen size={window.innerWidth <= 480 ? 12 : 14} />
+                <BookOpen size={window.innerWidth <= 768 ? 10 : 14} />
                 Explore Our Story
               </button>
             </div>
@@ -739,7 +740,7 @@ export const ProductSlider = ({ className }: { className?: string }) => {
           onClick={(e) => { scrollPrev(); setTimeout(() => e.currentTarget.blur(), 150); }}
           aria-label="Previous slide"
         >
-          <ChevronLeft size={window.innerWidth <= 480 ? 16 : 18} strokeWidth={2.5} />
+          <ChevronLeft size={window.innerWidth <= 768 ? 12 : 18} strokeWidth={2.5} />
         </button>
 
         {/* Next */}
@@ -748,7 +749,7 @@ export const ProductSlider = ({ className }: { className?: string }) => {
           onClick={(e) => { scrollNext(); setTimeout(() => e.currentTarget.blur(), 150); }}
           aria-label="Next slide"
         >
-          <ChevronRight size={window.innerWidth <= 480 ? 16 : 18} strokeWidth={2.5} />
+          <ChevronRight size={window.innerWidth <= 768 ? 12 : 18} strokeWidth={2.5} />
         </button>
 
         {/* Dots */}

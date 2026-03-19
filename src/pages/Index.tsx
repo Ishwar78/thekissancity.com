@@ -5,7 +5,7 @@ import { ProductCard } from "@/components/ProductCard";
 import { FeatureRow } from "@/components/FeatureRow";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import { PostInstallExperience } from "@/components/PostInstallExperience";
-import { PWADebugPanel } from "@/components/PWADebugPanel";
+
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
@@ -1084,12 +1084,13 @@ const Index = () => {
       margin-bottom: 8px;
     }
     .coll-title {
-      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-size: clamp(1.5rem, 4vw, 2.5rem);
       font-weight: 900;
       letter-spacing: -0.03em;
       line-height: 1;
       color: var(--brown);
       margin-bottom: 10px;
+      white-space: nowrap;
     }
     .coll-title span { color: var(--green); }
     .coll-title-underline {
@@ -1816,7 +1817,7 @@ const Index = () => {
       <Footer />
       <PWAInstallPrompt />
       <PostInstallExperience />
-      <PWADebugPanel />
+    
       <WhatsAppButton phoneNumber="+91 12345678" />
     </div>
   );

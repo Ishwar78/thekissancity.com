@@ -345,7 +345,7 @@ export default function RecentReviewsSection() {
           padding: 4px 14px; border-radius: 20px; margin-bottom: 10px;
         }
         .rr-title {
-          font-size: clamp(1.8rem,4vw,3rem);
+          font-size: clamp(1.5rem,4vw,3rem);
           font-weight: 900; letter-spacing: -0.03em; line-height: 1;
           color: #6b4423; margin-bottom: 10px;
         }

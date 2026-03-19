@@ -115,6 +115,8 @@ const WhyUsSection = () => {
           overflow: hidden;
           transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s;
           cursor: default;
+          /* Ensure cards in same row have equal height */
+          height: 100%;
         }
         .wus-card::before {
           content: '';
@@ -220,6 +222,52 @@ const WhyUsSection = () => {
           line-height: 1.65;
           max-width: 220px;
         }
+
+        /* Mobile-specific adjustments for 2-column layout */
+        @media (max-width: 639px) {
+          .wus-card {
+            padding: 24px 16px 20px;
+          }
+          
+          .wus-icon-ring {
+            width: 56px;
+            height: 56px;
+            margin-bottom: 14px;
+          }
+          
+          .wus-icon-ring svg {
+            width: 22px;
+            height: 22px;
+          }
+          
+          .wus-stat {
+            font-size: 24px;
+          }
+          
+          .wus-stat-label {
+            font-size: 9px;
+            margin-bottom: 10px;
+          }
+          
+          .wus-divider {
+            margin-bottom: 12px;
+          }
+          
+          .wus-card-title {
+            font-size: 14px;
+          }
+          
+          .wus-card-desc {
+            font-size: 12px;
+            max-width: 100%;
+          }
+          
+          .wus-watermark {
+            font-size: 70px;
+            top: -5px;
+            right: 5px;
+          }
+        }
       `}</style>
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8" ref={sectionRef}>
@@ -234,8 +282,8 @@ const WhyUsSection = () => {
           </p>
         </div>
 
-        {/* Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
+        {/* Cards - Updated grid classes for 2 columns on mobile */}
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6">
           {features.map((feature, index) => {
             const Icon = feature.icon;
             return (
