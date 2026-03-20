@@ -30,6 +30,14 @@ export async function api(path: string, options: RequestInit = {}) {
       : url
   );
 
+  console.log('🌐 [API] Request:', {
+    path,
+    method: options.method || 'GET',
+    finalUrl,
+    API_BASE,
+    isProduction: import.meta.env.PROD
+  });
+
   if (
     API_BASE &&
     isLocalhost(API_BASE) &&

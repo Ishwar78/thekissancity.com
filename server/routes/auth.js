@@ -21,6 +21,20 @@ function sendToken(res, user) {
   return token;
 }
 
+// Test endpoint to verify connectivity
+router.get('/test', (req, res) => {
+  console.log('🔍 [TEST] Test endpoint hit!');
+  console.log('🔍 [TEST] Headers:', JSON.stringify(req.headers, null, 2));
+  console.log('🔍 [TEST] Origin:', req.headers.origin);
+  console.log('🔍 [TEST] Timestamp:', new Date().toISOString());
+  res.json({ 
+    ok: true, 
+    message: 'Server is reachable!', 
+    timestamp: new Date().toISOString(),
+    origin: req.headers.origin 
+  });
+});
+
 // Send OTP for signup
 router.post('/send-otp', async (req, res) => {
   console.log('========================================');
