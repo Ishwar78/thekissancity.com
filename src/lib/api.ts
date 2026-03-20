@@ -37,6 +37,16 @@ export async function api(path: string, options: RequestInit = {}) {
     API_BASE,
     isProduction: import.meta.env.PROD
   });
+  
+  // Log the full request details for debugging
+  console.log('🌐 [API] Full request details:', {
+    url: finalUrl,
+    options: {
+      method: options.method || 'GET',
+      headers: options.headers,
+      body: options.body
+    }
+  });
 
   if (
     API_BASE &&
