@@ -33,11 +33,21 @@ const Auth = () => {
   useEffect(() => {
     if (user) {
       const added = handleIntent();
-      // Redirect admin users to /admin, others to sign-in or cart
+      // Redirect admin users to /admin, others based on auth context
       if (user.role === 'admin') {
         navigate('/admin', { replace: true });
       } else {
-        navigate(added ? '/cart' : '/auth?mode=signin', { replace: true });
+        // Check if user just signed in (has token and is coming from login)
+        const urlParams = new URLSearchParams(window.location.search);
+        const fromSignup = urlParams.get('from') === 'signup';
+        
+        if (fromSignup) {
+          // User just registered, redirect to sign-in
+          navigate('/auth?mode=signin', { replace: true });
+        } else {
+          // User signed in, redirect to dashboard or cart
+          navigate(added ? '/cart' : '/dashboard', { replace: true });
+        }
       }
     }
   }, [user, navigate]);
@@ -167,6 +177,8 @@ const Auth = () => {
         const { error, user: signedUpUser } = await signUp(email, password, name, phone, otp);
         if (error) throw new Error(error?.message ?? JSON.stringify(error));
         toast.success('Account created successfully!');
+        // Redirect to sign-in page with from=signup parameter
+        navigate('/auth?mode=signin&from=signup', { replace: true });
       }
     } catch (error: any) {
       toast.error(error.message || 'An error occurred');
