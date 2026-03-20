@@ -84,6 +84,13 @@ const app = express();
 const PORT = process.env.PORT || 10000;
 
 /* --------------------------- LOG EACH REQUEST --------------------------- */
+app.use((req, res, next) => {
+  console.log(`🔍 [REQUEST] ${req.method} ${req.url}`);
+  console.log('🔍 [REQUEST] Headers:', JSON.stringify(req.headers, null, 2));
+  console.log('🔍 [REQUEST] Body:', JSON.stringify(req.body, null, 2));
+  next();
+});
+
 app.use((req, _res, next) => {
   console.log(`${req.method} ${req.path}`);
   next();
@@ -131,7 +138,6 @@ app.use(express.static(path.join(__dirname, '..', 'dist'), {
 app.use(cookieParser());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
-
 
 /* -------------------------------- ROUTES -------------------------------- */
 const bulkCouponsRoutes = require('./routes/bulkCoupons');
