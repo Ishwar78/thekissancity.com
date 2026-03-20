@@ -278,6 +278,36 @@ export const Navbar = ({ cartItemCount = 0 }: NavbarProps) => {
               >
                 Wishlist
               </Link>
+              
+              {/* Food Products Dropdown */}
+              <Dropdown title="Food Products" gender="unisex">
+                {categories.filter(cat => 
+                  ['Honey', 'Ghee', 'Dry fruit', 'Mushroom'].includes(cat.name)
+                ).map((category) => (
+                  <Link
+                    key={category.slug || category.name}
+                    to={`/collection/${category.slug || category.name}`}
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors border-l-2 border-transparent hover:border-green-500"
+                  >
+                    {category.name}
+                  </Link>
+                ))}
+              </Dropdown>
+              
+              {/* Wellness Products Dropdown */}
+              <Dropdown title="Wellness Products" gender="unisex">
+                {categories.filter(cat => 
+                  ['Pahadi Wellness'].includes(cat.name)
+                ).map((category) => (
+                  <Link
+                    key={category.slug || category.name}
+                    to={`/collection/${category.slug || category.name}`}
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-amber-700 transition-colors border-l-2 border-transparent hover:border-amber-500"
+                  >
+                    {category.name}
+                  </Link>
+                ))}
+              </Dropdown>
             </div>
             
             {/* Search Bar - Desktop - Increased Size */}
@@ -407,7 +437,7 @@ export const Navbar = ({ cartItemCount = 0 }: NavbarProps) => {
                   key={item.to}
                   to={item.to}
                   className={`text-base font-semibold px-3 py-3 rounded-md hover:bg-amber-50 transition-colors relative`}
-                  style={{ color: '#907258' }}
+                  style={{ color: '#6b4423' }}
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {item.isNew && (
@@ -421,7 +451,7 @@ export const Navbar = ({ cartItemCount = 0 }: NavbarProps) => {
               <Link
                 to="/about#about-us"
                 className="text-base font-semibold px-3 py-3 rounded-md hover:bg-amber-50 transition-colors relative"
-                style={{ color: '#907258' }}
+                style={{ color: '#6b4423' }}
                 onClick={() => {
                   console.log('Mobile Explore Our Story clicked, navigating to:', '/about#about-us');
                   setIsMenuOpen(false);
@@ -451,17 +481,40 @@ export const Navbar = ({ cartItemCount = 0 }: NavbarProps) => {
               <Link
                 to="/wishlist"
                 className="text-base font-semibold px-3 py-3 rounded-md hover:bg-amber-50 transition-colors"
-                style={{ color: '#907258' }}
+                style={{ color: '#6b4423' }}
                 onClick={() => setIsMenuOpen(false)}
               >
                 Wishlist
               </Link>
               
+              {/* Mobile Food Products Dropdown */}
+              <MobileDropdown 
+                title="Food Products" 
+                gender="unisex" 
+                categories={categories.filter(cat => 
+                  ['Honey', 'Ghee', 'Dry fruit', 'Mushroom'].includes(cat.name)
+                )}
+                products={products}
+                onClose={() => setIsMenuOpen(false)}
+              />
+              
+              {/* Mobile Wellness Products Dropdown */}
+              <MobileDropdown 
+                title="Wellness Products" 
+                gender="unisex" 
+                categories={categories.filter(cat => 
+                  ['Pahadi Wellness'].includes(cat.name)
+                )}
+                products={products}
+                onClose={() => setIsMenuOpen(false)}
+              />
+              
               {(user ? [{ to: "/account/support", label: "Support Tickets" }] : []).map((item) => (
                 <Link
                   key={item.to}
                   to={item.to}
-                  className="text-base font-semibold px-3 py-3 rounded-md text-gray-700 hover:bg-gray-100 transition-colors"
+                  className="text-base font-semibold px-3 py-3 rounded-md hover:bg-amber-50 transition-colors"
+                  style={{ color: '#6b4423' }}
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {item.label}

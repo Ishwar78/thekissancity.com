@@ -373,8 +373,8 @@ export const FeatureSection = () => {
                 </div>
 
                 {/* Stat */}
-                <div className="fs-stat">{feature.stat}</div>
-                <div className="fs-stat-label">{feature.statLabel}</div>
+                {/* <div className="fs-stat">{feature.stat}</div>
+                <div className="fs-stat-label">{feature.statLabel}</div> */}
 
                 <div className="fs-divider" />
 

@@ -292,6 +292,9 @@ const Index = () => {
   const [mixedProducts, setMixedProducts] = useState<ProductRow[]>([]);
   const [mixedLoading, setMixedLoading] = useState(true);
   const [mixedError, setMixedError] = useState<string | null>(null);
+  
+  // Selected category for banner display
+  const [selectedCategory, setSelectedCategory] = useState<CategoryRow | null>(null);
 
   // Regions state
   const [regions, setRegions] = useState<any[]>([]);
@@ -1231,8 +1234,8 @@ const Index = () => {
   </div>
 </section>
 
-      {/* Categories grid with product showcase */}
-      <section
+    {/* Category Banner Display — place this AFTER your category chips/tabs JSX */}
+       <section
   style={{ backgroundColor: '#F5F0E8' }}
   className="mx-auto px-4 sm:px-8 pb-10 sm:pb-16 pt-4 sm:pt-4"
 >
@@ -1412,24 +1415,41 @@ const Index = () => {
   )}
 </section>
 
+     
+
 
   
       {/* Best Seller Section */}
       <BestSellerSection />
       {/* Shop By Region */}
   
-<section style={{ backgroundColor: '#F5F0E8' }} className="py-2 sm:py-4 overflow-hidden">
-  <style>{`
-    .region-section {
-      --green:     #2d6a4f;
-      --green-dark:#1b4332;
-      --brown:     #6b4423;
-      --brown-mid: #ba8c5c;
-      --cream:     #faf3eb;
-    }
+<section
+  style={{ backgroundColor: '#F5F0E8' }}
+  className="mx-auto px-4 sm:px-8 pb-10 sm:pb-16 pt-4 sm:pt-4 overflow-hidden"
+>
+  {/* Header — identical to Shop By Categories */}
+  <div className="text-center mb-10">
+    <span
+      className="inline-block text-xs font-semibold uppercase tracking-[0.2em] mb-3 px-4 py-1 rounded-full"
+      style={{ background: '#e8d5bc', color: '#6b4423' }}
+    >
+      Explore India
+    </span>
+    <h2
+      className="text-3xl md:text-5xl font-extrabold tracking-tight"
+      style={{ color: '#2d6a4f' }}
+    >
+      Shop By Region
+    </h2>
+    <div
+      className="mx-auto mt-3 h-1 w-16 rounded-full"
+      style={{ background: 'linear-gradient(90deg, #2d6a4f, #6b4423)' }}
+    />
+  </div>
 
-    /* Region card */
-    .region-card {
+  <style>{`
+    .cat-pill {
+      position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -1437,76 +1457,68 @@ const Index = () => {
       cursor: pointer;
       text-decoration: none;
     }
-
-    /* Gradient ring */
-    .region-ring {
-      padding: 3px;
+    .cat-img-ring {
+      position: relative;
       border-radius: 50%;
-      background: linear-gradient(135deg, #ba8c5c 0%, #2d6a4f 100%);
+      padding: 3px;
+      background: linear-gradient(135deg, #2d6a4f 0%, #6b4423 100%);
       transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
-    .region-card:hover .region-ring {
+    .cat-pill:hover .cat-img-ring {
       transform: scale(1.08) translateY(-3px);
-      box-shadow: 0 10px 28px rgba(45,106,79,0.22);
+      box-shadow: 0 12px 28px rgba(45,106,79,0.25);
     }
-
-    .region-inner {
-      width: 72px;
-      height: 72px;
+    .cat-img-inner {
       border-radius: 50%;
-      background: #fff;
+      background: #faf3eb;
+      overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
-      overflow: hidden;
     }
-    @media (min-width: 640px) {
-      .region-inner { width: 84px; height: 84px; }
-    }
-    .region-inner img {
-      width: 70%;
-      height: 70%;
+    .cat-img-inner img {
+      width: 100%;
+      height: 100%;
       object-fit: contain;
+      padding: 10px;
       transition: transform 0.4s ease;
     }
-    .region-card:hover .region-inner img {
+    .cat-pill:hover .cat-img-inner img {
       transform: scale(1.1);
     }
-
-    .region-label {
-      font-size: 12px;
-      font-weight: 700;
-      color: #3d3d3d;
+    .cat-label {
+      font-size: 11px;
+      font-weight: 600;
       text-align: center;
-      letter-spacing: 0.2px;
+      letter-spacing: 0.3px;
+      color: #3d3d3d;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
       transition: color 0.2s;
-      line-height: 1.3;
     }
-    .region-card:hover .region-label { color: var(--green); }
+    .cat-pill:hover .cat-label {
+      color: #2d6a4f;
+    }
 
-    /* Nav buttons */
-    .region-nav-btn {
-      width: 40px !important;
-      height: 40px !important;
-      border-radius: 50% !important;
-      border: 1.5px solid rgba(107,68,35,0.18) !important;
-      background: #fff !important;
-      box-shadow: 0 2px 10px rgba(45,106,79,0.08) !important;
-      transition: all 0.2s ease !important;
-      position: static !important;
-      transform: none !important;
-      display: flex !important;
+    .cat-nav-btn {
+      display: flex;
       align-items: center;
       justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid #d4c5b0;
+      background: #fff;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     }
-    .region-nav-btn:hover {
-      border-color: #2d6a4f !important;
-      box-shadow: 0 4px 18px rgba(45,106,79,0.2) !important;
-      transform: scale(1.06) !important;
-      background: #fff !important;
+    .cat-nav-btn:hover {
+      border-color: #2d6a4f;
+      box-shadow: 0 4px 16px rgba(45,106,79,0.2);
     }
-    .region-nav-btn:active  { transform: scale(0.93) !important; }
-    .region-nav-btn:focus   { outline: none !important; box-shadow: 0 2px 10px rgba(45,106,79,0.08) !important; }
 
     /* Skeleton shimmer */
     @keyframes region-shimmer {
@@ -1521,103 +1533,85 @@ const Index = () => {
     }
   `}</style>
 
-  <div className="region-section container mx-auto px-4 sm:px-6">
-
-    {regionsLoading ? (
-      <>
-        {/* Static header during loading */}
-        <div className="mb-10 text-center">
-          <span className="inline-block text-xs font-bold uppercase tracking-[0.2em] px-4 py-1 rounded-full mb-3"
-            style={{ background: 'rgba(107,68,35,0.08)', color: '#ba8c5c' }}>
-            Explore India
-          </span>
-          <h2 className="font-black tracking-tight mb-2" style={{ fontSize: 'clamp(1.8rem,4vw,3rem)', color: '#6b4423', letterSpacing: '-0.03em' }}>
-            Shop By <span style={{ color: '#2d6a4f' }}>Region</span>
-          </h2>
-          <div className="h-1 w-20 rounded-full mx-auto" style={{ background: 'linear-gradient(90deg, #2d6a4f, #ba8c5c)' }} />
+  {regionsLoading ? (
+    <div className="flex justify-center gap-6 flex-wrap">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} className="flex flex-col items-center gap-2">
+          <div className="region-shimmer" style={{ width: 80, height: 80 }} />
+          <div className="region-shimmer rounded-full" style={{ width: 60, height: 10 }} />
         </div>
-        <div className="flex justify-center gap-6 flex-wrap">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="flex flex-col items-center gap-3">
-              <div className="region-shimmer" style={{ width: 78, height: 78 }} />
-              <div className="region-shimmer rounded-full" style={{ width: 60, height: 10 }} />
-            </div>
-          ))}
-        </div>
-      </>
-    ) : regionsError ? (
-      <div className="text-center text-sm py-12" style={{ color: '#a0a0a0' }}>{regionsError}</div>
-    ) : (
-      /* Carousel wraps header + nav to avoid context error */
-      <Carousel opts={{ align: "start", loop: true }} className="w-full">
-
-        {/* Header row with desktop nav inside Carousel */}
-        <div className="flex flex-col items-center mb-10 sm:mb-12">
-          <div className="text-center">
-            <span className="inline-block text-xs font-bold uppercase tracking-[0.2em] px-4 py-1 rounded-full mb-3"
-              style={{ background: 'rgba(107,68,35,0.08)', color: '#ba8c5c' }}>
-              Explore India
-            </span>
-            <h2 className="font-black tracking-tight mb-2"
-              style={{ fontSize: 'clamp(1.8rem,4vw,3rem)', color: '#6b4423', letterSpacing: '-0.03em' }}>
-              Shop By <span style={{ color: '#2d6a4f' }}>Region</span>
-            </h2>
-            <div className="h-1 w-14 rounded-full mx-auto" style={{ background: 'linear-gradient(90deg,#2d6a4f,#ba8c5c)' }} />
-          </div>
-
-          {/* Desktop nav */}
-          <div className="hidden sm:flex items-center gap-2 mt-4">
+      ))}
+    </div>
+  ) : regionsError ? (
+    <div className="text-center text-sm text-muted-foreground mb-12">{regionsError}</div>
+  ) : (
+    <>
+      {/* Mobile Carousel */}
+      <div className="block sm:hidden">
+        <Carousel opts={{ align: "start", loop: true }} className="w-full">
+          <CarouselContent className="-ml-3">
+            {regions.map((region) => {
+              const to = `/collection/region/${region.slug || slugify(region.name || "")}`;
+              return (
+                <CarouselItem
+                  key={String(region._id || region.id || region.slug || region.name)}
+                  className="pl-3 basis-1/3"
+                >
+                  <Link to={to} className="cat-pill flex flex-col items-center gap-2">
+                    <div className="cat-img-ring">
+                      <div className="cat-img-inner w-[72px] h-[72px]">
+                        <img
+                          src={resolveImage(region.imageUrl || "/placeholder.svg")}
+                          alt={region.name}
+                          loading="lazy"
+                        />
+                      </div>
+                    </div>
+                    <span className="cat-label w-20">{region.name}</span>
+                  </Link>
+                </CarouselItem>
+              );
+            })}
+          </CarouselContent>
+          <div className="flex justify-center gap-3 mt-7">
             <CarouselPrevious
-              className="region-nav-btn"
-              onMouseDown={(e) => setTimeout(() => e.currentTarget.blur(), 150)}
+              className="cat-nav-btn static translate-y-0"
+              onTouchEnd={(e) => setTimeout(() => e.currentTarget.blur(), 150)}
             />
             <CarouselNext
-              className="region-nav-btn"
-              onMouseDown={(e) => setTimeout(() => e.currentTarget.blur(), 150)}
+              className="cat-nav-btn static translate-y-0"
+              onTouchEnd={(e) => setTimeout(() => e.currentTarget.blur(), 150)}
             />
           </div>
-        </div>
+        </Carousel>
+      </div>
 
-        <CarouselContent className="-ml-4 sm:-ml-6">
-          {regions.map((region) => {
-            const to = `/collection/region/${region.slug || slugify(region.name || "")}`;
-            return (
-              <CarouselItem
-                key={String(region._id || region.id || region.slug || region.name)}
-                className="pl-4 sm:pl-6 basis-1/3 sm:basis-1/4 md:basis-1/5 lg:basis-1/6"
-              >
-                <Link to={to} className="region-card py-2">
-                  <div className="region-ring">
-                    <div className="region-inner">
-                      <img
-                        src={resolveImage(region.imageUrl || "/placeholder.svg")}
-                        alt={region.name}
-                        loading="lazy"
-                      />
-                    </div>
-                  </div>
-                  <span className="region-label px-1">{region.name}</span>
-                </Link>
-              </CarouselItem>
-            );
-          })}
-        </CarouselContent>
-
-        {/* Mobile nav — inside Carousel ✓ */}
-        <div className="flex sm:hidden justify-center gap-3 mt-8">
-          <CarouselPrevious
-            className="region-nav-btn"
-            onTouchEnd={(e) => setTimeout(() => e.currentTarget.blur(), 150)}
-          />
-          <CarouselNext
-            className="region-nav-btn"
-            onTouchEnd={(e) => setTimeout(() => e.currentTarget.blur(), 150)}
-          />
-        </div>
-
-      </Carousel>
-    )}
-  </div>
+      {/* Desktop Grid — pill chips, same as categories */}
+      <div className="hidden sm:flex flex-wrap justify-center gap-6 md:gap-8">
+        {regions.map((region) => {
+          const to = `/collection/region/${region.slug || slugify(region.name || "")}`;
+          return (
+            <Link
+              key={String(region._id || region.id || region.slug || region.name)}
+              to={to}
+              className="cat-pill flex flex-col items-center gap-2"
+            >
+              <div className="cat-img-ring">
+                <div className="cat-img-inner w-24 h-24 md:w-28 md:h-28">
+                  <img
+                    src={resolveImage(region.imageUrl || "/placeholder.svg")}
+                    alt={region.name}
+                    loading="lazy"
+                  />
+                </div>
+              </div>
+              <span className="cat-label w-24 md:w-28">{region.name}</span>
+            </Link>
+          );
+        })}
+      </div>
+    </>
+  )}
 </section>
 
    {/* Banner Section */}

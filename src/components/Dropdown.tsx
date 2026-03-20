@@ -10,7 +10,7 @@ interface Category {
 
 interface DropdownProps {
   title: string;
-  gender: 'male' | 'female';
+  gender: 'male' | 'female' | 'unisex';
   children: React.ReactNode;
 }
 
@@ -25,7 +25,8 @@ export const Dropdown: React.FC<DropdownProps> = ({ title, gender, children }) =
     >
       <Link
         to={`/shop?gender=${gender}`}
-        className="text-sm font-semibold px-3 py-2 rounded-full text-gray-700 hover:bg-gray-100 transition flex items-center gap-1"
+        className="text-sm font-semibold px-3 py-2 rounded-full hover:bg-amber-50 transition flex items-center gap-1"
+        style={{ color: '#6b4423' }}
       >
         {title}
         <ChevronDown className={`h-3 w-3 transition-transform ${isOpen ? 'rotate-180' : ''}`} />

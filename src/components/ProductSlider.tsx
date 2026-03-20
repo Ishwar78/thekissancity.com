@@ -34,7 +34,6 @@ export const ProductSlider = ({ className }: { className?: string }) => {
         if (items.length > 0) {
           setSliderItems(items);
         } else {
-          // Fallback to products if no slider data available
           console.log('No slider data found, using product fallback');
         }
       } catch (error) {
@@ -48,7 +47,6 @@ export const ProductSlider = ({ className }: { className?: string }) => {
     fetchSliderData();
   }, []);
 
-  // Get current slide data (fallback to product if no slider data)
   const currentSlideData = sliderItems[currentSlide] || null;
   const total = sliderItems.length > 0 ? sliderItems.length : products.length;
 
@@ -74,8 +72,7 @@ export const ProductSlider = ({ className }: { className?: string }) => {
   }, [navigate, location.pathname]);
 
   const handleButtonClick = React.useCallback((link: string) => {
-    if (!link) return; // Add null check
-    
+    if (!link) return;
     if (link.startsWith('/')) {
       navigate(link);
     } else if (link.startsWith('http')) {
@@ -101,10 +98,11 @@ export const ProductSlider = ({ className }: { className?: string }) => {
           position: absolute;
           inset: 0;
           background: linear-gradient(
-            105deg,
-            rgba(0,0,0,0.75) 0%,
-            rgba(0,0,0,0.5) 45%,
-            rgba(0,0,0,0.2) 100%
+            100deg,
+            rgba(0,0,0,0.72) 0%,
+            rgba(0,0,0,0.45) 40%,
+            rgba(0,0,0,0.15) 70%,
+            rgba(0,0,0,0.05) 100%
           );
           z-index: 2;
           pointer-events: none;
@@ -123,9 +121,9 @@ export const ProductSlider = ({ className }: { className?: string }) => {
         /* ── HERO TEXT ── */
         .ps-hero {
           position: absolute;
-          top: 50%;
+          top: 45%;
           left: 0;
-          transform: translateY(-55%);
+          transform: translateY(-50%);
           z-index: 5;
           padding: 0 4%;
           max-width: 60%;
@@ -172,12 +170,12 @@ export const ProductSlider = ({ className }: { className?: string }) => {
 
         .ps-headline {
           font-family: 'Playfair Display', serif;
-          font-size: clamp(24px, 5vw, 72px);
+          font-size: clamp(20px, 3.5vw, 48px);
           font-weight: 800;
           line-height: 1.1;
           color: #ffffff;
           letter-spacing: -0.3px;
-          margin: 0 0 12px 0;
+          margin: 0 0 8px 0;
           text-shadow: 0 2px 16px rgba(0,0,0,0.3);
         }
 
@@ -212,13 +210,17 @@ export const ProductSlider = ({ className }: { className?: string }) => {
 
         .ps-subtext {
           font-family: 'Inter', sans-serif;
-          font-size: clamp(11px, 1.5vw, 17px);
+          font-size: clamp(10px, 1.2vw, 14px);
           font-weight: 300;
           color: rgba(255,255,255,0.9);
-          line-height: 1.6;
-          margin: 0 0 20px 0;
-          max-width: 480px;
+          line-height: 1.5;
+          margin: 0 0 14px 0;
+          max-width: 420px;
           text-shadow: 0 1px 8px rgba(0,0,0,0.4);
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
         }
 
         @media (max-width: 768px) {
@@ -226,10 +228,7 @@ export const ProductSlider = ({ className }: { className?: string }) => {
             font-size: 10px;
             margin-bottom: 8px;
             line-height: 1.4;
-            display: -webkit-box;
             -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
           }
         }
 
@@ -278,10 +277,10 @@ export const ProductSlider = ({ className }: { className?: string }) => {
           background: #2d6a4f;
           color: #fff;
           font-family: 'Inter', sans-serif;
-          font-size: clamp(11px, 1.2vw, 14px);
+          font-size: clamp(10px, 1vw, 13px);
           font-weight: 600;
           letter-spacing: 0.2px;
-          padding: 9px 22px;
+          padding: 7px 18px;
           border-radius: 30px;
           border: none; cursor: pointer;
           text-decoration: none;
@@ -323,10 +322,10 @@ export const ProductSlider = ({ className }: { className?: string }) => {
           background: rgba(255,255,255,0.15);
           color: #fff;
           font-family: 'Inter', sans-serif;
-          font-size: clamp(11px, 1.2vw, 14px);
+          font-size: clamp(10px, 1vw, 13px);
           font-weight: 600;
           letter-spacing: 0.2px;
-          padding: 9px 22px;
+          padding: 7px 18px;
           border-radius: 30px;
           border: 1.5px solid rgba(255,255,255,0.6);
           cursor: pointer;
@@ -378,7 +377,7 @@ export const ProductSlider = ({ className }: { className?: string }) => {
           backdrop-filter: blur(8px);
           -webkit-backdrop-filter: blur(8px);
           border-top: 1px solid rgba(255,255,255,0.1);
-          padding: 10px 3%;
+          padding: 7px 3%;
           pointer-events: none;
         }
 
@@ -416,7 +415,7 @@ export const ProductSlider = ({ className }: { className?: string }) => {
 
         .ps-stat-num {
           font-family: 'Playfair Display', serif;
-          font-size: clamp(14px, 2.5vw, 32px);
+          font-size: clamp(13px, 2vw, 24px);
           font-weight: 700;
           color: #ffffff;
           line-height: 1.2;
@@ -445,7 +444,7 @@ export const ProductSlider = ({ className }: { className?: string }) => {
 
         .ps-stat-label {
           font-family: 'Inter', sans-serif;
-          font-size: clamp(7px, 0.9vw, 12px);
+          font-size: clamp(7px, 0.7vw, 10px);
           font-weight: 400;
           color: rgba(255,255,255,0.6);
           letter-spacing: 0.03em;
@@ -530,7 +529,7 @@ export const ProductSlider = ({ className }: { className?: string }) => {
         /* Dots */
         .ps-dots {
           position: absolute;
-          bottom: 70px; left: 50%;
+          bottom: 55px; left: 50%;
           transform: translateX(-50%);
           z-index: 10;
           display: flex; align-items: center; gap: 5px;
@@ -538,7 +537,7 @@ export const ProductSlider = ({ className }: { className?: string }) => {
 
         @media (max-width: 1024px) {
           .ps-dots { 
-            bottom: 60px; 
+            bottom: 50px; 
           }
         }
 
@@ -615,51 +614,37 @@ export const ProductSlider = ({ className }: { className?: string }) => {
           }
         }
 
-        /* Ken Burns effect */
-        .ps-img {
-          width: 100%; 
-          height: auto; 
-          display: block; 
-          object-fit: cover;
-          min-height: 280px;
-          max-height: 600px;
-          transition: transform 6s ease;
+        /* Image container - fixed height, full width */
+        .ps-img-container {
+          position: relative;
+          width: 100%;
+          height: 320px;
+          overflow: hidden;
         }
 
-        /* Mobile: roughly half the desktop height */
         @media (max-width: 768px) {
-          .ps-img {
-            min-height: 175px;
-            max-height: 210px;
-            height: 175px;
-          }
-        }
-
-        @media (max-width: 640px) {
-          .ps-img {
-            min-height: 170px;
-            max-height: 200px;
-            height: 170px;
+          .ps-img-container {
+            height: 190px;
           }
         }
 
         @media (max-width: 480px) {
-          .ps-img {
-            min-height: 160px;
-            max-height: 190px;
-            height: 160px;
+          .ps-img-container {
+            height: 170px;
           }
         }
 
-        .ps-img.active { transform: scale(1.04); }
-
-        /* Image container */
-        .ps-img-container {
-          position: relative;
+        /* Ken Burns effect */
+        .ps-img {
           width: 100%;
           height: 100%;
-          overflow: hidden;
+          display: block;
+          object-fit: cover;
+          object-position: center center;
+          transition: transform 6s ease;
         }
+
+        .ps-img.active { transform: scale(1.04); }
       `}</style>
 
       <div className="ps-wrap">
@@ -678,7 +663,6 @@ export const ProductSlider = ({ className }: { className?: string }) => {
                       alt={item.title}
                       className={`ps-img ${index === currentSlide ? "active" : ""}`}
                       onError={(e) => {
-                        // Fallback to placeholder if image fails to load
                         (e.target as HTMLImageElement).src = "/api/uploads/placeholder-slider.jpg";
                       }}
                     />
@@ -686,7 +670,6 @@ export const ProductSlider = ({ className }: { className?: string }) => {
                 </CarouselItem>
               ))
             ) : (
-              // Fallback to products if no slider data
               products.map((product, index) => (
                 <CarouselItem key={product.id}>
                   <div className="ps-img-container">
@@ -720,11 +703,11 @@ export const ProductSlider = ({ className }: { className?: string }) => {
                 onClick={() => handleButtonClick(currentSlideData.buttonLink!)}
                 className="ps-shop-btn"
               >
-                <ShoppingBag size={window.innerWidth <= 768 ? 10 : 14} />
+                <ShoppingBag size={window.innerWidth <= 768 ? 10 : 13} />
                 {currentSlideData.buttonText}
               </button>
               <button onClick={handleAboutUsClick} className="ps-story-btn">
-                <BookOpen size={window.innerWidth <= 768 ? 10 : 14} />
+                <BookOpen size={window.innerWidth <= 768 ? 10 : 13} />
                 Explore Our Story
               </button>
             </div>
