@@ -93,10 +93,16 @@ const Auth = () => {
 
       if (ok) {
         setOtpSent(true);
-        setOtpVerified(false);
-        setOtp('');
         setResendTimer(60); // 60 seconds cooldown
-        toast.success('OTP sent to your phone number');
+        
+        // If OTP is returned in response (development mode), display it
+        if (json.otp) {
+          toast.success(`OTP sent! Your code is: ${json.otp}`, {
+            duration: 10000, // Show for 10 seconds
+          });
+        } else {
+          toast.success('OTP sent to your phone number');
+        }
       } else {
         toast.error(json?.message || 'Failed to send OTP');
       }

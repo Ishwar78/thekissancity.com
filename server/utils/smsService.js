@@ -220,7 +220,7 @@ async function sendOTP(phone, otp) {
       console.log('  - TWILIO_PHONE_NUMBER');
       console.log('========================================\n');
 
-      return { ok: true, messageId: 'console-log', devMode: true };
+      return { ok: true, messageId: 'console-log', devMode: true, otp: otp };
     }
   } else {
     console.log('⚠️  [SMS SERVICE] Twilio not configured, using development mode');
@@ -239,7 +239,7 @@ async function sendOTP(phone, otp) {
   console.log('  - TWILIO_PHONE_NUMBER');
   console.log('========================================\n');
 
-  return { ok: true, messageId: 'console-log', devMode: true };
+  return { ok: true, messageId: 'console-log', devMode: true, otp: otp };
   }
 }
 

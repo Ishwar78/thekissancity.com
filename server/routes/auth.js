@@ -84,7 +84,15 @@ router.post('/send-otp', async (req, res) => {
 
     console.log('✅ [SEND OTP] OTP sent successfully!');
     console.log('========================================\n');
-    return res.json({ ok: true, message: 'OTP sent successfully' });
+    
+    // If SMS failed but fallback worked, include OTP in response
+    const response = { ok: true, message: 'OTP sent successfully' };
+    if (smsResult.devMode && smsResult.otp) {
+      response.otp = smsResult.otp;
+      response.devMode = true;
+    }
+    
+    return res.json(response);
   } catch (e) {
     console.error('❌ [SEND OTP] Error occurred:', e);
     console.error('❌ [SEND OTP] Error stack:', e.stack);
