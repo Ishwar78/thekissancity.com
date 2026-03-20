@@ -411,9 +411,9 @@ export default function CouponPopup({ isOpen, onClose, coupons }: CouponPopupPro
               )}
             </div>
 
-            {coupon.description && (
+            {/* {coupon.description && (
               <p className="cp-desc">{coupon.description}</p>
-            )}
+            )} */}
 
             {coupon.termsAndConditions && (
               <>
