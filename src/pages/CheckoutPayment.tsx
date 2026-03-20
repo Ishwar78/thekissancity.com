@@ -148,7 +148,7 @@ const CheckoutPayment = () => {
     if (!pa) return '';
     const pn = encodeURIComponent(paymentSettings?.beneficiaryName || '');
     const am = encodeURIComponent((total || 0).toFixed(2));
-    const tn = encodeURIComponent('Order payment at UNI10');
+    const tn = encodeURIComponent('Order payment at KisaanCity');
     const base = scheme ? scheme : 'upi://pay';
     const sep = base.includes('?') ? '&' : '?';
     return `${base}${sep}pa=${pa}&pn=${pn}&am=${am}&cu=INR&tn=${tn}`;
@@ -528,7 +528,7 @@ const CheckoutPayment = () => {
         key: keyId.trim(),
         amount: amount,
         currency: currency || 'INR',
-        name: 'UNI10',
+        name: 'KisaanCity',
         description: `Order for ₹${total}`,
         order_id: orderId.trim(),
         handler: async (response: any) => {

@@ -52,11 +52,11 @@ export const Footer = () => {
             <Link
               to="/"
               className="inline-flex items-center gap-3 mb-3 md:mb-4"
-              aria-label="UNI10 Home"
+              aria-label="KisaanCity Home"
             >
               <img
                 src="/logo.jpeg" 
-                alt="UNI10 Logo"
+                alt="KisaanCity Logo"
                 className="h-8 md:h-10 w-auto object-contain"
               />
               <span className="sr-only">Kissan City</span>
@@ -68,8 +68,8 @@ export const Footer = () => {
             <div className="space-y-2 md:space-y-3">
               <div className="flex items-center gap-2 md:gap-3 text-xs md:text-sm text-gray-300 hover:text-yellow-400 transition-colors">
                 <Mail className="h-3 w-3 md:h-4 md:w-4 text-white flex-shrink-0" />
-                <a href="mailto:support@uni10.in">
-                  support@kissancity.in
+                <a href="mailto:support@kisaancity.in">
+                  support@kisaancity.in
                 </a>
               </div>
               

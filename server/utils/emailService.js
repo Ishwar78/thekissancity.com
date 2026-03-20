@@ -47,12 +47,12 @@ function generateOrderConfirmationEmail(order, user) {
     <body>
       <div class="container">
         <div class="header">
-          <img src="${logoUrl}" alt="UNI10" class="logo" />
+          <img src="${logoUrl}" alt="KisaanCity" class="logo" />
           <h1 style="color: #333; margin: 10px 0;">Order Confirmation</h1>
         </div>
 
         <p>Hi <strong>${user.name || user.fullName || 'Valued Customer'}</strong>,</p>
-        <p>Thank you for placing your order with UNI10! We're thrilled to have you as a customer.</p>
+        <p>Thank you for placing your order with KisaanCity! We're thrilled to have you as a customer.</p>
 
         <div class="order-info">
           <div class="order-id">Order #${order._id.toString().substring(0, 8).toUpperCase()}</div>
@@ -102,13 +102,13 @@ function generateOrderConfirmationEmail(order, user) {
         <p>We'll send you an email update as soon as your order ships. You can track your delivery in the "My Orders" section on our website.</p>
 
         <center>
-          <a href="https://www.uni10.in/my-orders" class="btn">Track Your Order</a>
+          <a href="https://kisaancity-1.onrender.com/my-orders" class="btn">Track Your Order</a>
         </center>
 
         <div class="footer">
-          <p>UNI10 | CREATE YOUR IDENTITY</p>
+          <p>KisaanCity | CREATE YOUR IDENTITY</p>
           <p>Questions? Email us at support@uni10.in</p>
-          <p>&copy; 2025 UNI10. All rights reserved.</p>
+          <p>&copy; 2025 KisaanCity. All rights reserved.</p>
         </div>
       </div>
     </body>
@@ -142,7 +142,7 @@ function generateStatusUpdateEmail(order, user, newStatus) {
     <body>
       <div class="container">
         <div class="header">
-          <img src="${logoUrl}" alt="UNI10" class="logo" />
+          <img src="${logoUrl}" alt="KisaanCity" class="logo" />
           <h1 style="color: #333; margin: 10px 0;">Order Update</h1>
         </div>
 
@@ -159,12 +159,12 @@ function generateStatusUpdateEmail(order, user, newStatus) {
           ${order.trackingNumber ? `<p><strong>Tracking Number:</strong> ${order.trackingNumber}</p>` : ''}
         </div>
 
-        <p>We'll notify you once your order reaches its final destination. Thank you for shopping with UNI10!</p>
+        <p>We'll notify you once your order reaches its final destination. Thank you for shopping with KisaanCity!</p>
 
         <div class="footer">
-          <p>UNI10 | CREATE YOUR IDENTITY</p>
+          <p>KisaanCity | CREATE YOUR IDENTITY</p>
           <p>Questions? Email us at support@uni10.in</p>
-          <p>&copy; 2025 UNI10. All rights reserved.</p>
+          <p>&copy; 2025 KisaanCity. All rights reserved.</p>
         </div>
       </div>
     </body>
@@ -191,7 +191,7 @@ function generateReturnApprovalEmail(order, user) {
     <body>
       <div class="container">
         <div class="header">
-          <img src="${logoUrl}" alt="UNI10" class="logo" />
+          <img src="${logoUrl}" alt="KisaanCity" class="logo" />
           <h1 style="color: #333; margin: 10px 0;">Return Request Approved</h1>
         </div>
 
@@ -210,9 +210,9 @@ function generateReturnApprovalEmail(order, user) {
         <p>Once we receive and verify your return, we'll process a full refund to your original payment method within 5-7 business days.</p>
 
         <div class="footer">
-          <p>UNI10 | CREATE YOUR IDENTITY</p>
+          <p>KisaanCity | CREATE YOUR IDENTITY</p>
           <p>Questions? Email us at support@uni10.in</p>
-          <p>&copy; 2025 UNI10. All rights reserved.</p>
+          <p>&copy; 2025 KisaanCity. All rights reserved.</p>
         </div>
       </div>
     </body>
@@ -225,7 +225,7 @@ async function sendOrderConfirmationEmail(order, user) {
     const mailOptions = {
       from: process.env.GMAIL_USER || 'a60196141@gmail.com',
       to: user.email,
-      subject: 'Order Placed Successfully - UNI10',
+      subject: 'Order Placed Successfully - KisaanCity',
       html: generateOrderConfirmationEmail(order, user),
     };
 
@@ -243,7 +243,7 @@ async function sendStatusUpdateEmail(order, user, newStatus) {
     const mailOptions = {
       from: process.env.GMAIL_USER || 'a60196141@gmail.com',
       to: user.email,
-      subject: `Order Status Update - UNI10 Order #${order._id.toString().substring(0, 8).toUpperCase()}`,
+      subject: `Order Status Update - KisaanCity Order #${order._id.toString().substring(0, 8).toUpperCase()}`,
       html: generateStatusUpdateEmail(order, user, newStatus),
     };
 
@@ -261,7 +261,7 @@ async function sendReturnApprovalEmail(order, user) {
     const mailOptions = {
       from: process.env.GMAIL_USER || 'a60196141@gmail.com',
       to: user.email,
-      subject: `Return Approved - UNI10 Order #${order._id.toString().substring(0, 8).toUpperCase()}`,
+      subject: `Return Approved - KisaanCity Order #${order._id.toString().substring(0, 8).toUpperCase()}`,
       html: generateReturnApprovalEmail(order, user),
     };
 
