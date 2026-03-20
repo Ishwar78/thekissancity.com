@@ -93,6 +93,8 @@ export async function api(path: string, options: RequestInit = {}) {
       : { "Content-Type": "application/json", ...(options.headers || {}) } as Record<string,string>;
     if (token) headers['Authorization'] = `Bearer ${token}`;
 
+    console.log('🌐 [API] Headers being sent:', headers);
+
     const { headers: _, ...optionsWithoutHeaders } = options;
     const res = await fetch(cacheBustUrl, {
       credentials: "include",
