@@ -38,11 +38,13 @@ router.get('/test', (req, res) => {
 // Send OTP for signup
 router.post('/send-otp', async (req, res) => {
   console.log('========================================');
-  console.log('📱 [SEND OTP] Request received');
+  console.log('📱 [SEND OTP] Request received at:', new Date().toISOString());
   console.log('📱 [SEND OTP] Request headers:', JSON.stringify(req.headers, null, 2));
   console.log('📱 [SEND OTP] Request origin:', req.headers.origin);
   console.log('📱 [SEND OTP] Request body:', JSON.stringify(req.body, null, 2));
-  console.log('Timestamp:', new Date().toISOString());
+  
+  // Immediate response for testing
+  console.log('📤 [SEND OTP] About to process request...');
   
   try {
     const { phone } = req.body || {};
