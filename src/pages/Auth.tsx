@@ -33,11 +33,11 @@ const Auth = () => {
   useEffect(() => {
     if (user) {
       const added = handleIntent();
-      // Redirect admin users to /admin, others to login or cart
+      // Redirect admin users to /admin, others to sign-in or cart
       if (user.role === 'admin') {
         navigate('/admin', { replace: true });
       } else {
-        navigate(added ? '/cart' : '/auth', { replace: true });
+        navigate(added ? '/cart' : '/auth?mode=signin', { replace: true });
       }
     }
   }, [user, navigate]);
