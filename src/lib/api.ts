@@ -19,13 +19,15 @@ function joinUrl(base: string, p: string) {
  
 
 export async function api(path: string, options: RequestInit = {}) {
-  // Add cache-busting timestamp for GET requests
+  // Add cache-busting timestamp for GET requests only
   const url = path.startsWith("http") ? path : joinUrl(API_BASE, path);
-  const timestampedUrl = url.includes('?') 
-    ? `${url}&_t=${Date.now()}` 
-    : `${url}?_t=${Date.now()}`;
-
-  const finalUrl = path.startsWith("http") ? timestampedUrl : timestampedUrl;
+  
+  // Only add timestamp for GET requests to avoid caching issues
+  const finalUrl = path.startsWith("http") ? url : (
+    (options.method === 'GET' || !options.method) 
+      ? (url.includes('?') ? `${url}&_t=${Date.now()}` : `${url}?_t=${Date.now()}`)
+      : url
+  );
 
   if (
     API_BASE &&
@@ -37,11 +39,6 @@ export async function api(path: string, options: RequestInit = {}) {
       ? path
       : (path.startsWith("/api") ? path : `/api${path.startsWith("/") ? path : `/${path}`}`);
 
-    // Add cache-busting timestamp for GET requests
-    const cacheBustUrl = relUrl.includes('?') 
-      ? `${relUrl}&_t=${Date.now()}` 
-      : `${relUrl}?_t=${Date.now()}`;
-
     try {
       const token = (typeof window !== 'undefined') ? localStorage.getItem('token') : null;
       const relHeaders = options.body instanceof FormData
@@ -50,15 +47,15 @@ export async function api(path: string, options: RequestInit = {}) {
       if (token) relHeaders['Authorization'] = `Bearer ${token}`;
 
       const { headers: _, ...optionsWithoutHeaders } = options;
-      const relRes = await fetch(cacheBustUrl, {
+      const res = await fetch(relUrl, {
         credentials: "include",
         headers: relHeaders,
         cache: "no-store",
         ...optionsWithoutHeaders,
       });
-      const relJson = await relRes.json().catch(() => ({}));
-      if (relRes.ok) return { ok: true, status: relRes.status, json: relJson };
-      return { ok: relRes.ok, status: relRes.status, json: relJson };
+
+      const json = await res.json().catch(() => ({}));
+      return { ok: res.ok, status: res.status, json };
     } catch (relErr) {
       // Re-throwing the error to propagate it.
       throw relErr;
@@ -88,7 +85,7 @@ export async function api(path: string, options: RequestInit = {}) {
     const json = await res.json().catch(() => ({}));
     return { ok: res.ok, status: res.status, json };
   } catch (error: any) {
-    // Re-throwing the error to propagate it.
+    // Re-throwing error to propagate it.
     throw error;
   }
 }
