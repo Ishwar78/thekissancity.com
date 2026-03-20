@@ -92,12 +92,29 @@ export const Footer = () => {
             <div>
               <h4 className="font-semibold text-white mb-3 md:mb-5 text-sm md:text-base">Shop</h4>
               <ul className="space-y-2 md:space-y-3">
+                
+                <li>
+                  <Link
+                    to="/about"
+                    className="text-xs md:text-sm text-gray-300 hover:text-yellow-400 transition-colors font-medium"
+                  >
+                    About
+                  </Link>
+                </li>
                 <li>
                   <Link
                     to="/shop"
                     className="text-xs md:text-sm text-gray-300 hover:text-yellow-400 transition-colors font-medium"
                   >
                     All Products
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/shop"
+                    className="text-xs md:text-sm text-gray-300 hover:text-yellow-400 transition-colors font-medium"
+                  >
+                    Shop
                   </Link>
                 </li>
                 <li>

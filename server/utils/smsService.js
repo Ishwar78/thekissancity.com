@@ -205,7 +205,22 @@ async function sendOTP(phone, otp) {
       
       console.error('❌ [SMS SERVICE] Error stack:', error.stack);
       console.log('📱 [SMS SERVICE] Falling back to console logging...');
-      // Fall through to console logging
+      
+      // Fallback: Log OTP to console (for development)
+      console.log('========================================');
+      console.log('📱 [Kissaan City SMS SERVICE] OTP SMS (Development Mode)');
+      console.log(`📱 Phone Number: ${phone}`);
+      console.log(`🔢 OTP Code: ${otp}`);
+      console.log(`⏰ Timestamp: ${new Date().toISOString()}`);
+      console.log('========================================');
+      console.log('\n⚠️  Kissan City SMS service not configured. OTP logged above.');
+      console.log('To enable SMS, set the following in .env:');
+      console.log('  - TWILIO_ACCOUNT_SID');
+      console.log('  - TWILIO_AUTH_TOKEN');
+      console.log('  - TWILIO_PHONE_NUMBER');
+      console.log('========================================\n');
+
+      return { ok: true, messageId: 'console-log', devMode: true };
     }
   } else {
     console.log('⚠️  [SMS SERVICE] Twilio not configured, using development mode');
@@ -225,7 +240,7 @@ async function sendOTP(phone, otp) {
   console.log('========================================\n');
 
   return { ok: true, messageId: 'console-log', devMode: true };
-}
+  }
 }
 
 module.exports = {

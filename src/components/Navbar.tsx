@@ -186,9 +186,9 @@ export const Navbar = ({ cartItemCount = 0 }: NavbarProps) => {
             <div className="flex items-center gap-3">
               {[
                 { to: "/", label: "Home" },
-                { to: "/shop", label: "Shop" },
+                // { to: "/shop", label: "Shop" },
                 { to: "/shop/new-arrivals", label: "New Arrivals", isNew: true },
-                { to: "/about", label: "About" },
+                // { to: "/about", label: "About" },
               ].map((item) => (
                 <Link
                   key={item.to}
@@ -429,9 +429,9 @@ export const Navbar = ({ cartItemCount = 0 }: NavbarProps) => {
               
               {[
                 { to: "/", label: "Home" },
-                { to: "/shop", label: "Shop" },
+                // { to: "/shop", label: "Shop" },
                 { to: "/shop/new-arrivals", label: "New Arrivals", isNew: true },
-                { to: "/about", label: "About" },
+                // { to: "/about", label: "About" },
               ].map((item) => (
                 <Link
                   key={item.to}

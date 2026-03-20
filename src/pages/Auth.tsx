@@ -33,11 +33,11 @@ const Auth = () => {
   useEffect(() => {
     if (user) {
       const added = handleIntent();
-      // Redirect admin users to /admin, others to dashboard or cart
+      // Redirect admin users to /admin, others to login or cart
       if (user.role === 'admin') {
         navigate('/admin', { replace: true });
       } else {
-        navigate(added ? '/cart' : '/dashboard', { replace: true });
+        navigate(added ? '/cart' : '/auth', { replace: true });
       }
     }
   }, [user, navigate]);
@@ -153,7 +153,11 @@ const Auth = () => {
           setLoading(false);
           return;
         }
-        // OTP is now optional - proceed with or without OTP verification
+        if (!otpVerified) {
+          toast.error('Please verify your phone number with OTP');
+          setLoading(false);
+          return;
+        }
         const { error, user: signedUpUser } = await signUp(email, password, name, phone, otp);
         if (error) throw new Error(error?.message ?? JSON.stringify(error));
         toast.success('Account created successfully!');
@@ -298,7 +302,7 @@ const Auth = () => {
                       <p className="text-xs text-green-600">✓ Phone number verified</p>
                     )}
                     {!otpSent && (
-                      <p className="text-xs text-muted-foreground">OTP verification is optional - you can skip this step</p>
+                      <p className="text-xs text-muted-foreground">Please verify your phone number with OTP</p>
                     )}
                   </div>
                   {otpSent && !otpVerified && (
