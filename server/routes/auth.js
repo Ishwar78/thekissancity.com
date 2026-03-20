@@ -25,7 +25,9 @@ function sendToken(res, user) {
 router.post('/send-otp', async (req, res) => {
   console.log('========================================');
   console.log('📱 [SEND OTP] Request received');
-  console.log('Request body:', JSON.stringify(req.body, null, 2));
+  console.log('📱 [SEND OTP] Request headers:', JSON.stringify(req.headers, null, 2));
+  console.log('📱 [SEND OTP] Request origin:', req.headers.origin);
+  console.log('📱 [SEND OTP] Request body:', JSON.stringify(req.body, null, 2));
   console.log('Timestamp:', new Date().toISOString());
   
   try {
@@ -92,6 +94,7 @@ router.post('/send-otp', async (req, res) => {
       response.devMode = true;
     }
     
+    console.log('📤 [SEND OTP] Response being sent:', JSON.stringify(response, null, 2));
     return res.json(response);
   } catch (e) {
     console.error('❌ [SEND OTP] Error occurred:', e);
