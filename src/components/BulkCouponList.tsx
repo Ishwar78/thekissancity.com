@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+  import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -25,7 +25,10 @@ import {
   Clock,
   User,
   MoreHorizontal,
-  Download
+  Download,
+  TrendingUp,
+  ShoppingCart,
+  DollarSign
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { api } from '@/lib/api';
@@ -147,6 +150,71 @@ export default function BulkCouponList({ onEdit, refreshKey = 0 }: BulkCouponLis
     }
   };
 
+  const exportSalesData = (coupon: BulkCoupon) => {
+    const analytics = calculateSalesAnalytics(coupon);
+    
+    // Create CSV content
+    const headers = ['Email', 'Order Amount', 'Discount Amount', 'Used Date', 'Final Amount'];
+    const rows = coupon.usedBy.map(usage => [
+      usage.email,
+      usage.orderAmount.toString(),
+      usage.discountAmount.toString(),
+      formatDate(usage.usedAt),
+      (usage.orderAmount - usage.discountAmount).toString()
+    ]);
+    
+    // Add empty row
+    rows.push([]);
+    
+    // Add date-wise sales breakdown
+    rows.push(['DATE-WISE SALES BREAKDOWN', '', '', '', '']);
+    rows.push(['Date', 'Total Sales', 'Total Discount', 'Orders', 'Average Order Value']);
+    
+    Object.entries(analytics.salesByDate)
+      .sort(([a], [b]) => new Date(b).getTime() - new Date(a).getTime())
+      .forEach(([date, data]) => {
+        const avgOrderValue = data.orders > 0 ? data.sales / data.orders : 0;
+        rows.push([
+          date,
+          data.sales.toString(),
+          data.discount.toString(),
+          data.orders.toString(),
+          avgOrderValue.toFixed(2)
+        ]);
+      });
+    
+    // Add empty row
+    rows.push([]);
+    
+    // Add summary rows
+    rows.push(['SUMMARY', '', '', '', '']);
+    rows.push(['Total Orders', analytics.totalOrders.toString(), '', '', '']);
+    rows.push(['Total Sales', analytics.totalSales.toString(), '', '', '']);
+    rows.push(['Total Discount', analytics.totalDiscount.toString(), '', '', '']);
+    rows.push(['Average Order Value', analytics.averageOrderValue.toString(), '', '', '']);
+    rows.push(['Conversion Rate', `${((analytics.totalOrders / coupon.sentTo.length) * 100).toFixed(1)}%`, '', '', '']);
+    
+    const csvContent = [headers, ...rows]
+      .map(row => row.map(cell => `"${cell}"`).join(','))
+      .join('\n');
+    
+    // Create and download CSV file
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `${coupon.code}_sales_data_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast({
+      title: 'Export Successful',
+      description: `Sales data for ${coupon.code} exported successfully`,
+    });
+  };
+
   const handleSendEmails = async () => {
     if (!selectedCoupon || !emailRecipients.trim()) {
       toast({
@@ -220,6 +288,40 @@ export default function BulkCouponList({ onEdit, refreshKey = 0 }: BulkCouponLis
     return new Date(dateString).toLocaleDateString('en-IN');
   };
 
+  const calculateSalesAnalytics = (coupon: BulkCoupon) => {
+    const usedBy = coupon.usedBy || [];
+    
+    const totalSales = usedBy.reduce((sum, usage) => sum + usage.orderAmount, 0);
+    const totalDiscount = usedBy.reduce((sum, usage) => sum + usage.discountAmount, 0);
+    const averageOrderValue = usedBy.length > 0 ? totalSales / usedBy.length : 0;
+    
+    // Calculate sales by date for trend analysis
+    const salesByDate = usedBy.reduce((acc, usage) => {
+      const date = formatDate(usage.usedAt);
+      if (!acc[date]) {
+        acc[date] = { sales: 0, orders: 0, discount: 0 };
+      }
+      acc[date].sales += usage.orderAmount;
+      acc[date].orders += 1;
+      acc[date].discount += usage.discountAmount;
+      return acc;
+    }, {} as Record<string, { sales: number; orders: number; discount: number }>);
+
+    // Get top customers by order value
+    const topCustomers = [...usedBy]
+      .sort((a, b) => b.orderAmount - a.orderAmount)
+      .slice(0, 5);
+
+    return {
+      totalSales,
+      totalDiscount,
+      averageOrderValue,
+      salesByDate,
+      topCustomers,
+      totalOrders: usedBy.length
+    };
+  };
+
   if (loading) {
     return (
       <Card>
@@ -291,6 +393,7 @@ export default function BulkCouponList({ onEdit, refreshKey = 0 }: BulkCouponLis
                     <TableHead>Name</TableHead>
                     <TableHead>Discount</TableHead>
                     <TableHead>Usage</TableHead>
+                    <TableHead>Total Sales</TableHead>
                     <TableHead>Expiry</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Recipients</TableHead>
@@ -336,6 +439,17 @@ export default function BulkCouponList({ onEdit, refreshKey = 0 }: BulkCouponLis
                               }}
                             ></div>
                           </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <ShoppingCart className="h-4 w-4 text-green-600" />
+                          <span className="font-medium text-green-600">
+                            ₹{(() => {
+                              const totalSales = coupon.usedBy.reduce((sum, usage) => sum + usage.orderAmount, 0);
+                              return totalSales.toLocaleString('en-IN');
+                            })()}
+                          </span>
                         </div>
                       </TableCell>
                       <TableCell>
@@ -426,9 +540,22 @@ export default function BulkCouponList({ onEdit, refreshKey = 0 }: BulkCouponLis
       <Dialog open={showDetails} onOpenChange={setShowDetails}>
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Tag className="h-5 w-5" />
-              Coupon Details
+            <DialogTitle className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Tag className="h-5 w-5" />
+                Coupon Details
+              </div>
+              {selectedCoupon && selectedCoupon.usedBy.length > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => exportSalesData(selectedCoupon)}
+                  className="flex items-center gap-2"
+                >
+                  <Download className="h-4 w-4" />
+                  Export Sales Data
+                </Button>
+              )}
             </DialogTitle>
           </DialogHeader>
           {selectedCoupon && (
@@ -499,27 +626,126 @@ export default function BulkCouponList({ onEdit, refreshKey = 0 }: BulkCouponLis
 
               <Card>
                 <CardContent className="pt-6">
-                  <h4 className="font-semibold mb-4">Usage Statistics</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-primary">
-                        {selectedCoupon.usedCount}
+                  <h4 className="font-semibold mb-4 flex items-center gap-2">
+                    <TrendingUp className="h-4 w-4" />
+                    Sales Analytics
+                  </h4>
+                  {(() => {
+                    const analytics = calculateSalesAnalytics(selectedCoupon);
+                    return (
+                      <div className="space-y-4">
+                        {/* Main Sales Metrics */}
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-primary">
+                              {analytics.totalOrders}
+                            </div>
+                            <p className="text-sm text-muted-foreground">Total Orders</p>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-green-600">
+                              ₹{analytics.totalSales.toLocaleString('en-IN')}
+                            </div>
+                            <p className="text-sm text-muted-foreground">Total Sales</p>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-orange-600">
+                              ₹{analytics.totalDiscount.toLocaleString('en-IN')}
+                            </div>
+                            <p className="text-sm text-muted-foreground">Total Discount</p>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-blue-600">
+                              ₹{analytics.averageOrderValue.toLocaleString('en-IN')}
+                            </div>
+                            <p className="text-sm text-muted-foreground">Avg Order Value</p>
+                          </div>
+                        </div>
+
+                        {/* Conversion Rate */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="text-center p-4 border rounded-lg">
+                            <div className="text-xl font-bold text-purple-600">
+                              {selectedCoupon.sentTo.length > 0 
+                                ? ((analytics.totalOrders / selectedCoupon.sentTo.length) * 100).toFixed(1)
+                                : '0'
+                              }%
+                            </div>
+                            <p className="text-sm text-muted-foreground">Conversion Rate</p>
+                            <p className="text-xs text-muted-foreground">
+                              {analytics.totalOrders} of {selectedCoupon.sentTo.length} recipients
+                            </p>
+                          </div>
+                          <div className="text-center p-4 border rounded-lg">
+                            <div className="text-xl font-bold text-teal-600">
+                              {analytics.totalSales > 0 
+                                ? ((analytics.totalDiscount / analytics.totalSales) * 100).toFixed(1)
+                                : '0'
+                              }%
+                            </div>
+                            <p className="text-sm text-muted-foreground">Discount Impact</p>
+                            <p className="text-xs text-muted-foreground">
+                              Discount as % of sales
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Top Customers */}
+                        {analytics.topCustomers.length > 0 && (
+                          <div>
+                            <h5 className="font-medium mb-2 flex items-center gap-2">
+                              <User className="h-4 w-4" />
+                              Top Customers
+                            </h5>
+                            <div className="space-y-2">
+                              {analytics.topCustomers.map((customer, index) => (
+                                <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                                  <div>
+                                    <p className="font-medium text-sm">{customer.email}</p>
+                                    <p className="text-xs text-muted-foreground">
+                                      {formatDate(customer.usedAt)}
+                                    </p>
+                                  </div>
+                                  <div className="text-right">
+                                    <p className="font-semibold text-sm">₹{customer.orderAmount.toLocaleString('en-IN')}</p>
+                                    <p className="text-xs text-green-600">Saved ₹{customer.discountAmount}</p>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Date-wise Sales */}
+                        {Object.keys(analytics.salesByDate).length > 0 && (
+                          <div>
+                            <h5 className="font-medium mb-2 flex items-center gap-2">
+                              <Calendar className="h-4 w-4" />
+                              Daily Sales Breakdown
+                            </h5>
+                            <div className="space-y-2 max-h-48 overflow-y-auto">
+                              {Object.entries(analytics.salesByDate)
+                                .sort(([a], [b]) => new Date(b).getTime() - new Date(a).getTime())
+                                .map(([date, data], index) => (
+                                  <div key={index} className="flex justify-between items-center p-2 border rounded">
+                                    <div>
+                                      <p className="font-medium text-sm">{date}</p>
+                                      <p className="text-xs text-muted-foreground">
+                                        {data.orders} order{data.orders !== 1 ? 's' : ''}
+                                      </p>
+                                    </div>
+                                    <div className="text-right">
+                                      <p className="font-semibold text-sm">₹{data.sales.toLocaleString('en-IN')}</p>
+                                      <p className="text-xs text-orange-600">Discount: ₹{data.discount}</p>
+                                    </div>
+                                  </div>
+                                ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
-                      <p className="text-sm text-muted-foreground">Total Uses</p>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-green-600">
-                        {selectedCoupon.remainingUsage}
-                      </div>
-                      <p className="text-sm text-muted-foreground">Remaining</p>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-blue-600">
-                        {selectedCoupon.sentTo.length}
-                      </div>
-                      <p className="text-sm text-muted-foreground">Email Recipients</p>
-                    </div>
-                  </div>
+                    );
+                  })()}
                 </CardContent>
               </Card>
 
