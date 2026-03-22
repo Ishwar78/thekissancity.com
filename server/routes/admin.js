@@ -604,7 +604,7 @@ router.get('/billing-info', requireAuth, requireAdmin, async (req, res) => {
     let billingInfo = await BillingInfo.findOne();
     if (!billingInfo) {
       billingInfo = await BillingInfo.create({
-        companyName: 'UNI10',
+        companyName: 'KisaanCity',
         address: '',
         contactNumber: '',
         email: '',
@@ -619,7 +619,7 @@ router.get('/billing-info', requireAuth, requireAdmin, async (req, res) => {
       data: {
         ...data,
         // Map to invoice-compatible field names
-        name: data.companyName || 'UNI10',
+        name: data.companyName || 'KisaanCity',
         phone: data.contactNumber || '',
         gstIn: data.gstinNumber || '',
       }
@@ -636,7 +636,7 @@ router.get('/billing-info/public', async (req, res) => {
     let billingInfo = await BillingInfo.findOne();
     if (!billingInfo) {
       billingInfo = await BillingInfo.create({
-        companyName: 'UNI10',
+        companyName: 'KisaanCity',
         address: '',
         contactNumber: '',
         email: '',
@@ -651,7 +651,7 @@ router.get('/billing-info/public', async (req, res) => {
       data: {
         ...data,
         // Map to invoice-compatible field names
-        name: data.companyName || 'UNI10',
+        name: data.companyName || 'KisaanCity',
         phone: data.contactNumber || '',
         gstIn: data.gstinNumber || '',
       }
@@ -706,7 +706,7 @@ router.patch('/billing-info', requireAuth, requireAdmin, async (req, res) => {
     let billingInfo = await BillingInfo.findOne();
     if (!billingInfo) {
       billingInfo = await BillingInfo.create({
-        companyName: companyName || 'UNI10',
+        companyName: companyName || 'KisaanCity',
         address: address || '',
         contactNumber: contactNumber || '',
         email: email || '',

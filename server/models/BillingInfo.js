@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const BillingInfoSchema = new mongoose.Schema(
   {
-    companyName: { type: String, required: true, default: 'UNI10' },
+    companyName: { type: String, required: true, default: 'KisaanCity' },
     address: { type: String, required: true, default: '' },
     contactNumber: { type: String, required: true, default: '' },
     email: { type: String, required: true, default: '' },

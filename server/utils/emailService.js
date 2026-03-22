@@ -107,7 +107,7 @@ function generateOrderConfirmationEmail(order, user) {
 
         <div class="footer">
           <p>KisaanCity | CREATE YOUR IDENTITY</p>
-          <p>Questions? Email us at support@uni10.in</p>
+          <p>Questions? Email us at support@kissancity.in</p>
           <p>&copy; 2025 KisaanCity. All rights reserved.</p>
         </div>
       </div>
@@ -163,7 +163,7 @@ function generateStatusUpdateEmail(order, user, newStatus) {
 
         <div class="footer">
           <p>KisaanCity | CREATE YOUR IDENTITY</p>
-          <p>Questions? Email us at support@uni10.in</p>
+          <p>Questions? Email us at support@kissancity.in</p>
           <p>&copy; 2025 KisaanCity. All rights reserved.</p>
         </div>
       </div>
@@ -211,7 +211,7 @@ function generateReturnApprovalEmail(order, user) {
 
         <div class="footer">
           <p>KisaanCity | CREATE YOUR IDENTITY</p>
-          <p>Questions? Email us at support@uni10.in</p>
+          <p>Questions? Email us at support@kissancity.in</p>
           <p>&copy; 2025 KisaanCity. All rights reserved.</p>
         </div>
       </div>

@@ -155,7 +155,7 @@ router.get('/business', async (req, res) => {
     const doc = await ensureSettingsDoc();
     const b = (doc.business || {});
     const out = {
-      name: b.name || 'UNI10',
+      name: b.name || 'KisaanCity',
       logo: publicAssetUrl(req, b.logo || ''),
       address: b.address || '',
       phone: b.phone || '',

@@ -3410,7 +3410,7 @@ const handleProductSubmit = async (e: React.FormEvent) => {
             <DialogHeader>
               <DialogTitle>{editingProduct ? 'Edit Product' : 'Add New Product'}</DialogTitle>
               <DialogDescription>
-                {editingProduct ? 'Update product details to keep your catalogue accurate.' : 'Create a new product listing for the UNI10 store.'}
+                {editingProduct ? 'Update product details to keep your catalogue accurate.' : 'Create a new product listing for the Kissan City store.'}
               </DialogDescription>
             </DialogHeader>
 

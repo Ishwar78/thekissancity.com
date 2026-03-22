@@ -24,7 +24,7 @@ const RazorpaySettingsSchema = new mongoose.Schema(
 const ShiprocketSettingsSchema = new mongoose.Schema(
   {
     enabled: { type: Boolean, default: true },
-    email: { type: String, default: 'logistics@uni10.in' },
+    email: { type: String, default: 'logistics@kissancity.in' },
     password: { type: String, default: 'Test@1234' },
     apiKey: { type: String, default: 'ship_test_key_123456' },
     secret: { type: String, default: 'ship_test_secret_abcdef' },
@@ -66,9 +66,9 @@ const HomeSettingsSchema = new mongoose.Schema(
 
 const SiteSettingSchema = new mongoose.Schema(
   {
-    domain: { type: String, default: 'www.uni10.in' },
+    domain: { type: String, default: 'www.kissancity.in' },
     business: {
-      name: { type: String, default: 'UNI10' },
+      name: { type: String, default: 'KisaanCity' },
       logo: { type: String, default: '' },
       address: { type: String, default: '' },
       phone: { type: String, default: '' },
