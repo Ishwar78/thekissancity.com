@@ -3,6 +3,7 @@ const router = express.Router();
 const Product = require('../models/Product');
 const Category = require('../models/Category');
 const Region = require('../models/Region');
+const Review = require('../models/Review');
 const slugify = require('slugify');
 const { authOptional, requireAuth, requireAdmin } = require('../middleware/auth');
 
@@ -268,6 +269,24 @@ router.get('/slug/:slug', async (req, res) => {
       return res.status(404).json({ ok: false, message: 'Product not found' });
     }
 
+    // Calculate review count and average rating
+    const reviewStats = await Review.aggregate([
+      { $match: { productId: doc._id, status: 'published', approved: true } },
+      {
+        $group: {
+          _id: '$productId',
+          reviewCount: { $sum: 1 },
+          averageRating: { $avg: '$rating' }
+        }
+      }
+    ]);
+
+    const stats = reviewStats[0] || { reviewCount: 0, averageRating: 0 };
+    
+    // Add review stats to product data
+    doc.reviewCount = stats.reviewCount;
+    doc.averageRating = Math.round(stats.averageRating * 10) / 10; // Round to 1 decimal place
+
     return res.json({ ok: true, data: doc });
   } catch (e) {
     console.error(e);
@@ -288,6 +307,25 @@ router.get('/:idOrSlug', async (req, res) => {
     if (/^[0-9a-fA-F]{24}$/.test(idOrSlug)) doc = await Product.findById(idOrSlug).lean();
     if (!doc) doc = await Product.findOne({ slug: idOrSlug }).lean();
     if (!doc) return res.status(404).json({ ok: false, message: 'Not found' });
+    
+    // Calculate review count and average rating
+    const reviewStats = await Review.aggregate([
+      { $match: { productId: doc._id, status: 'published', approved: true } },
+      {
+        $group: {
+          _id: '$productId',
+          reviewCount: { $sum: 1 },
+          averageRating: { $avg: '$rating' }
+        }
+      }
+    ]);
+
+    const stats = reviewStats[0] || { reviewCount: 0, averageRating: 0 };
+    
+    // Add review stats to product data
+    doc.reviewCount = stats.reviewCount;
+    doc.averageRating = Math.round(stats.averageRating * 10) / 10; // Round to 1 decimal place
+    
     return res.json({ ok: true, data: doc });
   } catch (e) {
     console.error(e);

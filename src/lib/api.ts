@@ -1,5 +1,5 @@
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 
-  (import.meta.env.PROD ? "https://kissancity-1.onrender.com" : "");
+  (import.meta.env.PROD ? "https://kissancity-1.onrender.com" : "http://localhost:5055");
 
 function isLocalhost(url: string) {
   try {
@@ -81,11 +81,8 @@ export async function api(path: string, options: RequestInit = {}) {
     }
   }
 
-  // Add cache-busting timestamp for GET requests
-  const cacheBustUrl = finalUrl.includes('?') 
-    ? `${finalUrl}&_t=${Date.now()}` 
-    : `${finalUrl}?_t=${Date.now()}`;
-
+  console.log('🌐 [API] Using absolute URL path');
+  
   try {
     const token = (typeof window !== 'undefined') ? localStorage.getItem('token') : null;
     const headers = options.body instanceof FormData
@@ -96,7 +93,7 @@ export async function api(path: string, options: RequestInit = {}) {
     console.log('🌐 [API] Headers being sent:', headers);
 
     const { headers: _, ...optionsWithoutHeaders } = options;
-    const res = await fetch(cacheBustUrl, {
+    const res = await fetch(finalUrl, {
       credentials: "include",
       headers,
       cache: "no-store",
@@ -106,6 +103,7 @@ export async function api(path: string, options: RequestInit = {}) {
     const json = await res.json().catch(() => ({}));
     return { ok: res.ok, status: res.status, json };
   } catch (error: any) {
+    console.error('🌐 [API] Absolute request error:', error);
     // Re-throwing error to propagate it.
     throw error;
   }

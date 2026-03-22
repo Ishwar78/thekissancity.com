@@ -1295,9 +1295,13 @@ const Index = () => {
     .cat-img-inner img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
-      padding: 10px;
+      object-fit: cover;
+      object-position: center;
+      padding: 8px;
       transition: transform 0.4s ease;
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: crisp-edges;
+      image-rendering: pixelated;
     }
     .cat-pill:hover .cat-img-inner img {
       transform: scale(1.1);
@@ -1483,9 +1487,13 @@ const Index = () => {
     .cat-img-inner img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
-      padding: 10px;
+      object-fit: cover;
+      object-position: center;
+      padding: 8px;
       transition: transform 0.4s ease;
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: crisp-edges;
+      image-rendering: pixelated;
     }
     .cat-pill:hover .cat-img-inner img {
       transform: scale(1.1);
@@ -1563,7 +1571,7 @@ const Index = () => {
                 >
                   <Link to={to} className="cat-pill flex flex-col items-center gap-2">
                     <div className="cat-img-ring">
-                      <div className="cat-img-inner w-[72px] h-[72px]">
+                      <div className="cat-img-inner w-[96px] h-[96px]">
                         <img
                           src={resolveImage(region.imageUrl || "/placeholder.svg")}
                           alt={region.name}
@@ -1601,7 +1609,7 @@ const Index = () => {
               className="cat-pill flex flex-col items-center gap-2"
             >
               <div className="cat-img-ring">
-                <div className="cat-img-inner w-24 h-24 md:w-28 md:h-28">
+                <div className="cat-img-inner w-32 h-32 md:w-36 md:h-36">
                   <img
                     src={resolveImage(region.imageUrl || "/placeholder.svg")}
                     alt={region.name}
@@ -1609,7 +1617,7 @@ const Index = () => {
                   />
                 </div>
               </div>
-              <span className="cat-label w-24 md:w-28">{region.name}</span>
+              <span className="cat-label w-32 md:w-36">{region.name}</span>
             </Link>
           );
         })}

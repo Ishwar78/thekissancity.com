@@ -7,7 +7,7 @@ const aboutUsSchema = new mongoose.Schema({
   },
   title: {
     main: { type: String, required: true, default: 'Our Story' },
-    highlighted: { type: String, required: true, default: 'Story' }
+    highlighted: { type: String, required: false, default: 'Story' }
   },
   content: {
     main: [{

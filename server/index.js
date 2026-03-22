@@ -100,8 +100,8 @@ app.use((req, _res, next) => {
 /* -------------------------------- CORS --------------------------------- */
 // Disable CORS restrictions for development
 const corsOptions = {
-  origin: '*',
-  credentials: false,
+  origin: ['http://localhost:8080', 'http://localhost:3000', 'http://127.0.0.1:8080', 'http://127.0.0.1:3000'],
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 };

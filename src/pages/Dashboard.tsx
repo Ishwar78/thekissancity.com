@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/dialog";
 
 // Types for orders and items
-type OrderItem = { id: string; title: string; price: number; qty: number; image?: string };
+type OrderItem = { id: string; productId: string; title: string; price: number; qty: number; image?: string };
 export type Order = {
   _id: string;
   total: number;
@@ -174,14 +174,20 @@ export default function Dashboard() {
   };
 
   const openReviewModal = (productId: string, orderId: string, productTitle: string) => {
-    setReviewingProduct({ productId, orderId, title: productTitle });
+    console.log('🔍 [DASHBOARD] Opening review for productId:', productId);
+    
+    // Store additional info in case product doesn't exist
+    setReviewingProduct({ 
+      productId, 
+      orderId, 
+      title: productTitle,
+      fallbackInfo: {
+        originalProductId: productId,
+        productTitle,
+        timestamp: new Date().toISOString()
+      }
+    });
     setReviewModalOpen(true);
-  };
-
-  const handleReviewSuccess = () => {
-    setReviewModalOpen(false);
-    setReviewingProduct(null);
-    toast({ title: "Success", description: "Your review has been submitted and is pending approval." });
   };
 
   const statusBadge = (s: string) => {
@@ -461,10 +467,21 @@ export default function Dashboard() {
                               <div className="mt-4 mb-4 p-4 bg-muted/30 rounded-lg border border-border">
                                 <h4 className="font-semibold text-sm mb-3">Select product to review:</h4>
                                 <div className="space-y-2">
-                                  {o.items.map((item, idx) => (
+                                  {o.items.map((item, idx) => {
+                                    console.log('🔍 [DASHBOARD] Order item:', {
+                                      item,
+                                      productId: item.productId,
+                                      id: item.id,
+                                      title: item.title
+                                    });
+                                    return (
                                     <button
                                       key={idx}
-                                      onClick={() => openReviewModal(item.id, o._id, item.title)}
+                                      onClick={() => {
+                                        const productId = item.productId || item.id;
+                                        console.log('🔍 [DASHBOARD] Opening review for productId:', productId);
+                                        openReviewModal(productId, o._id, item.title);
+                                      }}
                                       className="w-full flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors text-left"
                                     >
                                       <img
@@ -478,7 +495,8 @@ export default function Dashboard() {
                                       </div>
                                       <Star className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                                     </button>
-                                  ))}
+                                    );
+                                  })}
                                 </div>
                               </div>
                             )}
@@ -637,11 +655,14 @@ export default function Dashboard() {
       <CheckoutModal open={openCheckout} setOpen={setOpenCheckout} />
       {reviewingProduct && (
         <ReviewModal
-          open={reviewModalOpen}
-          onOpenChange={setReviewModalOpen}
+          isOpen={reviewModalOpen}
+          onClose={() => {
+            setReviewModalOpen(false);
+            setReviewingProduct(null);
+          }}
           productId={reviewingProduct.productId}
-          orderId={reviewingProduct.orderId}
-          onSuccess={handleReviewSuccess}
+          productName={reviewingProduct.title}
+          fallbackInfo={reviewingProduct.fallbackInfo}
         />
       )}
     </div>

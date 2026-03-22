@@ -25,7 +25,13 @@ export default function CouponPopup({ isOpen, onClose, coupons }: CouponPopupPro
   const modalRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    console.log(' [COUPON POPUP] Component state:', {
+      isOpen,
+      couponsLength: coupons.length
+    });
+
     if (isOpen) {
+      console.log(' [COUPON POPUP] Opening modal');
       document.body.style.overflow = 'hidden';
       setTimeout(() => setMounted(true), 30);
     } else {
@@ -33,7 +39,7 @@ export default function CouponPopup({ isOpen, onClose, coupons }: CouponPopupPro
       setMounted(false);
     }
     return () => { document.body.style.overflow = ''; };
-  }, [isOpen]);
+  }, [isOpen, coupons]);
 
   const copyToClipboard = async (code: string) => {
     try {

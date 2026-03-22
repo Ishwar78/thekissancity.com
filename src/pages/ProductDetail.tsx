@@ -283,7 +283,10 @@ const ProductDetail = () => {
     }
     if (Array.isArray(product?.quantityOptions) && selectedSize) {
       const selectedOption = product.quantityOptions.find((opt: any) => opt.id === selectedSize || opt.code === selectedSize);
-      return selectedOption?.stock || selectedOption?.qty || 0;
+      const optionStock = selectedOption?.stock || selectedOption?.qty || 0;
+      // If option stock is 0, fall back to main product stock
+      const result = optionStock > 0 ? optionStock : Number(product?.stock ?? 0);
+      return result;
     }
     if (product?.trackInventoryBySize && Array.isArray(product?.sizeInventory) && selectedSize) {
       const sizeInfo = product.sizeInventory.find((s) => s.code === selectedSize);
@@ -341,8 +344,9 @@ const ProductDetail = () => {
     let stockError = "";
     if (hasQuantityOptions && selectedSize) {
       const selectedOption = product.quantityOptions?.find((opt: any) => opt.id === selectedSize || opt.code === selectedSize);
-      currentStock = selectedOption?.stock || selectedOption?.qty || 0;
-      stockError = `Option ${selectedSize} is out of stock`;
+      const optionStock = selectedOption?.stock || selectedOption?.qty || 0;
+      currentStock = optionStock > 0 ? optionStock : product.stock ?? 0;
+      stockError = optionStock > 0 ? "" : `Option ${selectedSize} is out of stock`;
     } else if (usingSizeInventory && selectedSize) {
       currentStock = product.sizeInventory?.find((s) => s.code === selectedSize)?.qty ?? 0;
       stockError = `Size ${selectedSize} is out of stock`;
@@ -412,7 +416,17 @@ const ProductDetail = () => {
     const currentStock = usingSizeInventory && selectedSize
       ? product.sizeInventory?.find((s) => s.code === selectedSize)?.qty ?? 0
       : product.stock ?? 0;
-    if (currentStock === 0) {
+    
+    // Apply fallback logic for quantity options
+    const finalStock = (Array.isArray(product?.quantityOptions) && selectedSize)
+      ? (() => {
+          const selectedOption = product.quantityOptions?.find((opt: any) => opt.id === selectedSize || opt.code === selectedSize);
+          const optionStock = selectedOption?.stock || selectedOption?.qty || 0;
+          return optionStock > 0 ? optionStock : Number(product?.stock ?? 0);
+        })()
+      : currentStock;
+    
+    if (finalStock === 0) {
       const errorMsg = usingSizeInventory && selectedSize ? `Size ${selectedSize} is out of stock` : "Out of stock";
       setSizeStockError(errorMsg);
       toast({ title: "Out of stock", variant: "destructive" });
@@ -613,13 +627,14 @@ const ProductDetail = () => {
                   )}
                 </div> */}
                  {product.paragraph1 && (
-                    <div className="flex items-center gap-1 text-xs">
-                      <span className="text-red-800 mt-0.5">
-                        <svg width="13" height="13" viewBox="0 0 15 15" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M7.49991 0.879059C3.87771 0.879059 0.879059 3.87771 0.879059 7.49991C0.879059 11.1221 3.87771 14.1208 7.49991 14.1208C11.1221 14.1208 14.1208 11.1221 14.1208 7.49991C14.1208 3.87771 11.1221 0.879059 7.49991 0.879059ZM1.82737 7.49991C1.82737 4.40422 4.40422 1.82737 7.49991 1.82737C10.5956 1.82737 13.1724 4.40422 13.1724 7.49991C13.1724 10.5956 10.5956 13.1724 7.49991 13.1724C4.40422 13.1724 1.82737 10.5956 1.82737 7.49991ZM8.24991 4.24991C8.24991 3.8357 7.91422 3.49991 7.49991 3.49991C7.0857 3.49991 6.74991 3.8357 6.74991 4.24991V7.49991C6.74991 7.91412 7.0857 8.24991 7.49991 8.24991C7.91412 8.24991 8.24991 7.91412 8.24991 7.49991V4.24991ZM7.49991 9.74991C7.10287 9.74991 6.77259 10.0551 6.75017 10.4516L6.74991 10.5C6.74991 10.8971 7.05515 11.2274 7.45164 11.2498L7.49991 11.2499C7.89711 11.2499 8.22739 10.9447 8.24982 10.5482L8.24991 10.5C8.24991 10.1029 7.94467 9.77263 7.54818 9.75021L7.49991 9.74991Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd" />
-                        </svg>
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className="text-amber-600 mt-0.5 shrink-0">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+  <path d="M9 12l2 2 4-4"></path>
+</svg>
                       </span>
-                      <p className="text-red-800 font-medium">{product.paragraph1}</p>
+                      <p className="text-amber-700 font-medium leading-relaxed">{product.paragraph1}</p>
                     </div>
                   )}
 
@@ -627,9 +642,13 @@ const ProductDetail = () => {
                   {product.paragraph2 && (
                     <div className="flex items-center gap-1 text-xs mt-1 mb-3">
                       <span className="text-gray-900 flex items-center">
-                        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M2.5 2C2.22386 2 2 2.22386 2 2.5C2 2.77614 2.22386 3 2.5 3H3.12104L4.5 10.5H12.5L14 4.5H5L4.87896 3.81957C4.82128 3.52339 4.55871 3.31547 4.25 3.31547H2.5ZM5.12104 5.5H12.7639L11.7639 9.5H5.5L5.12104 5.5ZM5.5 12C4.67157 12 4 12.6716 4 13.5C4 14.3284 4.67157 15 5.5 15C6.32843 15 7 14.3284 7 13.5C7 12.6716 6.32843 12 5.5 12ZM11.5 12C10.6716 12 10 12.6716 10 13.5C10 14.3284 10.6716 15 11.5 15C12.3284 15 13 14.3284 13 13.5C13 12.6716 12.3284 12 11.5 12Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd"/>
-                        </svg>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+  <polyline points="7.5 4.21 12 6.81 16.5 4.21"></polyline>
+  <polyline points="7.5 19.79 7.5 14.6 3 12"></polyline>
+  <polyline points="21 12 16.5 14.6 16.5 19.79"></polyline>
+  <polyline points="12 22.81 12 17"></polyline>
+</svg>
                       </span>
                       <p className="text-gray-900 font-medium">{product.paragraph2}</p>
                     </div>

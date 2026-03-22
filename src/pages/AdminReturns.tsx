@@ -89,7 +89,7 @@ export default function AdminReturns() {
     }
   };
 
-  const updateStatus = async (orderId: string, value: 'Pending'|'Approved'|'Rejected') => {
+  const updateStatus = async (orderId: string, value: 'Pending' | 'Approved' | 'Rejected') => {
     try {
       const { ok } = await api(`/api/orders/${orderId}/admin-update`, {
         method: 'PUT',
@@ -97,19 +97,18 @@ export default function AdminReturns() {
       });
       if (ok) {
         setRows(prev => prev.map(r => r._id === orderId ? { ...r, returnStatus: value, status: value === 'Approved' ? 'returned' : r.status } : r));
-        // Auto email (avoid duplicate on Approved - backend sends a templated approval email)
         if (value !== 'Approved') {
           const row = rows.find(r => r._id === orderId);
           const userEmail = (row?.userId && typeof row.userId === 'object') ? (row.userId.email || '') : '';
           if (userEmail) {
             const subj = value === 'Rejected' ? 'Return Rejected' : 'Return Update';
-            const html = `<p>Hello ${(row?.userId as any)?.name || ''},</p><p>Your return request for order #${orderId.slice(0,8).toUpperCase()} is <b>${value}</b>.</p>`;
+            const html = `<p>Hello ${(row?.userId as any)?.name || ''},</p><p>Your return request for order #${orderId.slice(0, 8).toUpperCase()} is <b>${value}</b>.</p>`;
             await api('/api/orders/send-mail', { method: 'POST', body: JSON.stringify({ to: userEmail, subject: subj, html }) });
           }
         }
         toast({ title: 'Status updated' });
       }
-    } catch (e:any) {
+    } catch (e: any) {
       toast({ title: e?.message || 'Failed to update', variant: 'destructive' });
     }
   };
@@ -120,8 +119,8 @@ export default function AdminReturns() {
       ? `Bank Account: ${row.refundBankDetails.accountHolderName}, ${row.refundBankDetails.bankName}, A/C: ${row.refundBankDetails.accountNumber}, IFSC: ${row.refundBankDetails.ifscCode}`
       : `UPI: ${row.refundUpiId || '-'}`;
     setEmailTo(to);
-    setEmailSubject('Refund processed for order #' + row._id.slice(0,8).toUpperCase());
-    setEmailHtml(`<p>Hello ${(row.userId as any)?.name || ''},</p><p>Your refund for order #${row._id.slice(0,8).toUpperCase()} has been processed to ${refundText}.</p>`);
+    setEmailSubject('Refund processed for order #' + row._id.slice(0, 8).toUpperCase());
+    setEmailHtml(`<p>Hello ${(row.userId as any)?.name || ''},</p><p>Your refund for order #${row._id.slice(0, 8).toUpperCase()} has been processed to ${refundText}.</p>`);
     setEmailOpen(true);
   };
 
@@ -154,7 +153,7 @@ export default function AdminReturns() {
         </div>
 
         <div className="flex flex-col md:flex-row gap-4 md:gap-8">
-          {/* Sidebar - Hidden on mobile, shown with toggle or visible on md+ */}
+          {/* Sidebar */}
           <aside
             className={cn(
               'transition-all duration-300 ease-in-out',
@@ -202,94 +201,154 @@ export default function AdminReturns() {
           </aside>
 
           <section className="flex-1 min-w-0 space-y-4 sm:space-y-6">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold">Return Requests</h1>
-          <p className="text-sm text-muted-foreground">Review and process product return requests</p>
-        </div>
+            <div className="mb-6">
+              <h1 className="text-2xl font-bold">Return Requests</h1>
+              <p className="text-sm text-muted-foreground">Review and process product return requests</p>
+            </div>
 
-        <Card className="p-4">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left text-muted-foreground border-b">
-                  <th className="py-2">Order ID</th>
-                  <th className="py-2">User Name & Email</th>
-                  <th className="py-2">Product Details</th>
-                  <th className="py-2">Return Reason</th>
-                  <th className="py-2">Refund Details</th>
-                  <th className="py-2">Date</th>
-                  <th className="py-2">Status</th>
-                  <th className="py-2">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {fetching ? (
-                  <tr><td className="py-8 text-center text-muted-foreground" colSpan={8}>Loading...</td></tr>
-                ) : rows.length === 0 ? (
-                  <tr><td className="py-8 text-center text-muted-foreground" colSpan={8}>No return requests</td></tr>
-                ) : (
-                  rows.map(row => {
-                    const first = (row.items || [])[0] || {};
-                    const d = row.returnRequestedAt || row.updatedAt || row.createdAt;
-                    const u = typeof row.userId === 'object' ? row.userId : undefined;
-                    return (
-                      <tr key={row._id} className="border-b last:border-b-0">
-                        <td className="py-2 font-mono">{row._id.slice(0,8).toUpperCase()}</td>
-                        <td className="py-2">
-                          <div className="flex flex-col">
-                            <span>{u?.name || '-'}</span>
-                            <span className="text-xs text-muted-foreground">{u?.email || '-'}</span>
-                          </div>
-                        </td>
-                        <td className="py-2">
-                          <div className="flex items-center gap-3">
-                            <img src={first.image || '/placeholder.svg'} alt={first.title || 'Product'} className="w-10 h-10 object-cover rounded border" />
-                            <div>
-                              <div className="font-medium truncate max-w-[220px]">{first.title || '-'}</div>
-                              <div className="text-xs text-muted-foreground">Qty {first.qty || 0}</div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="py-2 max-w-[240px] pr-4">
-                          <div className="line-clamp-2">{row.returnReason || '-'}</div>
-                        </td>
-                        <td className="py-2 max-w-[300px]">
-                          {row.refundMethod === 'bank' && row.refundBankDetails ? (
-                            <div className="text-xs space-y-1">
-                              <div><span className="font-semibold">Name:</span> {row.refundBankDetails.accountHolderName}</div>
-                              <div><span className="font-semibold">Bank:</span> {row.refundBankDetails.bankName}</div>
-                              <div><span className="font-semibold">A/C:</span> {row.refundBankDetails.accountNumber}</div>
-                              <div><span className="font-semibold">IFSC:</span> {row.refundBankDetails.ifscCode}</div>
-                            </div>
-                          ) : (
-                            <div className="text-sm">UPI: <span className="font-mono">{row.refundUpiId || '-'}</span></div>
-                          )}
-                        </td>
-                        <td className="py-2">{new Date(d as any).toLocaleString()}</td>
-                        <td className="py-2">
-                          <Select value={row.returnStatus || 'Pending'} onValueChange={(v:any)=>updateStatus(row._id, v)}>
-                            <SelectTrigger className="w-[140px]"><SelectValue /></SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="Pending">Pending</SelectItem>
-                              <SelectItem value="Approved">Approved</SelectItem>
-                              <SelectItem value="Rejected">Rejected</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </td>
-                        <td className="py-2">
-                          <div className="flex gap-2">
-                            <Button variant="outline" size="sm" onClick={()=>navigate(`/admin/orders/${row._id}/invoice`)}>View</Button>
-                            <Button size="sm" onClick={()=>openEmail(row)}>Process Refund</Button>
-                          </div>
-                        </td>
+            <Card className="p-4">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm border-collapse" style={{ tableLayout: 'fixed', minWidth: '900px' }}>
+                  <colgroup>
+                    <col style={{ width: '90px' }} />
+                    <col style={{ width: '150px' }} />
+                    <col style={{ width: '200px' }} />
+                    <col style={{ width: '150px' }} />
+                    <col style={{ width: '190px' }} />
+                    <col style={{ width: '120px' }} />
+                    <col style={{ width: '145px' }} />
+                    <col style={{ width: '160px' }} />
+                  </colgroup>
+                  <thead>
+                    <tr className="text-left text-muted-foreground border-b">
+                      <th className="py-2 pr-3 font-medium">Order ID</th>
+                      <th className="py-2 pr-3 font-medium">User Name & Email</th>
+                      <th className="py-2 pr-3 font-medium">Product Details</th>
+                      <th className="py-2 pr-3 font-medium">Return Reason</th>
+                      <th className="py-2 pr-3 font-medium">Refund Details</th>
+                      <th className="py-2 pr-3 font-medium">Date</th>
+                      <th className="py-2 pr-3 font-medium">Status</th>
+                      <th className="py-2 font-medium">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {fetching ? (
+                      <tr>
+                        <td className="py-8 text-center text-muted-foreground" colSpan={8}>Loading...</td>
                       </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
-        </Card>
+                    ) : rows.length === 0 ? (
+                      <tr>
+                        <td className="py-8 text-center text-muted-foreground" colSpan={8}>No return requests</td>
+                      </tr>
+                    ) : (
+                      rows.map(row => {
+                        const first = (row.items || [])[0] || {};
+                        const d = row.returnRequestedAt || row.updatedAt || row.createdAt;
+                        const u = typeof row.userId === 'object' ? row.userId : undefined;
+                        return (
+                          <tr key={row._id} className="border-b last:border-b-0 align-top">
+                            {/* Order ID */}
+                            <td className="py-3 pr-3">
+                              <span className="font-mono text-xs">{row._id.slice(0, 8).toUpperCase()}</span>
+                            </td>
+
+                            {/* User Name & Email */}
+                            <td className="py-3 pr-3">
+                              <div className="flex flex-col gap-0.5">
+                                <span className="font-medium truncate">{u?.name || '-'}</span>
+                                <span className="text-xs text-muted-foreground truncate">{u?.email || '-'}</span>
+                              </div>
+                            </td>
+
+                            {/* Product Details */}
+                            <td className="py-3 pr-3">
+                              <div className="flex items-start gap-2">
+                                <img
+                                  src={first.image || '/placeholder.svg'}
+                                  alt={first.title || 'Product'}
+                                  className="w-10 h-10 object-cover rounded border flex-shrink-0 mt-0.5"
+                                />
+                                <div className="min-w-0">
+                                  <div className="font-medium text-xs leading-snug break-words">{first.title || '-'}</div>
+                                  <div className="text-xs text-muted-foreground mt-0.5">Qty {first.qty || 0}</div>
+                                </div>
+                              </div>
+                            </td>
+
+                            {/* Return Reason */}
+                            <td className="py-3 pr-3">
+                              <div className="text-xs break-words leading-snug">{row.returnReason || '-'}</div>
+                            </td>
+
+                            {/* Refund Details */}
+                            <td className="py-3 pr-3">
+                              {row.refundMethod === 'bank' && row.refundBankDetails ? (
+                                <div className="text-xs space-y-0.5">
+                                  <div><span className="font-semibold">Name:</span> {row.refundBankDetails.accountHolderName}</div>
+                                  <div><span className="font-semibold">Bank:</span> {row.refundBankDetails.bankName}</div>
+                                  <div><span className="font-semibold">A/C:</span> {row.refundBankDetails.accountNumber}</div>
+                                  <div><span className="font-semibold">IFSC:</span> {row.refundBankDetails.ifscCode}</div>
+                                </div>
+                              ) : (
+                                <div className="text-xs">
+                                  <span className="font-semibold">UPI:</span>{' '}
+                                  <span className="font-mono break-all">{row.refundUpiId || '-'}</span>
+                                </div>
+                              )}
+                            </td>
+
+                            {/* Date */}
+                            <td className="py-3 pr-3">
+                              <div className="text-xs whitespace-nowrap">
+                                {new Date(d as any).toLocaleDateString()}
+                              </div>
+                              <div className="text-xs text-muted-foreground whitespace-nowrap">
+                                {new Date(d as any).toLocaleTimeString()}
+                              </div>
+                            </td>
+
+                            {/* Status */}
+                            <td className="py-3 pr-3">
+                              <Select value={row.returnStatus || 'Pending'} onValueChange={(v: any) => updateStatus(row._id, v)}>
+                                <SelectTrigger className="w-[130px] h-8 text-xs">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="Pending">Pending</SelectItem>
+                                  <SelectItem value="Approved">Approved</SelectItem>
+                                  <SelectItem value="Rejected">Rejected</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </td>
+
+                            {/* Actions */}
+                            <td className="py-3">
+                              <div className="flex flex-col gap-1.5">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-7 text-xs px-2 w-full"
+                                  onClick={() => navigate(`/admin/orders/${row._id}/invoice`)}
+                                >
+                                  View
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  className="h-7 text-xs px-2 w-full"
+                                  onClick={() => openEmail(row)}
+                                >
+                                  Process Refund
+                                </Button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
           </section>
         </div>
       </main>
@@ -302,29 +361,29 @@ export default function AdminReturns() {
           <div className="space-y-3">
             <div>
               <Label>To</Label>
-              <Input value={emailTo} onChange={(e)=>setEmailTo(e.target.value)} />
+              <Input value={emailTo} onChange={(e) => setEmailTo(e.target.value)} />
             </div>
             <div>
               <Label>Subject</Label>
-              <Input value={emailSubject} onChange={(e)=>setEmailSubject(e.target.value)} />
+              <Input value={emailSubject} onChange={(e) => setEmailSubject(e.target.value)} />
             </div>
             <div>
               <Label>HTML Content</Label>
-<textarea
-  className="w-full h-40 border rounded p-2 text-sm
-             text-slate-900 dark:text-slate-100
-             placeholder:text-slate-500 dark:placeholder:text-slate-400
-             caret-primary"
-  placeholder="Write HTML here..."
-  value={emailHtml}
-  onChange={(e)=>setEmailHtml(e.target.value)}
-/>
-
-
+              <textarea
+                className="w-full h-40 border rounded p-2 text-sm
+                           text-slate-900 dark:text-slate-100
+                           placeholder:text-slate-500 dark:placeholder:text-slate-400
+                           caret-primary"
+                placeholder="Write HTML here..."
+                value={emailHtml}
+                onChange={(e) => setEmailHtml(e.target.value)}
+              />
             </div>
             <div className="flex gap-2">
-              <Button onClick={sendEmail} disabled={emailSending}>{emailSending ? 'Sending…' : 'Send'}</Button>
-              <Button variant="outline" onClick={()=>setEmailOpen(false)}>Cancel</Button>
+              <Button onClick={sendEmail} disabled={emailSending}>
+                {emailSending ? 'Sending…' : 'Send'}
+              </Button>
+              <Button variant="outline" onClick={() => setEmailOpen(false)}>Cancel</Button>
             </div>
           </div>
         </DialogContent>

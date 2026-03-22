@@ -135,6 +135,25 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
     res.json(updatedAboutUs);
   } catch (error) {
     console.error('Error updating About Us content:', error);
+    
+    // Handle validation errors gracefully
+    if (error.name === 'ValidationError') {
+      const missingFields = [];
+      Object.keys(error.errors).forEach(field => {
+        if (error.errors[field].kind === 'required') {
+          missingFields.push(field);
+        }
+      });
+      
+      if (missingFields.length > 0) {
+        return res.status(400).json({ 
+          error: 'Missing required fields',
+          missingFields,
+          message: `Please fill in the following required fields: ${missingFields.join(', ')}`
+        });
+      }
+    }
+    
     res.status(500).json({ error: 'Failed to update About Us content' });
   }
 });

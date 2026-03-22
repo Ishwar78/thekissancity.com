@@ -140,7 +140,18 @@ export const AboutUsManager = () => {
         body: JSON.stringify(formData)
       });
 
-      if (!ok) throw new Error('Failed to save About Us content');
+      if (!ok) {
+        // Handle validation errors gracefully
+        if (json?.missingFields && json?.message) {
+          toast({
+            title: 'Missing Information',
+            description: json.message,
+            variant: 'destructive'
+          });
+          return;
+        }
+        throw new Error(json?.error || 'Failed to save About Us content');
+      }
       
       toast({
         title: 'Success',
@@ -151,10 +162,10 @@ export const AboutUsManager = () => {
       setEditingEntry(null);
       setFormData(DEFAULT_FORM_DATA);
       loadAboutUsEntries();
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: 'Error',
-        description: `Failed to ${editingEntry ? 'update' : 'create'} About Us content`,
+        description: error?.message || `Failed to ${editingEntry ? 'update' : 'create'} About Us content`,
         variant: 'destructive'
       });
     }

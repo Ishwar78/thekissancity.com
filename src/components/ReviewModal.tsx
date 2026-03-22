@@ -30,9 +30,14 @@ interface ReviewModalProps {
   onClose: () => void;
   productId: string;
   productName: string;
+  fallbackInfo?: {
+    originalProductId: string;
+    productTitle: string;
+    timestamp: string;
+  };
 }
 
-export const ReviewModal = ({ isOpen, onClose, productId, productName }: ReviewModalProps) => {
+export const ReviewModal = ({ isOpen, onClose, productId, productName, fallbackInfo }: ReviewModalProps) => {
   const { toast } = useToast();
   const { user } = useAuth();
   const [submitting, setSubmitting] = useState(false);
@@ -49,6 +54,14 @@ export const ReviewModal = ({ isOpen, onClose, productId, productName }: ReviewM
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    console.log('🔍 [REVIEW] Submitting review:', {
+      productId,
+      rating: review.rating,
+      text: review.text.trim(),
+      user: user?.email,
+      fallbackInfo
+    });
     
     if (!user) {
       toast({
@@ -77,18 +90,30 @@ export const ReviewModal = ({ isOpen, onClose, productId, productName }: ReviewM
       return;
     }
 
+    const requestBody = {
+      productId,
+      rating: review.rating,
+      text: review.text.trim()
+    };
+    
+    console.log('🔍 [REVIEW] Request body to be sent:', requestBody);
+
     setSubmitting(true);
     try {
-      const { ok, json } = await api("/api/reviews", {
+      console.log('🔍 [REVIEW] Making API call...');
+      const { ok, json, status } = await api("/api/reviews", {
         method: "POST",
-        body: JSON.stringify({
-          productId,
-          rating: review.rating,
-          text: review.text.trim()
-        }),
+        body: JSON.stringify(requestBody),
         headers: {
           "Content-Type": "application/json"
         }
+      });
+
+      console.log('🔍 [REVIEW] API Response:', {
+        ok,
+        status,
+        json,
+        bodySent: requestBody
       });
 
       if (ok) {
@@ -99,9 +124,29 @@ export const ReviewModal = ({ isOpen, onClose, productId, productName }: ReviewM
         setReview({ rating: 0, text: "" });
         onClose();
       } else {
-        throw new Error(json?.message || "Failed to submit review");
+        console.error('🔍 [REVIEW] API Error Response:', json);
+        
+        const errorMessage = json?.message || "Failed to submit review";
+        
+        // Show user-friendly error for product not found
+        if (json?.message === 'Product not found') {
+          toast({
+            title: "Product Not Available",
+            description: `This product is no longer available for review. It may have been removed from the catalog. ${fallbackInfo ? `(Product: ${fallbackInfo.productTitle})` : ''}`,
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "Error",
+            description: errorMessage,
+            variant: "destructive"
+          });
+        }
+        
+        throw new Error(errorMessage);
       }
     } catch (error: any) {
+      console.error('🔍 [REVIEW] Submit Error:', error);
       toast({
         title: "Error",
         description: error.message || "Failed to submit review",

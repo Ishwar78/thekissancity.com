@@ -6,6 +6,7 @@ const { requireAuth, requireAdmin } = require('../middleware/auth');
 // Public: GET /api/coupons/latest - Get latest active coupon for popup
 router.get('/latest', async (req, res) => {
   try {
+    console.log(' [COUPONS API] Fetching latest coupons...');
     const coupons = await Coupon.find({ 
       isActive: true, 
       expiryDate: { $gt: new Date() } 
@@ -13,6 +14,9 @@ router.get('/latest', async (req, res) => {
     .sort({ createdAt: -1 })
     .limit(1) // Show only 1 latest coupon
     .lean();
+    
+    console.log(' [COUPONS API] Found coupons:', coupons.length);
+    console.log(' [COUPONS API] Coupons data:', coupons);
     
     const normalized = coupons.map((c) => ({
       id: String(c._id),
@@ -23,6 +27,8 @@ router.get('/latest', async (req, res) => {
       description: String(c.description || ''),
       termsAndConditions: String(c.termsAndConditions || ''),
     }));
+    
+    console.log(' [COUPONS API] Normalized coupons:', normalized);
     
     return res.json({ ok: true, data: normalized });
   } catch (e) {
