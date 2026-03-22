@@ -748,7 +748,7 @@ export const ProductSlider = ({ className }: { className?: string }) => {
         </div>
 
         {/* ── STATS BAR ── */}
-        <div className="ps-stats">
+        {/* <div className="ps-stats">
           <div className="ps-stat">
             <span className="ps-stat-num">{currentSlideData?.stats?.products || "200+"}</span>
             <span className="ps-stat-label">Products</span>
@@ -765,7 +765,7 @@ export const ProductSlider = ({ className }: { className?: string }) => {
             <span className="ps-stat-num">{currentSlideData?.stats?.rating || "4.8★"}</span>
             <span className="ps-stat-label">Avg. Rating</span>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

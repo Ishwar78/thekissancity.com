@@ -4,8 +4,8 @@ import { Truck, Lock, RefreshCcw, Headphones, Shield, Clock, ArrowRight } from "
 const features = [
   {
     icon: Truck,
-    title: "Free Shipping",
-    description: "Free shipping on all orders above 1000",
+    title: " Direct Farm Sourcing",
+    description: "Every product is harvested and sourced directly from local farms , ensuring maximum freshness and fair pay for our growers.",
     color: "#2d6a4f",
     bgGradient: "linear-gradient(135deg, #2d6a4f, #40916c)",
     stat: "1000+",
@@ -22,8 +22,8 @@ const features = [
   },
   {
     icon: RefreshCcw,
-    title: "Easy Returns",
-    description: "30 days return policy",
+    title: "Quality Replacement",
+    description: "Not happy with the quality or found a defect ? We offer a hassle free-replacement or refund for damaged items within 36 hours",
     color: "#2d6a4f",
     bgGradient: "linear-gradient(135deg, #2d6a4f, #40916c)",
     stat: "30",

@@ -1,16 +1,46 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronDown, ChevronUp, Leaf, Mountain, Heart } from 'lucide-react';
 
-const stats = [
-  { value: '500+', label: 'Partner Farmers' },
-  { value: '100%', label: 'Organic Certified' },
-  { value: '50+', label: 'Hill Products' },
-  { value: '10K+', label: 'Happy Homes' },
-];
+interface AboutUsData {
+  eyebrow: {
+    text: string;
+    icon: string;
+  };
+  title: {
+    main: string;
+    highlighted: string;
+  };
+  content: {
+    main: { text: string }[];
+    expanded: { text: string }[];
+  };
+  image: {
+    src: string;
+    alt: string;
+    badge: {
+      text: string;
+      icon: string;
+    };
+    banner: {
+      text: string;
+    };
+  };
+  icons: {
+    text: string;
+    icon: string;
+  }[];
+  stats: {
+    value: string;
+    label: string;
+  }[];
+}
 
 const AboutUsSection = () => {
   const [isReadMore, setIsReadMore] = useState(false);
   const [visible, setVisible] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [aboutUsData, setAboutUsData] = useState<AboutUsData | null>(null);
   const sectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -26,30 +56,112 @@ const AboutUsSection = () => {
     return () => observer.disconnect();
   }, []);
 
-  const ImageCard = ({ height = 420 }: { height?: number }) => (
-    <div className="au-image-card">
-      <div className="au-img-top-bar" />
-      {/* 
-        Key fix: use object-cover + fixed height so the image fills
-        the container without leaving empty black space.
-        The image /Capture.PNG appears to be a 3-panel collage —
-        object-cover crops it to fill the area cleanly.
-      */}
-      <div className="au-img-wrap" style={{ height }}>
-        <img src="/Capture.PNG" alt="Direct from source" />
-        <div className="au-img-overlay" />
-        <div className="au-float-badge">
-          <Leaf size={10} />
-          100% Organic
+  useEffect(() => {
+    const fetchAboutUsData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await fetch('/api/about-us');
+        if (!response.ok) {
+          throw new Error('Failed to fetch About Us data');
+        }
+        const data = await response.json();
+        setAboutUsData(data);
+      } catch (err) {
+        console.error('Error fetching About Us data:', err);
+        setError('Failed to load About Us content');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAboutUsData();
+  }, []);
+
+  const getIconComponent = (iconName: string) => {
+    switch (iconName) {
+      case 'Leaf': return Leaf;
+      case 'Mountain': return Mountain;
+      case 'Heart': return Heart;
+      default: return Leaf;
+    }
+  };
+
+  const ImageCard = ({ height = 420 }: { height?: number }) => {
+    if (!aboutUsData) return null;
+
+    const BadgeIcon = getIconComponent(aboutUsData.image.badge.icon);
+
+    return (
+      <div className="au-image-card">
+        <div className="au-img-top-bar" />
+        <div className="au-img-wrap" style={{ height }}>
+          <img src={aboutUsData.image.src} alt={aboutUsData.image.alt} />
+          <div className="au-img-overlay" />
+          <div className="au-float-badge">
+            <BadgeIcon size={10} />
+            {aboutUsData.image.badge.text}
+          </div>
+        </div>
+        <div className="au-img-banner">
+          <div className="au-img-banner-dot" />
+          <span className="au-img-banner-text">{aboutUsData.image.banner.text}</span>
+          <div className="au-img-banner-dot" />
         </div>
       </div>
-      <div className="au-img-banner">
-        <div className="au-img-banner-dot" />
-        <span className="au-img-banner-text">Perfect for all occasions</span>
-        <div className="au-img-banner-dot" />
-      </div>
-    </div>
-  );
+    );
+  };
+
+  if (loading) {
+    return (
+      <section className="au-root" ref={sectionRef}>
+        <style>{`
+          .au-root {
+            position: relative; overflow: hidden;
+            background: linear-gradient(135deg, #1a120a 0%, #2d1f10 40%, #1e160c 100%);
+            padding: 80px 0;
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+          .au-loading {
+            color: #ba8c5c;
+            font-size: 18px;
+            font-weight: 600;
+          }
+        `}</style>
+        <div className="au-loading">Loading About Us...</div>
+      </section>
+    );
+  }
+
+  if (error || !aboutUsData) {
+    return (
+      <section className="au-root" ref={sectionRef}>
+        <style>{`
+          .au-root {
+            position: relative; overflow: hidden;
+            background: linear-gradient(135deg, #1a120a 0%, #2d1f10 40%, #1e160c 100%);
+            padding: 80px 0;
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+          .au-error {
+            color: #e74c3c;
+            font-size: 16px;
+            font-weight: 500;
+            text-align: center;
+          }
+        `}</style>
+        <div className="au-error">{error || 'About Us content not available'}</div>
+      </section>
+    );
+  }
+
+  const EyebrowIcon = getIconComponent(aboutUsData.eyebrow.icon);
 
   return (
     <section className="au-root" ref={sectionRef}>
@@ -262,53 +374,62 @@ const AboutUsSection = () => {
           <div className={`lg:w-[50%] w-full au-reveal-left ${visible ? 'au-in' : ''}`}>
 
             <div className="au-eyebrow">
-              <Mountain size={12} />
-              Kissan City
+              <EyebrowIcon size={12} />
+              {aboutUsData.eyebrow.text}
             </div>
 
-            <h2 className="au-title">Our <span>Story</span></h2>
+            <h2 className="au-title">{aboutUsData.title.main} <span>{aboutUsData.title.highlighted}</span></h2>
             <div className="au-title-underline" />
 
-            <p className="au-body">
-              Every jar, every packet tells a story. A story of farmers in the misty valleys of Himachal Pradesh, tending to their organic farms with the same care their ancestors showed to the land.
-            </p>
-            <p className="au-body">
-              A story of women in Haryana villages, preparing pure desi ghee using the ancient bilona method, handed down through generations.
-            </p>
+            {aboutUsData.content.main.map((paragraph, index) => (
+              <p key={index} className="au-body">
+                {paragraph.text}
+              </p>
+            ))}
 
-            {isReadMore && (
-              <>
-                <p className="au-body-more">
-                  From rich, aromatic ghee to unprocessed honey and handpicked dry fruits, every item reflects quality, freshness, and the true taste of the mountains.
-                </p>
-                <p className="au-body-more">
-                  Our mission is to deliver health, purity, and tradition straight from the hills to your home — food that is wholesome, natural, and crafted with care, just the way nature intended.
-                </p>
-                <div className="lg:hidden mt-6">
-                  <ImageCard height={260} />
-                </div>
-              </>
-            )}
+            {isReadMore && aboutUsData.content.expanded.map((paragraph, index) => (
+              <p key={index} className="au-body-more">
+                {paragraph.text}
+              </p>
+            ))}
 
             <button className="au-toggle-btn" onClick={() => setIsReadMore(!isReadMore)}>
-              {isReadMore
-                ? <><span>Read Less</span><ChevronUp size={14} /></>
-                : <><span>Read More</span><ChevronDown size={14} /></>}
+              {isReadMore ? (
+                <>
+                  <span>Read Less</span>
+                  <ChevronUp size={14} />
+                </>
+              ) : (
+                <>
+                  <span>Read More</span>
+                  <ChevronDown size={14} />
+                </>
+              )}
             </button>
 
             <div className="au-shimmer-line" />
 
+            <div className="lg:hidden mt-6">
+              <ImageCard height={260} />
+            </div>
+
             <div className="au-icons-row">
-              <span className="au-icon-pill"><Leaf size={11} />Organic</span>
-              <span className="au-icon-pill"><Mountain size={11} />Hill Fresh</span>
-              <span className="au-icon-pill"><Heart size={11} />Farmer-first</span>
+              {aboutUsData.icons.map((icon, index) => {
+                const IconComponent = getIconComponent(icon.icon);
+                return (
+                  <span key={index} className="au-icon-pill">
+                    <IconComponent size={11} />
+                    {icon.text}
+                  </span>
+                );
+              })}
             </div>
 
             <div className={`au-stats au-reveal au-d3 ${visible ? 'au-in' : ''}`}>
-              {stats.map((s, i) => (
-                <div key={i} className="au-stat-card">
-                  <span className="au-stat-value">{s.value}</span>
-                  <span className="au-stat-label">{s.label}</span>
+              {aboutUsData.stats.map((stat, index) => (
+                <div key={index} className="au-stat-card">
+                  <span className="au-stat-value">{stat.value}</span>
+                  <span className="au-stat-label">{stat.label}</span>
                 </div>
               ))}
             </div>

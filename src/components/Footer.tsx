@@ -63,7 +63,7 @@ export const Footer = () => {
             </Link>
 
             <p className="text-xs md:text-sm text-gray-300 leading-relaxed mb-4 md:mb-6 max-w-xs">
-              Kissan City is all about bringing you the purity of the pahad in its most natural form.
+             Kissan City is a brand name owned by Nut and Nector Pvt Ltd and is bridging the gap between the rural heartland and urban doorstep.
             </p>
             <div className="space-y-2 md:space-y-3">
               <div className="flex items-center gap-2 md:gap-3 text-xs md:text-sm text-gray-300 hover:text-yellow-400 transition-colors">

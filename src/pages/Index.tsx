@@ -565,9 +565,11 @@ const Index = () => {
           ? (json.data as CategoryRow[])
           : [];
 
+        const parentCategories = list.filter(cat => cat.parent === null);
         const subcategories = list.filter(cat => cat.parent !== null);
+        
         if (HOME_DEBUG) {
-          const parentNull = list.filter((c) => c.parent === null).length;
+          const parentNull = parentCategories.length;
           const parentNotNull = subcategories.length;
           homeLog("[Index] Categories: parent stats", {
             total: list.length,
@@ -581,7 +583,9 @@ const Index = () => {
             );
           }
         }
-        if (!ignore) setCats(subcategories);
+        
+        // Show parent categories (main categories) with images
+        if (!ignore) setCats(parentCategories);
 
         setMixedLoading(true);
         setMixedError(null);

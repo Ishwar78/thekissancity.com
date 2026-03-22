@@ -683,15 +683,37 @@ router.get('/:id/related', async (req, res) => {
   }
 });
 
-// Soft delete
+// Hard delete - actually remove from database
 router.delete('/:id', requireAuth, requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
-    const doc = await Product.findByIdAndUpdate(id, { active: false }, { new: true }).lean();
-    if (!doc) return res.status(404).json({ ok: false, message: 'Not found' });
-    return res.json({ ok: true, data: doc });
+    console.log(`🗑️ [DELETE] Attempting to delete product with ID: ${id}`);
+    
+    // First check if product exists
+    const existingProduct = await Product.findById(id);
+    if (!existingProduct) {
+      console.log(`❌ [DELETE] Product not found: ${id}`);
+      return res.status(404).json({ ok: false, message: 'Product not found' });
+    }
+    
+    console.log(`✅ [DELETE] Product found, deleting: ${existingProduct.title}`);
+    
+    // Actually delete the product from database
+    const deletedProduct = await Product.findByIdAndDelete(id);
+    
+    if (!deletedProduct) {
+      console.log(`❌ [DELETE] Failed to delete product: ${id}`);
+      return res.status(500).json({ ok: false, message: 'Failed to delete product' });
+    }
+    
+    console.log(`✅ [DELETE] Product successfully deleted from database: ${deletedProduct.title}`);
+    return res.json({ 
+      ok: true, 
+      message: 'Product permanently deleted',
+      data: deletedProduct 
+    });
   } catch (e) {
-    console.error(e);
+    console.error('❌ [DELETE] Error deleting product:', e);
     return res.status(500).json({ ok: false, message: 'Server error' });
   }
 });

@@ -13,7 +13,8 @@ import { AdminShippingPolicyEditor } from "../components/AdminShippingPolicyEdit
 import { AdminPrivacyPolicyEditor } from "../components/AdminPrivacyPolicyEditor";
 import { AdminReturnPolicyEditor } from "../components/AdminReturnPolicyEditor";
 import { AdminTermsOfServiceEditor } from "../components/AdminTermsOfServiceEditor";
-import { AdminEditReviewModal, type AdminReview } from '@/components/AdminEditReviewModal';
+import { AboutUsManager } from "../components/admin/AboutUsManager";
+import { AdminEditReviewModal, AdminReview } from '@/components/AdminEditReviewModal';
 import { Pagination } from '@/components/Pagination';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
 import { Product, Order, User } from '@/types/database.types';
@@ -158,6 +159,7 @@ const NAV_ITEMS = [
     { id: 'shiprocket', label: 'Shiprocket Settings', icon: Truck },
     { id: 'influencer-data', label: 'Influencer Data', icon: Video },
     { id: 'influencer-images', label: 'Influencer Images', icon: Image },
+    { id: 'about-us', label: 'About Us Section', icon: FileText },
     { id: 'faqs', label: 'FAQ Management', icon: FileText },
 ] as const;
 
@@ -591,6 +593,7 @@ const Admin = () => {
   const [categories, setCategories] = useState<any[]>([]);
   const [catName, setCatName] = useState('');
   const [catDesc, setCatDesc] = useState('');
+  const [catImageUrl, setCatImageUrl] = useState('');
   const [categoryForm, setCategoryForm] = useState<CategoryFormState>(EMPTY_CATEGORY_FORM);
   const [editingCategory, setEditingCategory] = useState<any | null>(null);
   const [catSaving, setCatSaving] = useState(false);
@@ -1445,10 +1448,20 @@ const Admin = () => {
     try {
       setCatSaving(true);
       // Use public categories endpoint
-      await apiFetch(`${ENDPOINTS.categories}`, { method: 'POST', body: JSON.stringify({ name: catName.trim(), slug: slugify(catName.trim(), { lower: true, strict: true }), parentId: undefined, description: catDesc }) });
+      await apiFetch(`${ENDPOINTS.categories}`, { 
+        method: 'POST', 
+        body: JSON.stringify({ 
+          name: catName.trim(), 
+          slug: slugify(catName.trim(), { lower: true, strict: true }), 
+          parentId: undefined, 
+          description: catDesc,
+          imageUrl: catImageUrl 
+        }) 
+      });
       toast.success('Category added successfully');
       setCatName('');
       setCatDesc('');
+      setCatImageUrl('');
       await fetchCategories();
     } catch (err: any) {
       console.error('Add category error:', err);
@@ -2161,36 +2174,28 @@ const handleProductSubmit = async (e: React.FormEvent) => {
     if (!ok) return;
 
     try {
-      // Optimistic update - remove from UI immediately
-      console.log('🔄 Optimistic update - removing product from UI');
+      // Show loading state
+      console.log('🔄 Starting deletion process');
+      
+      // Delete from backend first
+      console.log('🌐 Sending delete request to backend');
+      const response = await apiFetch(`${ENDPOINTS.products}/${id}`, { method: 'DELETE' });
+      
+      // Only show success toast after backend confirms deletion
+      console.log('✅ Backend confirmed deletion');
+      toast.success('Product deleted permanently');
+      
+      // Update UI after successful backend deletion
       setProducts((prev) => {
         const updated = prev.filter((p: any) => String(p._id || p.id) !== String(id));
-        console.log('📊 Products count after optimistic update:', updated.length);
+        console.log('📊 Products count after deletion:', updated.length);
         return updated;
       });
       
-      // Delete from backend
-      console.log('🌐 Sending delete request to backend');
-      await apiFetch(`${ENDPOINTS.products}/${id}`, { method: 'DELETE' });
-      toast.success('Product deleted');
-      
-      // Force immediate UI update
-      console.log('🔄 Forcing immediate UI update');
-      setProducts((prev) => {
-        const filtered = prev.filter((p: any) => String(p._id || p.id) !== String(id));
-        console.log('🔧 Final products count after delete:', filtered.length);
-        return filtered;
-      });
-      
-      // Then refresh from server as backup
-      setTimeout(() => {
-        console.log('🔄 Backup refresh from server');
-        void fetchAdminResources();
-      }, 1000);
     } catch (error: any) {
       console.error('❌ Delete failed:', error);
       toast.error(`Failed to delete product: ${error?.message ?? 'Unknown error'}`);
-      // Revert on failure
+      // Revert on failure - fetch fresh data
       console.log('🔄 Reverting - fetching fresh data');
       void fetchAdminResources();
     }
@@ -4940,6 +4945,27 @@ const handleProductSubmit = async (e: React.FormEvent) => {
               <Label htmlFor="catDesc">Description</Label>
               <Textarea id="catDesc" value={catDesc} onChange={(e)=>setCatDesc(e.target.value)} />
             </div>
+            <div className="md:col-span-3">
+              <Label>Category Image</Label>
+              <ImageUploader
+                images={catImageUrl ? [catImageUrl] : []}
+                onUpload={async (files) => {
+                  const uploadedUrls: string[] = [];
+                  for (const file of files) {
+                    try {
+                      const url = await getUploadUrl(file);
+                      uploadedUrls.push(url);
+                    } catch (err) {
+                      console.error('Failed to upload file:', err);
+                    }
+                  }
+                  setCatImageUrl(uploadedUrls.length > 0 ? uploadedUrls[0] : '');
+                  return uploadedUrls;
+                }}
+                isLoading={uploadingImage}
+                maxImages={1}
+              />
+            </div>
             <div className="md:col-span-3 flex items-end">
               <Button type="submit" disabled={catSaving} className="w-full">
                 {catSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -6428,8 +6454,6 @@ const handleProductSubmit = async (e: React.FormEvent) => {
         return renderCoupons();
       case 'bulk-coupons':
         return renderBulkCoupons();
-      case 'faqs':
-        return renderFAQs();
       case 'pages':
         return <AdminPages />;
       case 'orders':
@@ -6468,6 +6492,11 @@ const handleProductSubmit = async (e: React.FormEvent) => {
         return <AdminInfluencerData />;
       case 'influencer-images':
         return <InfluencerImageSection />;
+      case 'about-us':
+        return <AboutUsManager />;
+      case 'faqs':
+        return renderFAQs();
+      default:
         return null;
     }
   };
