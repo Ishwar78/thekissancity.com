@@ -614,23 +614,23 @@ export const ProductSlider = ({ className }: { className?: string }) => {
           }
         }
 
-        /* Image container - fixed height, full width */
+        /* Image container - fixed height, full width — INCREASED */
         .ps-img-container {
           position: relative;
           width: 100%;
-          height: 320px;
+          height: 420px;
           overflow: hidden;
         }
 
         @media (max-width: 768px) {
           .ps-img-container {
-            height: 190px;
+            height: 240px;
           }
         }
 
         @media (max-width: 480px) {
           .ps-img-container {
-            height: 170px;
+            height: 210px;
           }
         }
 
