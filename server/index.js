@@ -255,7 +255,7 @@ async function start() {
     // Seed base users (idempotent)
     try {
       const User = require('./models/User');
-      const bcrypt = require('bcrypt');
+      const bcrypt = require('bcryptjs');
 
       const seeds = [
         { name: 'UNI10 Admin', email: 'uni10@gmail.com', password: '12345678', role: 'admin' },
