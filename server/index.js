@@ -3,9 +3,17 @@
 const path = require('path');
 
 // 1) Load root .env  => /www/wwwroot/.env
-require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
+try {
+  require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
+} catch (e) {
+  console.log('Warning: dotenv not available, using environment variables directly');
+}
 // 2) Then load server/.env as fallback (yeh existing values override NAHI karega)
-    require('dotenv').config({ path: path.join(__dirname, '.env') });
+try {
+  require('dotenv').config({ path: path.join(__dirname, '.env') });
+} catch (e) {
+  console.log('Warning: dotenv not available, using environment variables directly');
+}
 
     console.log('[ENV CHECK] Cloudinary Cloud Name:', process.env.CLOUDINARY_CLOUD_NAME ? 'Loaded' : 'Not Set');
     console.log('[ENV CHECK] Cloudinary API Key:', process.env.CLOUDINARY_API_KEY ? mask(process.env.CLOUDINARY_API_KEY) : 'Not Set');
