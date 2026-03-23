@@ -39,6 +39,7 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
+    outDir: 'dist',
     rollupOptions: {
       output: {
         manualChunks: {
@@ -53,5 +54,6 @@ export default defineConfig(({ mode }) => ({
     chunkSizeWarningLimit: 300,
     target: 'es2015',
     minify: 'esbuild',
+    assetsInlineLimit: 4096, // Inline small assets as base64
   },
 }));
