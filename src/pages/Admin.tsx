@@ -904,7 +904,7 @@ const Admin = () => {
     setEditingProduct(product);
     setHasUnsavedChanges(false);
 
-    // Find categoryId based on product.category (name)
+    // Find categoryId based on product.category (name) and subcategory
     let foundCategoryId = (product as any).categoryId || '';
     let foundSubcategoryId = (product as any).subcategoryId || '';
 
@@ -916,6 +916,20 @@ const Admin = () => {
         foundCategoryId = matchingCat._id || matchingCat.id;
         // Also load subcategories if this is a parent category
         if (foundCategoryId && !foundSubcategoryId) {
+          void fetchChildren(foundCategoryId);
+        }
+      }
+    }
+
+    if (!foundSubcategoryId && product.subcategory) {
+      const matchingSubcat = categories.find((c: any) =>
+        (c.name || c.slug) === product.subcategory || c._id === product.subcategory
+      );
+      if (matchingSubcat) {
+        foundSubcategoryId = matchingSubcat._id || matchingSubcat.id;
+        // If we found a subcategory, also find its parent
+        if (matchingSubcat.parent && !foundCategoryId) {
+          foundCategoryId = matchingSubcat.parent;
           void fetchChildren(foundCategoryId);
         }
       }
@@ -1946,10 +1960,17 @@ const handleDialogOpenChange = (dialogOpen: boolean) => {
 
             // Determine category name from selectedcategoryId
             let categoryName = undefined;
+            let subcategoryName = undefined;
             if ((productForm as any).categoryId) {
               const selectedCat = categories.find((c: any) => (c._id || c.id) === (productForm as any).categoryId);
               if (selectedCat) {
                 categoryName = selectedCat.name;
+              }
+            }
+            if ((productForm as any).subcategoryId) {
+              const selectedSubcat = categories.find((c: any) => (c._id || c.id) === (productForm as any).subcategoryId);
+              if (selectedSubcat) {
+                subcategoryName = selectedSubcat.name;
               }
             }
 
@@ -1986,6 +2007,7 @@ const handleDialogOpenChange = (dialogOpen: boolean) => {
               sizeChart: sizeChartPayload,
               category: categoryName,
               categoryId: (productForm as any).categoryId || undefined,
+              subcategory: subcategoryName,
               subcategoryId: (productForm as any).subcategoryId || undefined,
               region: (productForm as any).regionId || undefined,
               colors: Array.isArray(productForm.colors)
@@ -2080,10 +2102,17 @@ const handleProductSubmit = async (e: React.FormEvent) => {
 
       // Determine category name from selectedcategoryId
       let categoryName = undefined;
+      let subcategoryName = undefined;
       if ((productForm as any).categoryId) {
         const selectedCat = categories.find((c: any) => (c._id || c.id) === (productForm as any).categoryId);
         if (selectedCat) {
           categoryName = selectedCat.name;
+        }
+      }
+      if ((productForm as any).subcategoryId) {
+        const selectedSubcat = categories.find((c: any) => (c._id || c.id) === (productForm as any).subcategoryId);
+        if (selectedSubcat) {
+          subcategoryName = selectedSubcat.name;
         }
       }
 
@@ -2100,6 +2129,7 @@ const handleProductSubmit = async (e: React.FormEvent) => {
         sizeChart: sizeChartPayload,
         category: categoryName,
         categoryId: (productForm as any).categoryId || undefined,
+        subcategory: subcategoryName,
         subcategoryId: (productForm as any).subcategoryId || undefined,
         region: (productForm as any).regionId || undefined,
         colors: Array.isArray(productForm.colors)

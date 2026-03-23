@@ -445,10 +445,19 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
 
     // If categoryId/subcategoryId is provided by Admin UI, resolve to category name/slug
     try {
-      const refId = body.subcategoryId || body.categoryId;
-      if (refId) {
-        const catDoc = await Category.findById(refId).lean();
-        if (catDoc) payload.category = catDoc.name || catDoc.slug;
+      if (body.categoryId) {
+        const catDoc = await Category.findById(body.categoryId).lean();
+        if (catDoc) {
+          payload.category = catDoc.name || catDoc.slug;
+          payload.categoryId = catDoc._id;
+        }
+      }
+      if (body.subcategoryId) {
+        const subcatDoc = await Category.findById(body.subcategoryId).lean();
+        if (subcatDoc) {
+          payload.subcategory = subcatDoc.name || subcatDoc.slug;
+          payload.subcategoryId = subcatDoc._id;
+        }
       }
     } catch (catErr) {}
 
@@ -574,10 +583,19 @@ if (Array.isArray(body.quantityOptions)) {
 
     // If Admin UI sent categoryId/subcategoryId, resolve to category name/slug
     try {
-      const refId = body.subcategoryId || body.categoryId;
-      if (refId) {
-        const catDoc = await Category.findById(refId).lean();
-        if (catDoc) updates.category = catDoc.name || catDoc.slug;
+      if (body.categoryId) {
+        const catDoc = await Category.findById(body.categoryId).lean();
+        if (catDoc) {
+          updates.category = catDoc.name || catDoc.slug;
+          updates.categoryId = catDoc._id;
+        }
+      }
+      if (body.subcategoryId) {
+        const subcatDoc = await Category.findById(body.subcategoryId).lean();
+        if (subcatDoc) {
+          updates.subcategory = subcatDoc.name || subcatDoc.slug;
+          updates.subcategoryId = subcatDoc._id;
+        }
       }
     } catch (catErr) {}
 

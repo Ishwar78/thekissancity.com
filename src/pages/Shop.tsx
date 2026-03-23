@@ -204,8 +204,8 @@ const Shop = ({ sortBy = "all", collectionSlug }: ShopPageProps = {}) => {
       try {
         const { ok, json } = await api("/api/categories");
         const list = ok && Array.isArray(json?.data) ? (json.data as Array<CategoryWithParent>) : [];
-        const subcategories = list.filter((c) => c.parent !== null && c.parent !== undefined);
-        const names = subcategories.map((c) => String(c.name || c.slug || "").trim()).filter(Boolean);
+        const mainCategories = list.filter((c) => c.parent === null || c.parent === undefined);
+        const names = mainCategories.map((c) => String(c.name || c.slug || "").trim()).filter(Boolean);
         if (!ignore) setApiCategories(names);
       } catch { if (!ignore) setApiCategories([]); }
     })();
@@ -226,12 +226,15 @@ const Shop = ({ sortBy = "all", collectionSlug }: ShopPageProps = {}) => {
       params.append("limit", "200");
       const query = params.toString();
       const url = query ? `/api/products?${query}` : "/api/products";
+      console.log(`[DEBUG] Fetching products from: ${url}`);
       const { ok, json } = await api(url);
+      console.log(`[DEBUG] API response:`, { ok, data: json?.data, dataLength: json?.data?.length || 0 });
       if (!ok) throw new Error(json?.message || json?.error || "Failed to load");
       let list = Array.isArray(json?.data) ? (json.data as ProductRow[]) : [];
       if (sortBy === "newest") {
         list = list.sort((a, b) => new Date(b.createdAt || "").getTime() - new Date(a.createdAt || "").getTime());
       }
+      console.log(`[DEBUG] Final products list length: ${list.length}`);
       setProducts(list); setLoading(false);
     } catch (error: any) {
       toast({ title: "Error", description: error.message || "Failed to load products", variant: "destructive" });
@@ -241,21 +244,24 @@ const Shop = ({ sortBy = "all", collectionSlug }: ShopPageProps = {}) => {
 
   const availableCategories = useMemo(() => {
     const cats = new Set<string>(["All"]);
+    // Add only main categories from API (exclude subcategories)
     apiCategories.forEach((n) => { if (n) cats.add(String(n)); });
-    products.forEach((p) => {
-      if (p.category) {
-        const categoryName = String(p.category).trim();
-        if (apiCategories.includes(categoryName)) cats.add(categoryName);
-      }
-    });
     return Array.from(cats);
-  }, [products, apiCategories]);
+  }, [apiCategories]);
 
   const filteredProducts = useMemo(() => {
     let result = products;
+    console.log(`[DEBUG] Total products before filtering: ${products.length}`);
     const normalizedSelectedCategory = normalizeCategory(selectedCategory);
     if (normalizedSelectedCategory !== "all") {
-      result = result.filter((p) => normalizeCategory(p.category || "") === normalizedSelectedCategory);
+      console.log(`[DEBUG] Selected category: "${normalizedSelectedCategory}"`);
+      console.log(`[DEBUG] Available main categories:`, apiCategories);
+      result = result.filter((p) => {
+        const productCategory = normalizeCategory(p.category || "");
+        console.log(`[DEBUG] Product: "${p.name}" - Category: "${productCategory}" - Contains selected: ${productCategory.includes(normalizedSelectedCategory)}`);
+        return productCategory.includes(normalizedSelectedCategory) || normalizedSelectedCategory.includes(productCategory);
+      });
+      console.log(`[DEBUG] Filtered products count: ${result.length}`);
     }
     if (selectedQuantity !== "All") {
       result = result.filter((p) => p.quantityOptions?.some(q => q.displayLabel === selectedQuantity));
