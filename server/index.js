@@ -2,13 +2,7 @@
 // server/index.js
 const path = require('path');
 
-// 1) Load root .env  => /www/wwwroot/.env
-try {
-  require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
-} catch (e) {
-  console.log('Warning: dotenv not available, using environment variables directly');
-}
-// 2) Then load server/.env as fallback (yeh existing values override NAHI karega)
+// Load server/.env file
 try {
   require('dotenv').config({ path: path.join(__dirname, '.env') });
 } catch (e) {
@@ -27,7 +21,7 @@ function mask(v) {
   return v.slice(0, 4) + '***' + v.slice(-2);
 }
 
-const ROOT_ENV = path.join(__dirname, '..', '.env');
+const ROOT_ENV = path.join(__dirname, '.env');
 const SERVER_ENV = path.join(__dirname, '.env');
 
 console.log('[ENV PATHS]', {
@@ -90,7 +84,7 @@ const productSliderRoutes = require('./routes/productSlider');
 const aboutUsRoutes = require('./routes/aboutUs');
 
 const app = express();
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 5055;
 
 /* --------------------------- LOG EACH REQUEST --------------------------- */
 app.use((req, res, next) => {
@@ -108,7 +102,7 @@ app.use((req, _res, next) => {
 /* -------------------------------- CORS --------------------------------- */
 // Disable CORS restrictions for development
 const corsOptions = {
-  origin: ['http://localhost:8080', 'http://localhost:3000', 'http://127.0.0.1:8080', 'http://127.0.0.1:3000'],
+  origin: ['https://thekissancity.com', 'http://localhost:8080', 'http://localhost:3000', 'http://127.0.0.1:8080', 'http://127.0.0.1:3000'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],

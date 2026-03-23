@@ -691,12 +691,16 @@ export const ProductSlider = ({ className }: { className?: string }) => {
 
         {/* ── HERO TEXT ── */}
         <div className="ps-hero">
-          <h1 className="ps-headline">
-            {currentSlideData?.title || "Farm Fresh<br />Goodness"}
-          </h1>
-          <p className="ps-subtext">
-            {currentSlideData?.subtitle || "KissanCity brings you handcrafted pickles, chutneys & murabbas — made from farm-fresh organic ingredients, delivered to your doorstep."}
-          </p>
+          {currentSlideData?.title && (
+            <h1 className="ps-headline">
+              {currentSlideData.title}
+            </h1>
+          )}
+          {currentSlideData?.subtitle && (
+            <p className="ps-subtext">
+              {currentSlideData.subtitle}
+            </p>
+          )}
           {currentSlideData?.buttonText && currentSlideData?.buttonLink && (
             <div className="ps-cta-row">
               <button 

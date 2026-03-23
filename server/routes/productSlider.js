@@ -147,14 +147,7 @@ router.post('/', requireAuth, requireAdmin, upload.single('image'), async (req, 
   try {
     const { title, subtitle, description, buttonText, buttonLink, order, isActive, stats } = req.body;
 
-    // Validation
-    if (!title) {
-      return res.status(400).json({
-        ok: false,
-        message: 'Title is required'
-      });
-    }
-
+    // Validation - title is now optional
     if (!req.file) {
       return res.status(400).json({
         ok: false,
@@ -239,8 +232,8 @@ router.put('/:id', requireAuth, requireAdmin, upload.single('image'), async (req
       }
     }
 
-    // Update fields
-    if (title) slider.title = title;
+    // Update fields - allow empty title
+    if (title !== undefined) slider.title = title;
     if (subtitle !== undefined) slider.subtitle = subtitle;
     if (description !== undefined) slider.description = description;
     if (buttonText !== undefined) slider.buttonText = buttonText;

@@ -58,15 +58,7 @@ export const ProductSliderManager = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.title) {
-      toast({
-        title: 'Error',
-        description: 'Title is required',
-        variant: 'destructive'
-      });
-      return;
-    }
-
+    // Title is now optional
     if (!imageFile && !editingSlider) {
       toast({
         title: 'Error',
@@ -269,13 +261,12 @@ export const ProductSliderManager = () => {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="title">Title *</Label>
+                  <Label htmlFor="title">Title</Label>
                   <Input
                     id="title"
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     placeholder="Farm Fresh\nGoodness"
-                    required
                   />
                 </div>
                 <div>
