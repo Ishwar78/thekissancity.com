@@ -217,8 +217,14 @@ const Shop = ({ sortBy = "all", collectionSlug }: ShopPageProps = {}) => {
       setLoading(true);
       const params = new URLSearchParams();
       if (searchQuery) params.append("q", searchQuery);
-      if (collectionSlug) params.append("category", collectionSlug);
-      if (selectedCategory !== "All") params.append("category", selectedCategory);
+      // Prioritize selectedCategory from sidebar, then collectionSlug from URL
+      let categoryParam = null;
+      if (selectedCategory !== "All") {
+        categoryParam = selectedCategory;
+      } else if (collectionSlug) {
+        categoryParam = collectionSlug;
+      }
+      if (categoryParam) params.append("category", categoryParam);
       if (selectedQuantity !== "All") params.append("quantities", selectedQuantity);
       params.append("minPrice", String(priceRange[0]));
       params.append("maxPrice", String(priceRange[1]));

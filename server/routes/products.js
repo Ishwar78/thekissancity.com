@@ -64,22 +64,49 @@ router.get('/', authOptional, async (req, res) => {
     // Category matching: accept slug or name (case-insensitive), resolve via Category model if possible
     const catParam = category || collection || categorySlug;
     if (catParam) {
-      const raw = String(catParam);
-      try {
-        const catDoc = await Category.findOne({ $or: [
-          { slug: raw },
-          { name: new RegExp(`^${escapeRegExp(raw)}$`, 'i') },
-        ] }).lean();
-        if (catDoc && catDoc.name) {
-          filter.$or = [
-            { category: new RegExp(`^${escapeRegExp(catDoc.name)}$`, 'i') },
-            { category: new RegExp(`^${escapeRegExp(raw)}$`, 'i') },
-          ];
-        } else {
-          filter.category = new RegExp(`^${escapeRegExp(raw)}$`, 'i');
+      // Handle both string and array cases
+      const rawValues = Array.isArray(catParam) ? catParam : [String(catParam)];
+      console.log('[products] Category filter requested:', rawValues);
+      
+      const $orConditions = [];
+      
+      for (const raw of rawValues) {
+        try {
+          const catDoc = await Category.findOne({ $or: [
+            { slug: raw },
+            { name: new RegExp(`^${escapeRegExp(raw)}$`, 'i') },
+          ] }).lean();
+          console.log('[products] Category found for', raw, ':', catDoc);
+          if (catDoc && catDoc.name) {
+            const categoryNamePattern = new RegExp(`^${escapeRegExp(catDoc.name)}$`, 'i');
+            const rawPattern = new RegExp(`^${escapeRegExp(raw)}$`, 'i');
+            $orConditions.push(
+              { category: categoryNamePattern },
+              { category: rawPattern },
+              { subcategory: categoryNamePattern },
+              { subcategory: rawPattern }
+            );
+            console.log('[products] Filter applied with category name:', catDoc.name);
+          } else {
+            const rawPattern = new RegExp(`^${escapeRegExp(raw)}$`, 'i');
+            $orConditions.push(
+              { category: rawPattern },
+              { subcategory: rawPattern }
+            );
+            console.log('[products] Filter applied with raw pattern:', raw);
+          }
+        } catch {
+          const rawPattern = new RegExp(`^${escapeRegExp(raw)}$`, 'i');
+          $orConditions.push(
+            { category: rawPattern },
+            { subcategory: rawPattern }
+          );
+          console.log('[products] Filter applied with fallback pattern:', raw);
         }
-      } catch {
-        filter.category = new RegExp(`^${escapeRegExp(raw)}$`, 'i');
+      }
+      
+      if ($orConditions.length > 0) {
+        filter.$or = $orConditions;
       }
     }
 
