@@ -98,7 +98,7 @@ const BestSellerCard = ({ product, index }: { product: Product; index: number })
         }}
       >
         {/* BEST SELLER Ribbon */}
-        {index % 2 === 1 && (
+      
           <div
             className="absolute -top-3 right-0 z-10 pr-3 pl-5 py-1"
             style={{
@@ -110,7 +110,7 @@ const BestSellerCard = ({ product, index }: { product: Product; index: number })
               ★ BEST SELLER
             </span>
           </div>
-        )}
+      
 
         {/* Discount Badge */}
         {discountPercentage > 0 && (
