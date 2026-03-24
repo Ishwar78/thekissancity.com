@@ -614,14 +614,30 @@ export const ProductSlider = ({ className }: { className?: string }) => {
         /* Loading state */
         .ps-loading {
           display: flex;
+          flex-direction: column;
           align-items: center;
           justify-content: center;
           height: 420px;
-          background: linear-gradient(135deg, #2d6a4f 0%, #1b4332 100%);
-          color: white;
+          background: #f8f9fa;
+          color: #6c757d;
           font-family: 'Inter', sans-serif;
-          font-size: 16px;
-          font-weight: 500;
+          font-size: 14px;
+          font-weight: 400;
+          gap: 12px;
+        }
+
+        .loading-spinner {
+          width: 32px;
+          height: 32px;
+          border: 3px solid #e9ecef;
+          border-top: 3px solid #2d6a4f;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
         }
 
         @media (max-width: 768px) {
@@ -672,7 +688,8 @@ export const ProductSlider = ({ className }: { className?: string }) => {
       <div className="ps-wrap">
         {loading ? (
           <div className="ps-loading">
-            Loading slider...
+            <div className="loading-spinner"></div>
+            <span>Loading slider...</span>
           </div>
         ) : (
           <Carousel
