@@ -33,12 +33,9 @@ export const ProductSlider = ({ className }: { className?: string }) => {
         
         if (items.length > 0) {
           setSliderItems(items);
-        } else {
-          console.log('No slider data found, using product fallback');
         }
       } catch (error) {
         console.error('Failed to fetch slider data:', error);
-        console.log('Using product fallback due to error');
       } finally {
         setLoading(false);
       }
@@ -614,6 +611,31 @@ export const ProductSlider = ({ className }: { className?: string }) => {
           }
         }
 
+        /* Loading state */
+        .ps-loading {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          height: 420px;
+          background: linear-gradient(135deg, #2d6a4f 0%, #1b4332 100%);
+          color: white;
+          font-family: 'Inter', sans-serif;
+          font-size: 16px;
+          font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+          .ps-loading {
+            height: 240px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .ps-loading {
+            height: 210px;
+          }
+        }
+
         /* Image container - fixed height, full width — INCREASED */
         .ps-img-container {
           position: relative;
@@ -648,108 +670,137 @@ export const ProductSlider = ({ className }: { className?: string }) => {
       `}</style>
 
       <div className="ps-wrap">
-        <Carousel
-          setApi={setApi}
-          opts={{ loop: true }}
-          plugins={[autoplayPlugin.current]}
-        >
-          <CarouselContent>
-            {sliderItems.length > 0 ? (
-              sliderItems.map((item, index) => (
-                <CarouselItem key={item.id}>
-                  <div className="ps-img-container">
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      className={`ps-img ${index === currentSlide ? "active" : ""}`}
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = "/api/uploads/placeholder-slider.jpg";
-                      }}
-                    />
-                  </div>
-                </CarouselItem>
-              ))
-            ) : (
-              products.map((product, index) => (
-                <CarouselItem key={product.id}>
-                  <div className="ps-img-container">
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className={`ps-img ${index === currentSlide ? "active" : ""}`}
-                    />
-                  </div>
-                </CarouselItem>
-              ))
-            )}
-          </CarouselContent>
-        </Carousel>
+        {loading ? (
+          <div className="ps-loading">
+            Loading slider...
+          </div>
+        ) : (
+          <Carousel
+            setApi={setApi}
+            opts={{ loop: true }}
+            plugins={[autoplayPlugin.current]}
+          >
+            <CarouselContent>
+              {sliderItems.length > 0 ? (
+                sliderItems.map((item, index) => (
+                  <CarouselItem key={item.id}>
+                    <div className="ps-img-container">
+                      <img
+                        src={item.image}
+                        alt={item.title}
+                        className={`ps-img ${index === currentSlide ? "active" : ""}`}
+                        onError={(e) => {
+                          console.error('Failed to load slider image:', item.image);
+                          // Try to reload the image once
+                          const img = e.target as HTMLImageElement;
+                          if (!img.dataset.retried) {
+                            img.dataset.retried = 'true';
+                            setTimeout(() => {
+                              img.src = item.image + '?retry=' + Date.now();
+                            }, 1000);
+                          }
+                        }}
+                      />
+                    </div>
+                  </CarouselItem>
+                ))
+              ) : (
+                products.map((product, index) => (
+                  <CarouselItem key={product.id}>
+                    <div className="ps-img-container">
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className={`ps-img ${index === currentSlide ? "active" : ""}`}
+                        onError={(e) => {
+                          console.error('Failed to load product image:', product.image);
+                          // Try to reload the image once
+                          const img = e.target as HTMLImageElement;
+                          if (!img.dataset.retried) {
+                            img.dataset.retried = 'true';
+                            setTimeout(() => {
+                              img.src = product.image + '?retry=' + Date.now();
+                            }, 1000);
+                          }
+                        }}
+                      />
+                    </div>
+                  </CarouselItem>
+                ))
+              )}
+            </CarouselContent>
+          </Carousel>
+        )}
 
-        {/* Overlays */}
-        <div className="ps-overlay" />
-        <div className="ps-bottom-gradient" />
+        {/* Overlays - only show when not loading */}
+        {!loading && (
+          <>
+            <div className="ps-overlay" />
+            <div className="ps-bottom-gradient" />
 
-        {/* ── HERO TEXT ── */}
-        <div className="ps-hero">
-          {currentSlideData?.title && (
-            <h1 className="ps-headline">
-              {currentSlideData.title}
-            </h1>
-          )}
-          {currentSlideData?.subtitle && (
-            <p className="ps-subtext">
-              {currentSlideData.subtitle}
-            </p>
-          )}
-          {currentSlideData?.buttonText && currentSlideData?.buttonLink && (
-            <div className="ps-cta-row">
-              <button 
-                onClick={() => handleButtonClick(currentSlideData.buttonLink!)}
-                className="ps-shop-btn"
-              >
-                <ShoppingBag size={window.innerWidth <= 768 ? 10 : 13} />
-                {currentSlideData.buttonText}
-              </button>
-              <button onClick={handleAboutUsClick} className="ps-story-btn">
-                <BookOpen size={window.innerWidth <= 768 ? 10 : 13} />
-                Explore Our Story
-              </button>
+            {/* ── HERO TEXT ── */}
+            <div className="ps-hero">
+              {currentSlideData?.title && (
+                <h1 className="ps-headline">
+                  {currentSlideData.title}
+                </h1>
+              )}
+              {currentSlideData?.subtitle && (
+                <p className="ps-subtext">
+                  {currentSlideData.subtitle}
+                </p>
+              )}
+              {currentSlideData?.buttonText && currentSlideData?.buttonLink && (
+                <div className="ps-cta-row">
+                  <button 
+                    onClick={() => handleButtonClick(currentSlideData.buttonLink!)}
+                    className="ps-shop-btn"
+                  >
+                    <ShoppingBag size={window.innerWidth <= 768 ? 10 : 13} />
+                    {currentSlideData.buttonText}
+                  </button>
+                  <button onClick={handleAboutUsClick} className="ps-story-btn">
+                    <BookOpen size={window.innerWidth <= 768 ? 10 : 13} />
+                    Explore Our Story
+                  </button>
+                </div>
+              )}
             </div>
-          )}
-        </div>
 
-        {/* Slide counter */}
-        <div className="ps-counter">{currentSlide + 1} / {total}</div>
+            {/* Slide counter */}
+            <div className="ps-counter">{currentSlide + 1} / {total}</div>
 
-        {/* Prev */}
-        <button
-          className="ps-btn ps-btn-prev"
-          onClick={(e) => { scrollPrev(); setTimeout(() => e.currentTarget.blur(), 150); }}
-          aria-label="Previous slide"
-        >
-          <ChevronLeft size={window.innerWidth <= 768 ? 12 : 18} strokeWidth={2.5} />
-        </button>
-
-        {/* Next */}
-        <button
-          className="ps-btn ps-btn-next"
-          onClick={(e) => { scrollNext(); setTimeout(() => e.currentTarget.blur(), 150); }}
-          aria-label="Next slide"
-        >
-          <ChevronRight size={window.innerWidth <= 768 ? 12 : 18} strokeWidth={2.5} />
-        </button>
-
-        {/* Dots */}
-        <div className="ps-dots">
-          {(sliderItems.length > 0 ? sliderItems : products).map((_, i) => (
+            {/* Prev */}
             <button
-              key={i}
-              className={`ps-dot ${i === currentSlide ? "active" : ""}`}
-              onClick={() => scrollTo(i)}
-              aria-label={`Go to slide ${i + 1}`}
-            />
-          ))}
-        </div>
+              className="ps-btn ps-btn-prev"
+              onClick={(e) => { scrollPrev(); setTimeout(() => e.currentTarget.blur(), 150); }}
+              aria-label="Previous slide"
+            >
+              <ChevronLeft size={window.innerWidth <= 768 ? 12 : 18} strokeWidth={2.5} />
+            </button>
+
+            {/* Next */}
+            <button
+              className="ps-btn ps-btn-next"
+              onClick={(e) => { scrollNext(); setTimeout(() => e.currentTarget.blur(), 150); }}
+              aria-label="Next slide"
+            >
+              <ChevronRight size={window.innerWidth <= 768 ? 12 : 18} strokeWidth={2.5} />
+            </button>
+
+            {/* Dots */}
+            <div className="ps-dots">
+              {(sliderItems.length > 0 ? sliderItems : products).map((_, i) => (
+                <button
+                  key={i}
+                  className={`ps-dot ${i === currentSlide ? "active" : ""}`}
+                  onClick={() => scrollTo(i)}
+                  aria-label={`Go to slide ${i + 1}`}
+                />
+              ))}
+            </div>
+          </>
+        )}
 
         {/* ── STATS BAR ── */}
         {/* <div className="ps-stats">

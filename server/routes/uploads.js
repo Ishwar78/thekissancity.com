@@ -55,6 +55,20 @@ router.post('/', requireAuth, requireAdmin, upload.single('file'), (req, res) =>
   return res.json({ ok: true, url: req.file.path });
 });
 
+// Single image upload (for AboutUsManager and similar components)
+router.post('/single', upload.single('image'), (req, res) => {
+  console.log('[UPLOADS /single] Request received.');
+  
+  if (!req.file) {
+    console.log('[UPLOADS /single] No file uploaded after multer processing.');
+    return res.status(400).json({ ok: false, message: 'No file uploaded' });
+  }
+
+  console.log('[UPLOADS /single] File processed by multer. Uploading to Cloudinary...', req.file.path);
+  console.log('[Cloudinary Upload Success /single]', req.file.path);
+  return res.json({ ok: true, url: req.file.path });
+});
+
 // Review image uploads (authenticated users)
 router.post('/images', requireAuth, (req, res) => {
   console.log('[UPLOADS /images] Request received.');

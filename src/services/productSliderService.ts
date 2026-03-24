@@ -6,15 +6,19 @@ class ProductSliderService {
   async getActiveSliders(): Promise<ProductSliderItem[]> {
     try {
       const response = await api('/api/product-slider/active');
+      
       if (response.ok && response.json?.data && Array.isArray(response.json.data)) {
-        return response.json.data.map((slider: any) => ({
+        const sliders = response.json.data.map((slider: any) => ({
           ...slider,
           id: slider._id || slider.id // Ensure we have an id field
         })).sort((a: ProductSliderItem, b: ProductSliderItem) => 
           (a.order || 0) - (b.order || 0)
         );
+        
+        return sliders;
+      } else {
+        return [];
       }
-      return [];
     } catch (error) {
       console.error('Failed to fetch active sliders:', error);
       return [];
