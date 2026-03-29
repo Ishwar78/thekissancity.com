@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const OTP = require('../models/OTP');
 const { requireAuth, requireAdmin } = require('../middleware/auth');
-const { generateOTP, sendOTP } = require('../utils/smsService');
+const { generateOTP, sendOTP, verifyOTP } = require('../utils/twoFactorService');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret';
 const COOKIE_NAME = 'token';
@@ -43,9 +43,6 @@ router.post('/send-otp', async (req, res) => {
   console.log('📱 [SEND OTP] Request origin:', req.headers.origin);
   console.log('📱 [SEND OTP] Request body:', JSON.stringify(req.body, null, 2));
   
-  // Immediate response for testing
-  console.log('📤 [SEND OTP] About to process request...');
-  
   try {
     const { phone } = req.body || {};
     console.log('📱 [SEND OTP] Phone received:', phone);
@@ -66,52 +63,39 @@ router.post('/send-otp', async (req, res) => {
     }
     console.log('✅ [SEND OTP] Phone not registered, proceeding...');
 
-    // Generate OTP
-    console.log('🔢 [SEND OTP] Generating OTP...');
-    const otp = generateOTP();
-    console.log('✅ [SEND OTP] OTP generated:', otp);
-    
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-    console.log('⏰ [SEND OTP] OTP expires at:', expiresAt.toISOString());
-
     // Delete any existing OTPs for this phone
     console.log('🗑️  [SEND OTP] Deleting existing OTPs for phone:', phone);
     const deleteResult = await OTP.deleteMany({ phone, purpose: 'signup', verified: false });
     console.log('✅ [SEND OTP] Deleted', deleteResult.deletedCount, 'existing OTP(s)');
 
-    // Save OTP
-    console.log('💾 [SEND OTP] Saving OTP to database...');
-    const otpRecord = await OTP.create({
-      phone,
-      otp,
-      purpose: 'signup',
-      expiresAt,
-    });
-    console.log('✅ [SEND OTP] OTP saved to database. ID:', otpRecord._id);
-
-    // Send OTP via SMS
-    console.log('📤 [SEND OTP] Attempting to send SMS...');
-    console.log('📤 [SEND OTP] Phone:', phone, '| OTP:', otp);
-    const smsResult = await sendOTP(phone, otp);
-    console.log('📤 [SEND OTP] SMS result:', JSON.stringify(smsResult, null, 2));
+    // Send OTP via 2Factor
+    console.log('📤 [SEND OTP] Attempting to send SMS via 2Factor...');
+    const smsResult = await sendOTP(phone); // No longer passing local OTP
     
     if (!smsResult.ok) {
-      console.log('❌ [SEND OTP] SMS sending failed');
-      return res.status(500).json({ ok: false, message: 'Failed to send OTP' });
+      console.log('❌ [SEND OTP] 2Factor sending failed:', smsResult.message);
+      return res.status(500).json({ ok: false, message: smsResult.message || 'Failed to send OTP' });
     }
 
-    console.log('✅ [SEND OTP] OTP sent successfully!');
+    // Save OTP record with session ID (no local OTP stored)
+    console.log('💾 [SEND OTP] Saving OTP record to database...');
+    const otpRecord = await OTP.create({
+      phone,
+      otp: null, // 2Factor manages the OTP
+      purpose: 'signup',
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
+      sessionId: smsResult.sessionId,
+    });
+    console.log('✅ [SEND OTP] OTP record saved. ID:', otpRecord._id, 'Session ID:', otpRecord.sessionId);
+
+    console.log('✅ [SEND OTP] OTP sent successfully via 2Factor!');
     console.log('========================================\n');
     
-    // If SMS failed but fallback worked, include OTP in response
-    const response = { ok: true, message: 'OTP sent successfully' };
-    if (smsResult.devMode && smsResult.otp) {
-      response.otp = smsResult.otp;
-      response.devMode = true;
-    }
-    
-    console.log('📤 [SEND OTP] Response being sent:', JSON.stringify(response, null, 2));
-    return res.json(response);
+    return res.json({ 
+      ok: true, 
+      message: 'OTP sent successfully via SMS',
+      sessionId: smsResult.sessionId
+    });
   } catch (e) {
     console.error('❌ [SEND OTP] Error occurred:', e);
     console.error('❌ [SEND OTP] Error stack:', e.stack);
@@ -122,33 +106,104 @@ router.post('/send-otp', async (req, res) => {
 
 // Verify OTP
 router.post('/verify-otp', async (req, res) => {
+  console.log('========================================');
+  console.log('📱 [VERIFY OTP] Request received at:', new Date().toISOString());
+  console.log('📱 [VERIFY OTP] Request headers:', JSON.stringify(req.headers, null, 2));
+  console.log('📱 [VERIFY OTP] Request body:', JSON.stringify(req.body, null, 2));
+  
   try {
     const { phone, otp } = req.body || {};
+    
+    // Validate inputs
     if (!phone || !otp) {
-      return res.status(400).json({ ok: false, message: 'Phone and OTP are required' });
+      console.log('❌ [VERIFY OTP] Missing phone or OTP');
+      return res.status(400).json({ 
+        ok: false, 
+        message: 'Phone and OTP are required',
+        details: {
+          phone: phone ? 'provided' : 'missing',
+          otp: otp ? 'provided' : 'missing'
+        }
+      });
     }
 
-    // Find the OTP
+    // Validate phone format
+    if (!/^\d{10}$/.test(phone)) {
+      console.log('❌ [VERIFY OTP] Invalid phone format:', phone);
+      return res.status(400).json({ 
+        ok: false, 
+        message: 'Valid 10-digit phone number is required' 
+      });
+    }
+
+    // Validate OTP format
+    if (!/^\d{6}$/.test(otp)) {
+      console.log('❌ [VERIFY OTP] Invalid OTP format:', otp);
+      return res.status(400).json({ 
+        ok: false, 
+        message: 'Valid 6-digit OTP is required' 
+      });
+    }
+
+    console.log('📱 [VERIFY OTP] Verifying OTP for phone:', phone);
+
+    // Find the OTP record
     const otpRecord = await OTP.findOne({
       phone,
-      otp,
       purpose: 'signup',
       verified: false,
       expiresAt: { $gt: new Date() },
     });
 
     if (!otpRecord) {
-      return res.status(400).json({ ok: false, message: 'Invalid or expired OTP' });
+      console.log('❌ [VERIFY OTP] No valid OTP record found for phone:', phone);
+      return res.status(400).json({ 
+        ok: false, 
+        message: 'Invalid or expired OTP. Please request a new OTP.' 
+      });
     }
+
+    // Must have a session ID for 2Factor verification
+    if (!otpRecord.sessionId) {
+      console.log('❌ [VERIFY OTP] No session ID found - cannot verify via 2Factor');
+      return res.status(400).json({ 
+        ok: false, 
+        message: 'Invalid verification session. Please request a new OTP.' 
+      });
+    }
+
+    console.log('📱 [VERIFY OTP] Using 2Factor API verification with session ID:', otpRecord.sessionId);
+    const verifyResult = await verifyOTP(phone, otp, otpRecord.sessionId);
+    
+    if (!verifyResult.ok) {
+      console.log('❌ [VERIFY OTP] 2Factor verification failed:', verifyResult.message);
+      return res.status(400).json({ 
+        ok: false, 
+        message: verifyResult.message || 'Invalid OTP' 
+      });
+    }
+    
+    console.log('✅ [VERIFY OTP] 2Factor verification successful');
 
     // Mark OTP as verified
     otpRecord.verified = true;
     await otpRecord.save();
 
-    return res.json({ ok: true, message: 'OTP verified successfully' });
+    console.log('✅ [VERIFY OTP] OTP marked as verified in database');
+    console.log('========================================\n');
+    
+    return res.json({ 
+      ok: true, 
+      message: 'OTP verified successfully' 
+    });
   } catch (e) {
-    console.error('Verify OTP error:', e);
-    return res.status(500).json({ ok: false, message: 'Server error' });
+    console.error('❌ [VERIFY OTP] Error occurred:', e);
+    console.error('❌ [VERIFY OTP] Error stack:', e.stack);
+    console.log('========================================\n');
+    return res.status(500).json({ 
+      ok: false, 
+      message: 'Server error during OTP verification' 
+    });
   }
 });
 
@@ -166,17 +221,36 @@ router.post('/signup', async (req, res) => {
   }
 
   try {
-    // Verify OTP
+    // Find verified OTP record for this phone
     const otpRecord = await OTP.findOne({
       phone,
-      otp,
       purpose: 'signup',
       verified: true,
       expiresAt: { $gt: new Date() },
     });
 
     if (!otpRecord) {
-      return res.status(400).json({ ok: false, message: 'Invalid or expired OTP. Please request a new OTP.' });
+      return res.status(400).json({ ok: false, message: 'Please verify your phone number with OTP first' });
+    }
+
+    // If we have a sessionId, verify the OTP with 2Factor
+    if (otpRecord.sessionId) {
+      console.log('📱 [SIGNUP] Verifying OTP with 2Factor for signup');
+      const verifyResult = await verifyOTP(phone, otp, otpRecord.sessionId);
+      
+      if (!verifyResult.ok) {
+        console.log('❌ [SIGNUP] 2Factor OTP verification failed:', verifyResult.message);
+        return res.status(400).json({ ok: false, message: verifyResult.message || 'Invalid OTP. Please request a new OTP.' });
+      }
+      
+      console.log('✅ [SIGNUP] 2Factor OTP verification successful for signup');
+    } else {
+      // Fallback to local OTP verification (for backward compatibility)
+      console.log('📱 [SIGNUP] Using local OTP verification for signup');
+      if (!otpRecord.otp || otpRecord.otp !== otp) {
+        return res.status(400).json({ ok: false, message: 'Invalid OTP. Please request a new OTP.' });
+      }
+      console.log('✅ [SIGNUP] Local OTP verification successful for signup');
     }
 
     // Check if email already exists

@@ -810,11 +810,11 @@ button[class*="p-2"][class*="bg-white"]:active {
 @media (min-width: 769px) {
   nav input[type="text"],
   nav input::placeholder {
-    color: white !important;
+    color: #000000 !important;
   }
   
   nav input[type="text"]:focus {
-    color: white !important;
+    color: #000000 !important;
   }
   
   /* Remove underline from Support button on hover */

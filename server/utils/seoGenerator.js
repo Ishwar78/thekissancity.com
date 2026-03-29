@@ -3,15 +3,15 @@
  * Used for server-side rendering of meta tags for search engine crawlers
  */
 
-const generateProductSeoTags = (product, baseUrl = 'https://uni10.in') => {
+const generateProductSeoTags = (product, baseUrl = 'https://thekissancity.in') => {
   if (!product) {
     return {
-      title: 'uni10 - Premium Streetwear & Lifestyle',
-      description: 'Discover exclusive streetwear and lifestyle products at uni10. Shop premium quality apparel, accessories, and more.',
+      title: 'thekissancity - Premium Streetwear & Lifestyle',
+      description: 'Discover exclusive streetwear and lifestyle products at thekissancity. Shop premium quality apparel, accessories, and more.',
       keywords: '',
-      ogTitle: 'uni10 - Premium Streetwear & Lifestyle',
-      ogDescription: 'Discover exclusive streetwear and lifestyle products at uni10',
-      ogImage: '/uni10-logo.png',
+      ogTitle: 'thekissancity - Premium Streetwear & Lifestyle',
+      ogDescription: 'Discover exclusive streetwear and lifestyle products at thekissancity',
+      ogImage: '/Untitled design.png',
       ogUrl: baseUrl,
       canonicalUrl: baseUrl,
     };
@@ -23,7 +23,7 @@ const generateProductSeoTags = (product, baseUrl = 'https://uni10.in') => {
   const productSlug = product.slug || '';
 
   // Use SEO title if available, otherwise use default format
-  const seoTitle = product.seo?.title || `${productTitle} - ₹${priceStr} | uni10`;
+  const seoTitle = product.seo?.title || `${productTitle} - ₹${priceStr} | thekissancity`;
 
   // Use SEO description if available, otherwise use product description or highlights
   let seoDescription = product.seo?.description;
@@ -33,7 +33,7 @@ const generateProductSeoTags = (product, baseUrl = 'https://uni10.in') => {
     } else if (product.highlights && product.highlights.length > 0) {
       seoDescription = product.highlights.join('. ');
     } else {
-      seoDescription = `Shop ${productTitle} at uni10. Premium streetwear and lifestyle products.`;
+      seoDescription = `Shop ${productTitle} at thekissancity. Premium streetwear and lifestyle products.`;
     }
   }
 
@@ -46,7 +46,7 @@ const generateProductSeoTags = (product, baseUrl = 'https://uni10.in') => {
   const seoKeywords = product.seo?.keywords || '';
 
   // Get image URL (first image or image_url)
-  const imageUrl = product.image_url || (product.images && product.images.length > 0 ? product.images[0] : '/uni10-logo.png');
+  const imageUrl = product.image_url || (product.images && product.images.length > 0 ? product.images[0] : '/thekissancity-logo.png');
   const absoluteImageUrl = imageUrl.startsWith('http') ? imageUrl : `${baseUrl}${imageUrl.startsWith('/') ? imageUrl : '/' + imageUrl}`;
 
   // Canonical URL

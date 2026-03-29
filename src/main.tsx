@@ -3,6 +3,10 @@ import App from "./App.tsx";
 import "./index.css";
 import { CouponRefreshProvider } from "./hooks/useCouponRefresh.tsx";
 
+// Polyfills for older browsers
+import "core-js/stable";
+import "regenerator-runtime/runtime";
+
 // Workaround for the "ResizeObserver loop completed with undelivered notifications"
 // Some browsers throw this error intermittently; swallow known ResizeObserver errors
 // to avoid noisy logs or uncaught exceptions that crash the app.

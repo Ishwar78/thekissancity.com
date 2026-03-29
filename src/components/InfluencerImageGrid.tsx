@@ -251,7 +251,7 @@ export default function InfluencerImageGrid() {
                   <div className="iig-overlay" />
 
                   {/* Index badge */}
-                  <div className="iig-num">#{String(index + 1).padStart(2, '0')}</div>
+                  {/* <div className="iig-num">#{String(index + 1).padStart(2, '0')}</div> */}
 
                   {/* Corner icon */}
                   <div className="iig-corner-tag">

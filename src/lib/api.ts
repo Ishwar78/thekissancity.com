@@ -1,5 +1,5 @@
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 
-  (import.meta.env.PROD ? "https://thekissancity.com" : "http://localhost:5000");
+  (import.meta.env.PROD ? "https://kissancity-1.onrender.com" : "http://localhost:5000");
 
 function isLocalhost(url: string) {
   try {

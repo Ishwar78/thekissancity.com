@@ -23,8 +23,8 @@ const Product = mongoose.model('Product', ProductSchema);
 
 async function seedDetails() {
   try {
-    const uri = process.env.MONGODB_URI || 'mongodb+srv://UNI10:SACHIN123@uni10.kqsmgmt.mongodb.net/UNI10';
-    await mongoose.connect(uri, { dbName: 'UNI10' });
+    const uri = process.env.MONGODB_URI || 'mongodb+srv://KISAN_CITY:SACHIN123@kissancity.kqsmgmt.mongodb.net/KISAN_CITY';
+    await mongoose.connect(uri, { dbName: 'KISAN_CITY' });
     console.log('Connected to MongoDB');
     
     const result = await Product.updateMany(

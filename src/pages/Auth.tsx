@@ -108,16 +108,23 @@ const Auth = () => {
         // If OTP is returned in response (development mode), display it
         if (json.otp) {
           toast.success(`OTP sent! Your code is: ${json.otp}`, {
+            description: 'Development mode - OTP shown for testing',
             duration: 10000, // Show for 10 seconds
           });
         } else {
-          toast.success('OTP sent to your phone number');
+          toast.success('OTP sent to your phone number', {
+            description: 'Please check your SMS for the 6-digit code',
+          });
         }
       } else {
-        toast.error(json?.message || 'Failed to send OTP');
+        toast.error(json?.message || 'Failed to send OTP', {
+          description: 'Please check your phone number and try again',
+        });
       }
     } catch (error: any) {
-      toast.error(error.message || 'Failed to send OTP');
+      toast.error(error.message || 'Failed to send OTP', {
+        description: 'Please check your internet connection and try again',
+      });
     } finally {
       setSendingOtp(false);
     }
@@ -129,6 +136,18 @@ const Auth = () => {
       return;
     }
 
+    if (!phone || phone.length !== 10) {
+      toast.error('Phone number is required for OTP verification');
+      return;
+    }
+
+    console.log('🔍 [VERIFY OTP] Sending request:', {
+      phone: phone,
+      otp: otp,
+      phoneLength: phone.length,
+      otpLength: otp.length
+    });
+
     setLoading(true);
     try {
       const { ok, json } = await api('/api/auth/verify-otp', {
@@ -136,14 +155,27 @@ const Auth = () => {
         body: JSON.stringify({ phone, otp }),
       });
 
+      console.log('🔍 [VERIFY OTP] Response:', {
+        ok,
+        json,
+        status: ok ? 'success' : 'error'
+      });
+
       if (ok) {
         setOtpVerified(true);
-        toast.success('OTP verified successfully');
+        toast.success('OTP verified successfully!', {
+          description: 'Phone number verified. You can now create your account.',
+        });
       } else {
-        toast.error(json?.message || 'Invalid OTP');
+        toast.error(json?.message || 'Invalid OTP', {
+          description: 'Please check the OTP and try again, or request a new one.',
+        });
       }
     } catch (error: any) {
-      toast.error(error.message || 'Failed to verify OTP');
+      console.error('🔍 [VERIFY OTP] Error:', error);
+      toast.error(error.message || 'Failed to verify OTP', {
+        description: 'Please try again or contact support if the issue persists.',
+      });
     } finally {
       setLoading(false);
     }
@@ -264,7 +296,7 @@ const Auth = () => {
           <CardHeader>
             <CardTitle>{isLogin ? 'Sign In' : 'Create Account'}</CardTitle>
             <CardDescription>
-              {isLogin ? 'Welcome back to KissanCity' : 'Join KissanCity today'}
+              {isLogin ? 'Welcome back to TheKissanCity' : 'Join TheKissanCity today'}
             </CardDescription>
           </CardHeader>
           <CardContent>

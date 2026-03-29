@@ -9,7 +9,12 @@ const OTPSchema = new mongoose.Schema(
     },
     otp: {
       type: String,
-      required: true,
+      required: false, // Made optional for 2Factor session verification
+    },
+    sessionId: {
+      type: String,
+      required: false, // For 2Factor session verification
+      index: true,
     },
     purpose: {
       type: String,
@@ -32,5 +37,6 @@ const OTPSchema = new mongoose.Schema(
 // Index for faster lookups
 OTPSchema.index({ phone: 1, purpose: 1, verified: 0 });
 OTPSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+OTPSchema.index({ sessionId: 1 }); // For 2Factor session lookups
 
 module.exports = mongoose.model('OTP', OTPSchema);

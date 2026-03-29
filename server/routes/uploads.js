@@ -21,7 +21,7 @@ const storage = new CloudinaryStorage({
   params: async (req, file) => {
     const isVideo = file.mimetype.startsWith('video/');
     return {
-      folder: 'uni10_uploads',
+      folder: 'thekissancity_uploads',
       resource_type: isVideo ? 'video' : 'image',
       allowed_formats: ['jpg', 'png', 'webp', 'avif', 'mp4', 'webm', 'mov'],
     };

@@ -13,17 +13,52 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+console.log('[PRODUCT SLIDER BACKEND] Cloudinary config:', {
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  has_api_key: !!process.env.CLOUDINARY_API_KEY,
+  has_api_secret: !!process.env.CLOUDINARY_API_SECRET
+});
+
+// Test Cloudinary connection
+cloudinary.api.ping((error, result) => {
+  if (error) {
+    console.error('[PRODUCT SLIDER BACKEND] Cloudinary connection failed:', error);
+  } else {
+    console.log('[PRODUCT SLIDER BACKEND] Cloudinary connection successful:', result);
+  }
+});
+
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: async (req, file) => {
+    console.log('[PRODUCT SLIDER BACKEND] Cloudinary upload params:', {
+      originalname: file.originalname,
+      mimetype: file.mimetype,
+      size: file.size,
+      folder: 'kissanCity_product_slider'
+    });
+
+    // Get filename without extension and add timestamp + random string to force unique
+    const nameWithoutExt = file.originalname.split('.')[0];
+    const timestamp = Date.now();
+    const randomString = Math.random().toString(36).substring(2, 8);
+    const uniqueFilename = `${nameWithoutExt}_${timestamp}_${randomString}`;
+    
+    console.log('[PRODUCT SLIDER BACKEND] Using unique filename:', uniqueFilename);
+    
     return {
       folder: 'kissanCity_product_slider',
+      public_id: uniqueFilename, // Force unique filename
       resource_type: 'image',
       allowed_formats: ['jpg', 'png', 'webp', 'jpeg'],
       transformation: [
-        { width: 1920, height: 800, crop: 'fill', quality: 'auto' },
+        { width: 1920, height: 800, crop: 'fill', quality: 'auto:good', gravity: 'center' },
         { fetch_format: 'auto' }
-      ]
+      ],
+      version: Date.now(), // Force new version to bypass Cloudinary cache
+      invalidate: true, // Force Cloudinary to invalidate cache
+      format: 'auto', // Auto-optimize format (webp, jpg, etc)
+      quality: 'auto:good' // Balance between quality and file size
     };
   },
 });
@@ -35,11 +70,68 @@ const upload = multer({
     const allowedMimes = [
       'image/jpeg', 'image/jpg', 'image/png', 'image/webp'
     ];
+    console.log('[PRODUCT SLIDER BACKEND] Multer file filter:', {
+      originalname: file.originalname,
+      mimetype: file.mimetype,
+      allowed: allowedMimes.includes(file.mimetype.toLowerCase())
+    });
+    
     if (allowedMimes.includes(file.mimetype.toLowerCase())) {
       cb(null, true);
     } else {
       cb(new Error('Only JPEG, PNG, and WebP images are allowed'));
     }
+  }
+});
+
+// Add multer logging middleware
+const uploadMiddleware = (req, res, next) => {
+  console.log('[PRODUCT SLIDER BACKEND] Before multer upload');
+  upload.single('image')(req, res, (err) => {
+    if (err) {
+      console.error('[PRODUCT SLIDER BACKEND] Multer error:', err);
+      return next(err);
+    }
+    
+    console.log('[PRODUCT SLIDER BACKEND] After multer upload:', {
+      hasFile: !!req.file,
+      fileName: req.file?.originalname,
+      fileSize: req.file?.size,
+      cloudinaryPath: req.file?.path,
+      buffer: req.file?.buffer ? 'has buffer' : 'no buffer'
+    });
+    
+    next();
+  });
+};
+
+// Test endpoint for file upload debugging
+router.post('/test-upload', requireAuth, requireAdmin, uploadMiddleware, (req, res) => {
+  console.log('[PRODUCT SLIDER BACKEND] Test upload endpoint called');
+  console.log('[PRODUCT SLIDER BACKEND] Request body:', req.body);
+  console.log('[PRODUCT SLIDER BACKEND] Request file:', {
+    hasFile: !!req.file,
+    fileName: req.file?.originalname,
+    fileSize: req.file?.size,
+    mimeType: req.file?.mimetype,
+    cloudinaryPath: req.file?.path
+  });
+  
+  if (req.file) {
+    res.json({
+      ok: true,
+      message: 'File uploaded successfully',
+      file: {
+        originalname: req.file.originalname,
+        size: req.file.size,
+        path: req.file.path
+      }
+    });
+  } else {
+    res.status(400).json({
+      ok: false,
+      message: 'No file received'
+    });
   }
 });
 
@@ -143,12 +235,24 @@ router.get('/:id', requireAuth, requireAdmin, async (req, res) => {
 });
 
 // POST /api/product-slider - Create new slider (admin only)
-router.post('/', requireAuth, requireAdmin, upload.single('image'), async (req, res) => {
+router.post('/', requireAuth, requireAdmin, uploadMiddleware, async (req, res) => {
   try {
     const { title, subtitle, description, buttonText, buttonLink, order, isActive, stats } = req.body;
 
+    // 🔍 DEBUG: Log incoming request details
+    console.log('[PRODUCT SLIDER BACKEND] Create request received:', {
+      user: req.user?.email,
+      hasFile: !!req.file,
+      fileName: req.file?.originalname,
+      fileSize: req.file?.size,
+      mimeType: req.file?.mimetype,
+      cloudinaryPath: req.file?.path,
+      bodyFields: { title, subtitle, buttonText, buttonLink, order, isActive, stats }
+    });
+
     // Validation - title is now optional
     if (!req.file) {
+      console.log('[PRODUCT SLIDER BACKEND] ERROR: No image file provided');
       return res.status(400).json({
         ok: false,
         message: 'Image is required'
@@ -160,7 +264,9 @@ router.post('/', requireAuth, requireAdmin, upload.single('image'), async (req, 
     if (stats) {
       try {
         parsedStats = typeof stats === 'string' ? JSON.parse(stats) : stats;
+        console.log('[PRODUCT SLIDER BACKEND] Parsed stats:', parsedStats);
       } catch (e) {
+        console.log('[PRODUCT SLIDER BACKEND] ERROR: Invalid stats format:', stats);
         return res.status(400).json({
           ok: false,
           message: 'Invalid stats format'
@@ -185,10 +291,19 @@ router.post('/', requireAuth, requireAdmin, upload.single('image'), async (req, 
       }
     };
 
+    console.log('[PRODUCT SLIDER BACKEND] Final slider data to save:', {
+      ...sliderData,
+      imageLength: sliderData.image.length
+    });
+
     const slider = new ProductSlider(sliderData);
     await slider.save();
 
-    console.log('[PRODUCT SLIDER] Created new slider:', slider._id);
+    console.log('[PRODUCT SLIDER BACKEND] Created new slider:', {
+      id: slider._id,
+      imageUrl: slider.image,
+      imageLength: slider.image.length
+    });
 
     res.status(201).json({
       ok: true,
@@ -196,7 +311,7 @@ router.post('/', requireAuth, requireAdmin, upload.single('image'), async (req, 
       message: 'Slider created successfully'
     });
   } catch (error) {
-    console.error('[PRODUCT SLIDER] Error creating slider:', error);
+    console.error('[PRODUCT SLIDER BACKEND] Error creating slider:', error);
     res.status(500).json({
       ok: false,
       message: 'Failed to create slider',
@@ -206,11 +321,12 @@ router.post('/', requireAuth, requireAdmin, upload.single('image'), async (req, 
 });
 
 // PUT /api/product-slider/:id - Update slider (admin only)
-router.put('/:id', requireAuth, requireAdmin, upload.single('image'), async (req, res) => {
+router.put('/:id', requireAuth, requireAdmin, uploadMiddleware, async (req, res) => {
   try {
     const slider = await ProductSlider.findById(req.params.id);
     
     if (!slider) {
+      console.log('[PRODUCT SLIDER BACKEND] ERROR: Slider not found with ID:', req.params.id);
       return res.status(404).json({
         ok: false,
         message: 'Slider not found'
@@ -219,12 +335,27 @@ router.put('/:id', requireAuth, requireAdmin, upload.single('image'), async (req
 
     const { title, subtitle, description, buttonText, buttonLink, order, isActive, stats } = req.body;
 
+    // 🔍 DEBUG: Log incoming request details
+    console.log('[PRODUCT SLIDER BACKEND] Update request received:', {
+      sliderId: req.params.id,
+      user: req.user?.email,
+      hasFile: !!req.file,
+      fileName: req.file?.originalname,
+      fileSize: req.file?.size,
+      mimeType: req.file?.mimetype,
+      cloudinaryPath: req.file?.path,
+      currentImageUrl: slider.image,
+      bodyFields: { title, subtitle, buttonText, buttonLink, order, isActive, stats }
+    });
+
     // Parse stats if provided as string
     let parsedStats = {};
     if (stats) {
       try {
         parsedStats = typeof stats === 'string' ? JSON.parse(stats) : stats;
+        console.log('[PRODUCT SLIDER BACKEND] Parsed stats:', parsedStats);
       } catch (e) {
+        console.log('[PRODUCT SLIDER BACKEND] ERROR: Invalid stats format:', stats);
         return res.status(400).json({
           ok: false,
           message: 'Invalid stats format'
@@ -252,12 +383,32 @@ router.put('/:id', requireAuth, requireAdmin, upload.single('image'), async (req
 
     // Update image if new one provided
     if (req.file) {
+      console.log('[PRODUCT SLIDER BACKEND] Updating image from:', slider.image, 'to:', req.file.path);
+      const oldImageUrl = slider.image;
       slider.image = req.file.path;
+      
+      // Optional: Delete old image from Cloudinary
+      if (oldImageUrl && oldImageUrl.includes('cloudinary')) {
+        try {
+          const publicId = oldImageUrl.split('/').pop().split('.')[0];
+          await cloudinary.uploader.destroy(`kissanCity_product_slider/${publicId}`);
+          console.log('[PRODUCT SLIDER BACKEND] Deleted old image from Cloudinary:', publicId);
+        } catch (imageError) {
+          console.warn('[PRODUCT SLIDER BACKEND] Failed to delete old image from Cloudinary:', imageError.message);
+        }
+      }
+    } else {
+      console.log('[PRODUCT SLIDER BACKEND] No new image provided, keeping existing image');
     }
 
     await slider.save();
 
-    console.log('[PRODUCT SLIDER] Updated slider:', slider._id);
+    console.log('[PRODUCT SLIDER BACKEND] Updated slider:', {
+      id: slider._id,
+      imageUrl: slider.image,
+      imageLength: slider.image.length,
+      wasUpdated: !!req.file
+    });
 
     res.json({
       ok: true,
@@ -265,7 +416,7 @@ router.put('/:id', requireAuth, requireAdmin, upload.single('image'), async (req
       message: 'Slider updated successfully'
     });
   } catch (error) {
-    console.error('[PRODUCT SLIDER] Error updating slider:', error);
+    console.error('[PRODUCT SLIDER BACKEND] Error updating slider:', error);
     res.status(500).json({
       ok: false,
       message: 'Failed to update slider',

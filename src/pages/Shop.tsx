@@ -161,7 +161,7 @@ const Shop = ({ sortBy = "all", collectionSlug }: ShopPageProps = {}) => {
   };
 
   const availableQuantities = useMemo(() => {
-    return ["All", "80gm", "100gm", "250gm", "300gm", "500gm", "600gm", "1kg" , "300ml" , "500ml"];
+    return ["All", "80gm", "100gm", "250gm", "300gm", "500gm", "600gm", "1kg" , "80ml" , "100ml" , "250ml" , "300ml" , "500ml" , "600ml" , "1L"];
   }, []);
 
   useEffect(() => {

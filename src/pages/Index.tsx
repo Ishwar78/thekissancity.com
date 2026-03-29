@@ -1628,14 +1628,10 @@ const Index = () => {
 
    {/* Banner Section */}
   {/* Banner Section */}
-
-      
-
-      {/* New Arrivals */}
  <section
   style={{ backgroundColor: '#F5F0E8' }}
   className="container mx-auto px-4 py-6 md:py-8 rounded-xl"
->
+ >
   <style>{`
     .na-section {
       --green:     #2d6a4f;
@@ -1824,7 +1820,7 @@ const Index = () => {
       <PWAInstallPrompt />
       <PostInstallExperience />
     
-      <WhatsAppButton phoneNumber="+91 12345678" />
+      <WhatsAppButton phoneNumber="+91 8295780500" />
     </div>
   );
 };

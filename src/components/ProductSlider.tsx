@@ -1,843 +1,464 @@
 import * as React from "react";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselApi,
-} from "@/components/ui/carousel";
-import { products } from "@/data/products";
 import { ChevronLeft, ChevronRight, ShoppingBag, BookOpen } from "lucide-react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import Autoplay from "embla-carousel-autoplay";
+import { useNavigate, useLocation } from "react-router-dom";
 import { productSliderService } from "@/services/productSliderService";
 import { ProductSliderItem } from "@/types/productSlider";
+import { products } from "@/data/products";
 
 export const ProductSlider = ({ className }: { className?: string }) => {
   const [currentSlide, setCurrentSlide] = React.useState(0);
-  const [api, setApi] = React.useState<CarouselApi>();
   const [sliderItems, setSliderItems] = React.useState<ProductSliderItem[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const [isHovered, setIsHovered] = React.useState(false);
+  const autoPlayRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
+
   const navigate = useNavigate();
   const location = useLocation();
 
-  const autoplayPlugin = React.useRef(
-    Autoplay({ delay: 4000, stopOnInteraction: true, stopOnMouseEnter: true })
-  );
-
-  // Fetch slider data from API
   React.useEffect(() => {
     const fetchSliderData = async () => {
       try {
-        setLoading(true);
         const items = await productSliderService.getActiveSliders();
-        
-        if (items.length > 0) {
-          setSliderItems(items);
-        }
-      } catch (error) {
-        console.error('Failed to fetch slider data:', error);
+        if (items.length > 0) setSliderItems(items);
+      } catch (err) {
+        console.error("[PRODUCT SLIDER] Error fetching slider data:", err);
       } finally {
         setLoading(false);
       }
     };
-
     fetchSliderData();
   }, []);
 
-  const currentSlideData = sliderItems[currentSlide] || null;
-  const total = sliderItems.length > 0 ? sliderItems.length : products.length;
+  const slides = sliderItems.length > 0 ? sliderItems : products;
+  const total = slides.length;
 
+  const goTo = React.useCallback(
+    (index: number) => {
+      setCurrentSlide((index + total) % total);
+    },
+    [total]
+  );
+
+  // Auto-play
   React.useEffect(() => {
-    if (!api) return;
-    api.on("select", () => setCurrentSlide(api.selectedScrollSnap()));
-  }, [api]);
+    if (loading || total === 0 || isHovered) return;
+    autoPlayRef.current = setInterval(() => goTo(currentSlide + 1), 5000);
+    return () => {
+      if (autoPlayRef.current) clearInterval(autoPlayRef.current);
+    };
+  }, [currentSlide, loading, total, isHovered, goTo]);
 
-  const scrollPrev = React.useCallback(() => api?.scrollPrev(), [api]);
-  const scrollNext = React.useCallback(() => api?.scrollNext(), [api]);
-  const scrollTo   = React.useCallback((i: number) => api?.scrollTo(i), [api]);
-
-  const handleAboutUsClick = React.useCallback((e: React.MouseEvent) => {
+  const handleAboutUsClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (location.pathname !== '/') {
-      navigate('/#about-us');
+    if (location.pathname !== "/") {
+      navigate("/#about-us");
       return;
     }
-    const aboutUsElement = document.getElementById('about-us');
-    if (aboutUsElement) {
-      aboutUsElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }, [navigate, location.pathname]);
+    document.getElementById("about-us")?.scrollIntoView({ behavior: "smooth" });
+  };
 
-  const handleButtonClick = React.useCallback((link: string) => {
+  const handleButtonClick = (link: string) => {
     if (!link) return;
-    if (link.startsWith('/')) {
-      navigate(link);
-    } else if (link.startsWith('http')) {
-      window.open(link, '_blank');
-    } else {
-      navigate(`/${link}`);
-    }
-  }, [navigate]);
+    if (link.startsWith("/")) navigate(link);
+    else if (link.startsWith("http")) window.open(link, "_blank");
+    else navigate(`/${link}`);
+  };
 
   return (
-    <div className={`relative w-full group ${className ?? ""}`}>
+    <div
+      className={`relative w-full overflow-hidden ${className ?? ""}`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=Inter:wght@300;400;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&display=swap');
 
-        .ps-wrap {
+        .kc-slider {
           position: relative;
+          width: 100%;
           overflow: hidden;
-          border-radius: 12px;
+          background: #0d0a04;
+          font-family: 'Lato', sans-serif;
         }
 
-        /* Dark overlay for text readability */
-        .ps-overlay {
+        /* ── TRACK ── */
+        .kc-track {
+          display: flex;
+          transition: transform 0.75s cubic-bezier(0.77, 0, 0.18, 1);
+          will-change: transform;
+        }
+
+        /* ── SLIDE ── */
+        .kc-slide {
+          min-width: 100%;
+          position: relative;
+          height: clamp(220px, 38vw, 440px);
+          overflow: hidden;
+          background: #0d0a04;
+        }
+
+        /* ── IMAGE ── */
+        .kc-img {
           position: absolute;
           inset: 0;
-          background: linear-gradient(
-            100deg,
-            rgba(0,0,0,0.72) 0%,
-            rgba(0,0,0,0.45) 40%,
-            rgba(0,0,0,0.15) 70%,
-            rgba(0,0,0,0.05) 100%
-          );
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: center 20%;
+          display: block;
+          transform: scale(1.02);
+          transition: transform 6s ease-out;
+        }
+
+        .kc-slide.active .kc-img {
+          transform: scale(1);
+        }
+
+        /* ── SLIDE CONTENT ── */
+        .kc-content {
+          position: absolute;
+          top: 50%;
+          left: clamp(20px, 5%, 64px);
+          transform: translateY(-50%) translateX(-20px);
           z-index: 2;
-          pointer-events: none;
+          max-width: min(440px, 52%);
+          opacity: 0;
+          transition: opacity 0.55s 0.35s ease, transform 0.55s 0.35s ease;
         }
 
-        /* Bottom gradient for stats */
-        .ps-bottom-gradient {
-          position: absolute;
-          bottom: 0; left: 0; right: 0;
-          height: 25%;
-          background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 100%);
-          pointer-events: none;
-          z-index: 3;
+        .kc-slide.active .kc-content {
+          opacity: 1;
+          transform: translateY(-50%) translateX(0);
         }
 
-        /* ── HERO TEXT ── */
-        .ps-hero {
-          position: absolute;
-          top: 45%;
-          left: 0;
-          transform: translateY(-50%);
-          z-index: 5;
-          padding: 0 4%;
-          max-width: 60%;
-          pointer-events: none;
-        }
-
-        /* Tablet */
-        @media (max-width: 1024px) {
-          .ps-hero { 
-            max-width: 70%; 
-            transform: translateY(-58%); 
-          }
-        }
-
-        /* Mobile landscape */
-        @media (max-width: 768px) {
-          .ps-hero { 
-            max-width: 75%; 
-            padding: 0 4%; 
-            transform: translateY(-60%);
-            top: 44%;
-          }
-        }
-
-        /* Mobile portrait */
-        @media (max-width: 640px) {
-          .ps-hero { 
-            max-width: 80%; 
-            padding: 0 12px; 
-            transform: translateY(-62%);
-            top: 42%;
-          }
-        }
-
-        /* Small mobile */
-        @media (max-width: 480px) {
-          .ps-hero { 
-            max-width: 85%; 
-            padding: 0 12px; 
-            transform: translateY(-60%);
-            top: 38%;
-          }
-        }
-
-        .ps-headline {
-          font-family: 'Playfair Display', serif;
-          font-size: clamp(20px, 3.5vw, 48px);
-          font-weight: 800;
-          line-height: 1.1;
-          color: #ffffff;
-          letter-spacing: -0.3px;
-          margin: 0 0 8px 0;
-          text-shadow: 0 2px 16px rgba(0,0,0,0.3);
-        }
-
-        @media (max-width: 768px) {
-          .ps-headline {
-            font-size: clamp(14px, 4vw, 26px);
-            margin-bottom: 4px;
-          }
-        }
-
-        @media (max-width: 640px) {
-          .ps-headline {
-            font-size: clamp(13px, 4vw, 22px);
-            margin-bottom: 3px;
-            letter-spacing: -0.1px;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .ps-headline {
-            font-size: clamp(12px, 4.5vw, 18px);
-            line-height: 1.2;
-            margin-bottom: 2px;
-          }
-        }
-
-        .ps-headline em {
-          font-style: italic;
+        /* Tag pill */
+        .kc-tag {
+          display: inline-block;
+          background: #c8821a;
+          color: #fff8ee;
+          font-size: 10px;
           font-weight: 700;
-          color: #ffffff;
+          letter-spacing: 2.5px;
+          text-transform: uppercase;
+          padding: 4px 13px;
+          border-radius: 2px;
+          margin-bottom: 12px;
         }
 
-        .ps-subtext {
-          font-family: 'Inter', sans-serif;
-          font-size: clamp(10px, 1.2vw, 14px);
+        /* Title */
+        .kc-title {
+          font-family: 'Playfair Display', serif;
+          font-size: clamp(18px, 2.8vw, 36px);
+          font-weight: 700;
+          color: #fff8ee;
+          line-height: 1.18;
+          margin-bottom: 10px;
+          text-shadow: 0 2px 16px rgba(0,0,0,0.55);
+        }
+
+        /* Subtitle */
+        .kc-subtitle {
+          font-size: clamp(11px, 1vw, 14px);
+          color: rgba(255, 248, 238, 0.78);
+          line-height: 1.6;
           font-weight: 300;
-          color: rgba(255,255,255,0.9);
-          line-height: 1.5;
-          margin: 0 0 14px 0;
-          max-width: 420px;
-          text-shadow: 0 1px 8px rgba(0,0,0,0.4);
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-        }
-
-        @media (max-width: 768px) {
-          .ps-subtext {
-            font-size: 10px;
-            margin-bottom: 8px;
-            line-height: 1.4;
-            -webkit-line-clamp: 2;
-          }
-        }
-
-        @media (max-width: 640px) {
-          .ps-subtext {
-            font-size: 9px;
-            margin-bottom: 6px;
-            -webkit-line-clamp: 2;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .ps-subtext {
-            font-size: 8px;
-            line-height: 1.3;
-            margin-bottom: 5px;
-            -webkit-line-clamp: 2;
-          }
+          margin-bottom: 18px;
         }
 
         /* CTA buttons */
-        .ps-cta-row {
+        .kc-cta-row {
           display: flex;
-          align-items: center;
-          gap: 10px;
-          pointer-events: all;
           flex-wrap: wrap;
+          gap: 10px;
         }
 
-        @media (max-width: 768px) {
-          .ps-cta-row {
-            gap: 6px;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .ps-cta-row {
-            gap: 5px;
-            flex-direction: row;
-            align-items: center;
-          }
-        }
-
-        .ps-shop-btn {
-          display: inline-flex; align-items: center; gap: 6px;
-          background: #2d6a4f;
-          color: #fff;
-          font-family: 'Inter', sans-serif;
-          font-size: clamp(10px, 1vw, 13px);
-          font-weight: 600;
-          letter-spacing: 0.2px;
-          padding: 7px 18px;
-          border-radius: 30px;
-          border: none; cursor: pointer;
-          text-decoration: none;
-          box-shadow: 0 4px 16px rgba(45,106,79,0.4);
-          transition: background 0.2s, transform 0.2s;
-          white-space: nowrap;
-        }
-
-        @media (max-width: 768px) {
-          .ps-shop-btn {
-            padding: 5px 12px;
-            font-size: 9px;
-            gap: 4px;
-          }
-        }
-
-        @media (max-width: 640px) {
-          .ps-shop-btn {
-            padding: 4px 10px;
-            font-size: 8px;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .ps-shop-btn {
-            padding: 4px 10px;
-            font-size: 8px;
-          }
-        }
-
-        .ps-shop-btn:hover {
-          background: #1b4332;
-          transform: translateY(-2px);
-        }
-        .ps-shop-btn:active { transform: scale(0.96); }
-
-        .ps-story-btn {
-          display: inline-flex; align-items: center; gap: 6px;
-          background: rgba(255,255,255,0.15);
-          color: #fff;
-          font-family: 'Inter', sans-serif;
-          font-size: clamp(10px, 1vw, 13px);
-          font-weight: 600;
-          letter-spacing: 0.2px;
-          padding: 7px 18px;
-          border-radius: 30px;
-          border: 1.5px solid rgba(255,255,255,0.6);
+        .kc-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+          padding: 9px 18px;
+          border-radius: 3px;
           cursor: pointer;
-          text-decoration: none;
+          font-size: clamp(10px, 0.9vw, 12px);
+          font-weight: 700;
+          letter-spacing: 0.8px;
+          text-transform: uppercase;
+          transition: background 0.22s, transform 0.2s, box-shadow 0.2s;
+          border: none;
+          font-family: 'Lato', sans-serif;
+        }
+
+        .kc-btn-primary {
+          background: #c8821a;
+          color: #fff8ee;
+          box-shadow: 0 4px 18px rgba(200,130,26,0.35);
+        }
+        .kc-btn-primary:hover {
+          background: #a06512;
+          transform: translateY(-2px);
+          box-shadow: 0 6px 24px rgba(200,130,26,0.45);
+        }
+
+        .kc-btn-secondary {
+          background: rgba(0,0,0,0.5);
+          border: 1.5px solid rgba(255,248,238,0.55);
+          color: #fff8ee;
           backdrop-filter: blur(6px);
-          -webkit-backdrop-filter: blur(6px);
-          transition: background 0.2s, transform 0.2s;
-          white-space: nowrap;
         }
-
-        @media (max-width: 768px) {
-          .ps-story-btn {
-            padding: 5px 12px;
-            font-size: 9px;
-            gap: 4px;
-          }
-        }
-
-        @media (max-width: 640px) {
-          .ps-story-btn {
-            padding: 4px 10px;
-            font-size: 8px;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .ps-story-btn {
-            padding: 4px 10px;
-            font-size: 8px;
-          }
-        }
-
-        .ps-story-btn:hover {
-          background: rgba(255,255,255,0.25);
-          border-color: #fff;
+        .kc-btn-secondary:hover {
+          background: rgba(0,0,0,0.7);
           transform: translateY(-2px);
         }
-        .ps-story-btn:active { transform: scale(0.96); }
 
-        /* ── STATS BAR ── */
-        .ps-stats {
+        /* ── SLIDE COUNTER (top-right) ── */
+        .kc-counter {
           position: absolute;
-          bottom: 0; left: 0; right: 0;
-          z-index: 6;
+          top: 16px;
+          right: 60px;
+          z-index: 10;
           display: flex;
           align-items: center;
-          gap: 0;
-          background: rgba(0,0,0,0.5);
-          backdrop-filter: blur(8px);
-          -webkit-backdrop-filter: blur(8px);
-          border-top: 1px solid rgba(255,255,255,0.1);
-          padding: 7px 3%;
-          pointer-events: none;
-        }
-
-        @media (max-width: 768px) {
-          .ps-stats {
-            padding: 4px 2%;
-          }
-        }
-
-        @media (max-width: 640px) {
-          .ps-stats {
-            padding: 3px 8px;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .ps-stats {
-            padding: 3px 6px;
-          }
-        }
-
-        .ps-stat {
-          flex: 1;
-          text-align: center;
-          position: relative;
-        }
-
-        .ps-stat + .ps-stat::before {
-          content: '';
-          position: absolute;
-          left: 0; top: 15%; bottom: 15%;
-          width: 1px;
-          background: rgba(255,255,255,0.2);
-        }
-
-        .ps-stat-num {
-          font-family: 'Playfair Display', serif;
-          font-size: clamp(13px, 2vw, 24px);
+          gap: 6px;
+          background: rgba(0,0,0,0.55);
+          backdrop-filter: blur(6px);
+          color: rgba(255,248,238,0.9);
+          padding: 5px 14px;
+          border-radius: 30px;
+          font-size: 11px;
           font-weight: 700;
-          color: #ffffff;
-          line-height: 1.2;
-          display: block;
-          margin-bottom: 2px;
+          letter-spacing: 1px;
+          border: 0.5px solid rgba(255,248,238,0.18);
         }
+        .kc-counter-current { color: #c8821a; font-size: 14px; }
 
-        @media (max-width: 768px) {
-          .ps-stat-num {
-            font-size: 11px;
-            margin-bottom: 1px;
-          }
-        }
-
-        @media (max-width: 640px) {
-          .ps-stat-num {
-            font-size: 10px;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .ps-stat-num {
-            font-size: 9px;
-          }
-        }
-
-        .ps-stat-label {
-          font-family: 'Inter', sans-serif;
-          font-size: clamp(7px, 0.7vw, 10px);
-          font-weight: 400;
-          color: rgba(255,255,255,0.6);
-          letter-spacing: 0.03em;
-          display: block;
-          text-transform: uppercase;
-        }
-
-        @media (max-width: 768px) {
-          .ps-stat-label {
-            font-size: 7px;
-          }
-        }
-
-        @media (max-width: 640px) {
-          .ps-stat-label {
-            font-size: 6px;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .ps-stat-label {
-            font-size: 6px;
-          }
-        }
-
-        /* Nav buttons */
-        .ps-btn {
+        /* ── DOTS ── */
+        .kc-dots {
           position: absolute;
-          top: 46%;
+          bottom: 14px;
+          left: 50%;
+          transform: translateX(-50%);
+          display: flex;
+          gap: 7px;
+          z-index: 10;
+        }
+
+        .kc-dot {
+          height: 6px;
+          border-radius: 3px;
+          background: rgba(255,248,238,0.35);
+          border: none;
+          cursor: pointer;
+          transition: width 0.35s ease, background 0.3s;
+          padding: 0;
+          width: 6px;
+        }
+        .kc-dot.active {
+          width: 28px;
+          background: #c8821a;
+        }
+        .kc-dot:hover:not(.active) {
+          background: rgba(255,248,238,0.65);
+        }
+
+        /* ── NAV ARROWS ── */
+        .kc-nav {
+          position: absolute;
+          top: 50%;
           transform: translateY(-50%);
           z-index: 10;
-          width: 40px; height: 40px;
+          width: 38px;
+          height: 38px;
           border-radius: 50%;
-          border: none;
-          display: flex; align-items: center; justify-content: center;
+          background: rgba(0,0,0,0.50);
+          backdrop-filter: blur(5px);
+          border: 1px solid rgba(255,248,238,0.22);
+          color: #fff8ee;
           cursor: pointer;
-          background: rgba(0,0,0,0.4);
-          backdrop-filter: blur(6px);
-          -webkit-backdrop-filter: blur(6px);
-          color: #fff;
-          box-shadow: 0 4px 16px rgba(0,0,0,0.3);
-          transition: background 0.2s, transform 0.2s;
-          opacity: 0;
-        }
-        .group:hover .ps-btn { opacity: 1; }
-        .ps-btn:hover {
-          background: rgba(255,255,255,0.9);
-          color: #2d6a4f;
-          transform: translateY(-50%) scale(1.05);
-        }
-        .ps-btn:active { transform: translateY(-50%) scale(0.95) !important; }
-        .ps-btn:focus  { outline: none; }
-        .ps-btn-prev   { left: 12px; }
-        .ps-btn-next   { right: 12px; }
-
-        @media (max-width: 1024px) {
-          .ps-btn { 
-            opacity: 0.9; 
-            width: 36px; 
-            height: 36px;
-          }
-        }
-
-        @media (max-width: 768px) {
-          .ps-btn { 
-            width: 24px; 
-            height: 24px;
-          }
-          .ps-btn-prev { left: 6px; }
-          .ps-btn-next { right: 6px; }
-        }
-
-        @media (max-width: 480px) {
-          .ps-btn { 
-            width: 22px; 
-            height: 22px;
-          }
-          .ps-btn-prev { left: 4px; }
-          .ps-btn-next { right: 4px; }
-        }
-
-        /* Dots */
-        .ps-dots {
-          position: absolute;
-          bottom: 55px; left: 50%;
-          transform: translateX(-50%);
-          z-index: 10;
-          display: flex; align-items: center; gap: 5px;
-        }
-
-        @media (max-width: 1024px) {
-          .ps-dots { 
-            bottom: 50px; 
-          }
-        }
-
-        @media (max-width: 768px) {
-          .ps-dots { 
-            bottom: 30px; 
-            gap: 3px;
-          }
-        }
-
-        @media (max-width: 640px) {
-          .ps-dots { 
-            bottom: 28px; 
-          }
-        }
-
-        @media (max-width: 480px) {
-          .ps-dots { 
-            bottom: 26px; 
-            gap: 3px;
-          }
-        }
-
-        .ps-dot {
-          border: none; cursor: pointer;
-          border-radius: 20px;
-          background: rgba(255,255,255,0.4);
-          height: 5px; width: 5px; padding: 0;
-          transition: width 0.3s, background 0.3s;
-        }
-        .ps-dot.active { background: #fff; width: 18px; }
-
-        @media (max-width: 768px) {
-          .ps-dot { height: 3px; width: 3px; }
-          .ps-dot.active { width: 10px; }
-        }
-
-        @media (max-width: 480px) {
-          .ps-dot { height: 3px; width: 3px; }
-          .ps-dot.active { width: 8px; }
-        }
-
-        .ps-dot:hover:not(.active) { background: rgba(255,255,255,0.75); }
-        .ps-dot:focus { outline: none; }
-
-        /* Counter */
-        .ps-counter {
-          position: absolute;
-          top: 12px; right: 12px;
-          z-index: 10;
-          background: rgba(0,0,0,0.5);
-          backdrop-filter: blur(6px);
-          color: #fff;
-          font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
-          padding: 3px 10px;
-          border-radius: 20px;
-        }
-
-        @media (max-width: 768px) {
-          .ps-counter {
-            top: 6px;
-            right: 6px;
-            font-size: 7px;
-            padding: 2px 6px;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .ps-counter {
-            top: 5px;
-            right: 5px;
-            font-size: 7px;
-            padding: 2px 5px;
-          }
-        }
-
-        /* Loading state */
-        .ps-loading {
           display: flex;
-          flex-direction: column;
           align-items: center;
           justify-content: center;
-          height: 420px;
-          background: #f8f9fa;
-          color: #6c757d;
-          font-family: 'Inter', sans-serif;
-          font-size: 14px;
-          font-weight: 400;
-          gap: 12px;
+          transition: background 0.22s, border-color 0.22s, transform 0.22s;
+        }
+        .kc-nav:hover {
+          background: #c8821a;
+          border-color: #c8821a;
+          transform: translateY(-50%) scale(1.08);
+        }
+        .kc-nav-prev { left: 14px; }
+        .kc-nav-next { right: 14px; }
+
+        /* ── THUMBNAIL STRIP ── */
+        .kc-thumbs {
+          display: flex;
+          background: #080500;
+          border-top: 1px solid rgba(200,130,26,0.2);
         }
 
-        .loading-spinner {
-          width: 32px;
-          height: 32px;
-          border: 3px solid #e9ecef;
-          border-top: 3px solid #2d6a4f;
-          border-radius: 50%;
-          animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-
-        @media (max-width: 768px) {
-          .ps-loading {
-            height: 240px;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .ps-loading {
-            height: 210px;
-          }
-        }
-
-        /* Image container - fixed height, full width — INCREASED */
-        .ps-img-container {
+        .kc-thumb {
+          flex: 1;
+          height: 50px;
           position: relative;
-          width: 100%;
-          height: 420px;
+          cursor: pointer;
           overflow: hidden;
+          border-top: 2px solid transparent;
+          transition: border-color 0.3s;
         }
+        .kc-thumb.active { border-color: #c8821a; }
 
-        @media (max-width: 768px) {
-          .ps-img-container {
-            height: 240px;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .ps-img-container {
-            height: 210px;
-          }
-        }
-
-        /* Ken Burns effect */
-        .ps-img {
+        .kc-thumb img {
           width: 100%;
           height: 100%;
-          display: block;
           object-fit: cover;
-          object-position: center center;
-          transition: transform 6s ease;
+          filter: brightness(0.45) saturate(0.7);
+          transition: filter 0.3s;
+        }
+        .kc-thumb.active img,
+        .kc-thumb:hover img {
+          filter: brightness(0.75) saturate(1);
         }
 
-        .ps-img.active { transform: scale(1.04); }
+        .kc-thumb-label {
+          position: absolute;
+          inset: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 9.5px;
+          font-weight: 700;
+          letter-spacing: 1.5px;
+          text-transform: uppercase;
+          color: rgba(255,248,238,0.75);
+          transition: color 0.3s;
+        }
+        .kc-thumb.active .kc-thumb-label { color: #c8821a; }
+
+        /* ── LOADING ── */
+        .kc-loading {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          padding: 60px 20px;
+          background: #0d0a04;
+          color: rgba(255,248,238,0.6);
+          font-size: 14px;
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 640px) {
+          .kc-slide { height: clamp(160px, 48vw, 260px); }
+          .kc-content { max-width: 70%; }
+          .kc-thumbs { display: none; }
+          .kc-nav { width: 30px; height: 30px; }
+          .kc-nav-prev { left: 8px; }
+          .kc-nav-next { right: 8px; }
+          .kc-counter { right: 46px; top: 10px; }
+        }
       `}</style>
 
-      <div className="ps-wrap">
+      <div className="kc-slider">
         {loading ? (
-          <div className="ps-loading">
-            <div className="loading-spinner"></div>
-            <span>Loading slider...</span>
+          <div className="kc-loading">
+            <div
+              style={{
+                width: 22,
+                height: 22,
+                borderRadius: "50%",
+                border: "2px solid #c8821a",
+                borderTopColor: "transparent",
+                animation: "spin 0.8s linear infinite",
+              }}
+            />
+            Loading…
+            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
           </div>
         ) : (
-          <Carousel
-            setApi={setApi}
-            opts={{ loop: true }}
-            plugins={[autoplayPlugin.current]}
-          >
-            <CarouselContent>
-              {sliderItems.length > 0 ? (
-                sliderItems.map((item, index) => (
-                  <CarouselItem key={item.id}>
-                    <div className="ps-img-container">
-                      <img
-                        src={item.image}
-                        alt={item.title}
-                        className={`ps-img ${index === currentSlide ? "active" : ""}`}
-                        onError={(e) => {
-                          console.error('Failed to load slider image:', item.image);
-                          // Try to reload the image once
-                          const img = e.target as HTMLImageElement;
-                          if (!img.dataset.retried) {
-                            img.dataset.retried = 'true';
-                            setTimeout(() => {
-                              img.src = item.image + '?retry=' + Date.now();
-                            }, 1000);
-                          }
-                        }}
-                      />
-                    </div>
-                  </CarouselItem>
-                ))
-              ) : (
-                products.map((product, index) => (
-                  <CarouselItem key={product.id}>
-                    <div className="ps-img-container">
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className={`ps-img ${index === currentSlide ? "active" : ""}`}
-                        onError={(e) => {
-                          console.error('Failed to load product image:', product.image);
-                          // Try to reload the image once
-                          const img = e.target as HTMLImageElement;
-                          if (!img.dataset.retried) {
-                            img.dataset.retried = 'true';
-                            setTimeout(() => {
-                              img.src = product.image + '?retry=' + Date.now();
-                            }, 1000);
-                          }
-                        }}
-                      />
-                    </div>
-                  </CarouselItem>
-                ))
-              )}
-            </CarouselContent>
-          </Carousel>
-        )}
-
-        {/* Overlays - only show when not loading */}
-        {!loading && (
           <>
-            <div className="ps-overlay" />
-            <div className="ps-bottom-gradient" />
+            {/* ── TRACK ── */}
+            <div
+              className="kc-track"
+              style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+            >
+              {slides.map((item: any, i: number) => (
+                <div
+                  key={item.id}
+                  className={`kc-slide${i === currentSlide ? " active" : ""}`}
+                >
+                  <img
+                    className="kc-img"
+                    src={item.image}
+                    alt={item.title || item.name || "Kissan City"}
+                    loading={i === 0 ? "eager" : "lazy"}
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = "none";
+                    }}
+                  />
 
-            {/* ── HERO TEXT ── */}
-            <div className="ps-hero">
-              {currentSlideData?.title && (
-                <h1 className="ps-headline">
-                  {currentSlideData.title}
-                </h1>
-              )}
-              {currentSlideData?.subtitle && (
-                <p className="ps-subtext">
-                  {currentSlideData.subtitle}
-                </p>
-              )}
-              {currentSlideData?.buttonText && currentSlideData?.buttonLink && (
-                <div className="ps-cta-row">
-                  <button 
-                    onClick={() => handleButtonClick(currentSlideData.buttonLink!)}
-                    className="ps-shop-btn"
-                  >
-                    <ShoppingBag size={window.innerWidth <= 768 ? 10 : 13} />
-                    {currentSlideData.buttonText}
-                  </button>
-                  <button onClick={handleAboutUsClick} className="ps-story-btn">
-                    <BookOpen size={window.innerWidth <= 768 ? 10 : 13} />
-                    Explore Our Story
-                  </button>
+                  {/* Text content */}
+                  <div className="kc-content">
+                    {item.tag && (
+                      <span className="kc-tag">{item.tag}</span>
+                    )}
+                    {(item.title || item.name) && (
+                      <h2 className="kc-title">
+                        {item.title || item.name}
+                      </h2>
+                    )}
+                    {item.subtitle && (
+                      <p className="kc-subtitle">{item.subtitle}</p>
+                    )}
+                    {item.buttonText && (
+                      <div className="kc-cta-row">
+                        <button
+                          className="kc-btn kc-btn-primary"
+                          onClick={() => handleButtonClick(item.buttonLink)}
+                        >
+                          <ShoppingBag size={14} />
+                          {item.buttonText}
+                        </button>
+                        <button
+                          className="kc-btn kc-btn-secondary"
+                          onClick={handleAboutUsClick}
+                        >
+                          <BookOpen size={14} />
+                          Our Story
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              )}
+              ))}
             </div>
 
-            {/* Slide counter */}
-            <div className="ps-counter">{currentSlide + 1} / {total}</div>
-
-            {/* Prev */}
+            {/* Nav arrows */}
             <button
-              className="ps-btn ps-btn-prev"
-              onClick={(e) => { scrollPrev(); setTimeout(() => e.currentTarget.blur(), 150); }}
+              className="kc-nav kc-nav-prev"
+              onClick={() => goTo(currentSlide - 1)}
               aria-label="Previous slide"
             >
-              <ChevronLeft size={window.innerWidth <= 768 ? 12 : 18} strokeWidth={2.5} />
+              <ChevronLeft size={17} />
             </button>
-
-            {/* Next */}
             <button
-              className="ps-btn ps-btn-next"
-              onClick={(e) => { scrollNext(); setTimeout(() => e.currentTarget.blur(), 150); }}
+              className="kc-nav kc-nav-next"
+              onClick={() => goTo(currentSlide + 1)}
               aria-label="Next slide"
             >
-              <ChevronRight size={window.innerWidth <= 768 ? 12 : 18} strokeWidth={2.5} />
+              <ChevronRight size={17} />
             </button>
 
             {/* Dots */}
-            <div className="ps-dots">
-              {(sliderItems.length > 0 ? sliderItems : products).map((_, i) => (
+            <div className="kc-dots">
+              {slides.map((_: any, i: number) => (
                 <button
                   key={i}
-                  className={`ps-dot ${i === currentSlide ? "active" : ""}`}
-                  onClick={() => scrollTo(i)}
+                  className={`kc-dot${i === currentSlide ? " active" : ""}`}
+                  onClick={() => goTo(i)}
                   aria-label={`Go to slide ${i + 1}`}
                 />
               ))}
             </div>
           </>
         )}
-
-        {/* ── STATS BAR ── */}
-        {/* <div className="ps-stats">
-          <div className="ps-stat">
-            <span className="ps-stat-num">{currentSlideData?.stats?.products || "200+"}</span>
-            <span className="ps-stat-label">Products</span>
-          </div>
-          <div className="ps-stat">
-            <span className="ps-stat-num">{currentSlideData?.stats?.customers || "50K+"}</span>
-            <span className="ps-stat-label">Happy Customers</span>
-          </div>
-          <div className="ps-stat">
-            <span className="ps-stat-num">{currentSlideData?.stats?.quality || "100%"}</span>
-            <span className="ps-stat-label">Premium Quality</span>
-          </div>
-          <div className="ps-stat">
-            <span className="ps-stat-num">{currentSlideData?.stats?.rating || "4.8★"}</span>
-            <span className="ps-stat-label">Avg. Rating</span>
-          </div>
-        </div> */}
       </div>
     </div>
   );

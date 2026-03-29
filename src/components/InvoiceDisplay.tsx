@@ -91,8 +91,7 @@ export function InvoiceDisplay({ order, invoice, businessInfo, isLoading, error 
         <div className="mb-8 pb-8 border-b border-border">
           <div className="flex justify-between items-start mb-6">
             <div>
-              <img src={businessInfo.logo || '/uni10-logo.png'} alt={businessInfo.name} className="h-16 mb-2 object-contain" />
-              <p className="text-sm text-muted-foreground">{businessInfo.address}</p>
+              <img src="/Untitled design.png" alt="Company Header" className="h-16 mb-2 object-contain" />
             </div>
             <div className="text-right">
               <p className="text-sm text-muted-foreground">Contact:</p>
@@ -133,7 +132,7 @@ export function InvoiceDisplay({ order, invoice, businessInfo, isLoading, error 
           <div>
             <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">Bill To</p>
             <div className="text-sm space-y-1">
-              <p className="font-semibold">{businessInfo?.companyName || 'UNI10'}</p>
+              <p className="font-semibold">{businessInfo?.companyName || 'thekissancity'}</p>
               <p>{businessInfo?.address}</p>
               {businessInfo?.contactNumber && <p>{businessInfo.contactNumber}</p>}
               {businessInfo?.email && <p>{businessInfo.email}</p>}

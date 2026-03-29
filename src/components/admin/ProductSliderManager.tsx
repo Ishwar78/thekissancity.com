@@ -69,38 +69,100 @@ export const ProductSliderManager = () => {
     }
 
     try {
+      // 🔍 DEBUG: Log what we're sending
+      console.log('[PRODUCT SLIDER MANAGER] Submitting form:', {
+        isEditing: !!editingSlider,
+        editingId: editingSlider?.id,
+        hasNewImage: !!imageFile,
+        imageFileName: imageFile?.name,
+        imageFileSize: imageFile?.size,
+        currentImage: editingSlider?.image,
+        formData
+      });
+
+      // Show loading state
+      setLoading(true);
+
       const sliderData = {
         ...formData,
         image: imageFile || editingSlider?.image || ''
       };
 
+      console.log('[PRODUCT SLIDER MANAGER] Final slider data:', sliderData);
+      console.log('[PRODUCT SLIDER MANAGER] Image being sent:', {
+        isNewFile: !!imageFile,
+        fileName: imageFile?.name,
+        fileSize: imageFile?.size,
+        type: imageFile?.type,
+        lastModified: imageFile?.lastModified
+      });
+
       if (editingSlider) {
+        console.log('[PRODUCT SLIDER MANAGER] Updating slider with ID:', editingSlider.id);
+        console.log('[PRODUCT SLIDER MANAGER] Current image in database:', editingSlider.image);
         const updateData = { ...sliderData, id: editingSlider.id };
+        
+        // 🔍 DEBUG: Log the update data being sent
+        console.log('[PRODUCT SLIDER MANAGER] Update data being sent:', updateData);
+        
         const updated = await productSliderService.updateSlider(editingSlider.id, updateData);
+        
+        // 🔍 DEBUG: Log the response
+        console.log('[PRODUCT SLIDER MANAGER] Update response:', updated);
+        
         if (updated) {
+          console.log('[PRODUCT SLIDER MANAGER] Slider updated successfully, new image URL:', updated.image);
+          console.log('[PRODUCT SLIDER MANAGER] Image URL comparison:', {
+            oldUrl: editingSlider.image,
+            newUrl: updated.image,
+            urlsMatch: editingSlider.image === updated.image
+          });
           toast({
             title: 'Success',
             description: 'Slider updated successfully'
           });
+        } else {
+          console.error('[PRODUCT SLIDER MANAGER] Update failed - no response data');
+          toast({
+            title: 'Error',
+            description: 'Failed to update slider',
+            variant: 'destructive'
+          });
         }
       } else {
+        console.log('[PRODUCT SLIDER MANAGER] Creating new slider');
         const created = await productSliderService.createSlider(sliderData);
+        
+        // 🔍 DEBUG: Log the response
+        console.log('[PRODUCT SLIDER MANAGER] Create response:', created);
+        
         if (created) {
+          console.log('[PRODUCT SLIDER MANAGER] Slider created successfully, image URL:', created.image);
           toast({
             title: 'Success',
             description: 'Slider created successfully'
+          });
+        } else {
+          console.error('[PRODUCT SLIDER MANAGER] Create failed - no response data');
+          toast({
+            title: 'Error',
+            description: 'Failed to create slider',
+            variant: 'destructive'
           });
         }
       }
 
       resetForm();
-      loadSliders();
+      await loadSliders(); // Refresh the list to show updated data
     } catch (error) {
+      console.error('[PRODUCT SLIDER MANAGER] Failed to save slider:', error);
       toast({
         title: 'Error',
         description: 'Failed to save slider',
         variant: 'destructive'
       });
+    } finally {
+      setLoading(false); // Always reset loading state
     }
   };
 
@@ -228,12 +290,24 @@ export const ProductSliderManager = () => {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // 🔍 DEBUG: Log image file details
+      console.log('[PRODUCT SLIDER MANAGER] New image selected:', {
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type,
+        lastModified: new Date(file.lastModified).toISOString()
+      });
+      
       setImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImagePreview(reader.result as string);
+        const previewUrl = reader.result as string;
+        console.log('[PRODUCT SLIDER MANAGER] Image preview generated, length:', previewUrl.length);
+        setImagePreview(previewUrl);
       };
       reader.readAsDataURL(file);
+    } else {
+      console.log('[PRODUCT SLIDER MANAGER] No file selected');
     }
   };
 

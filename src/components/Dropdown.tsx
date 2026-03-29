@@ -25,7 +25,7 @@ export const Dropdown: React.FC<DropdownProps> = ({ title, gender, children }) =
     >
       <Link
         to={`/shop?gender=${gender}`}
-        className="text-sm font-semibold px-3 py-2 rounded-full hover:bg-amber-50 transition flex items-center gap-1"
+        className="text-sm font-semibold px-3 py-2 rounded-full hover:bg-amber-50 transition flex items-center gap-0.5"
         style={{ color: '#6b4423' }}
       >
         {title}

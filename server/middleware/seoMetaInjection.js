@@ -34,7 +34,7 @@ const createDefaultSeoTags = (pathname) => {
   return createMetaTagsHtml(seoData);
 };
 
-const injectMetaTags = async (html, pathname, baseUrl = 'https://uni10.in') => {
+const injectMetaTags = async (html, pathname, baseUrl = 'https://thekissancity.in') => {
   const slug = extractProductSlug(pathname);
 
   if (!slug) {

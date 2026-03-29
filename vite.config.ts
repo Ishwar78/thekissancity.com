@@ -31,7 +31,16 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   optimizeDeps: {
-    exclude: ["lovable-tagger"]
+    include: ["react", "react-dom"],
+    exclude: [
+      "lovable-tagger",
+      "@radix-ui/react-dialog",
+      "@radix-ui/react-dropdown-menu", 
+      "@radix-ui/react-select",
+      "@tanstack/react-query",
+      "embla-carousel-react",
+      "embla-carousel-autoplay"
+    ]
   },
   resolve: {
     alias: {
@@ -52,7 +61,7 @@ export default defineConfig(({ mode }) => ({
       },
     },
     chunkSizeWarningLimit: 300,
-    target: 'es2015',
+    target: ['es2015', 'edge88', 'firefox78', 'chrome87', 'safari14'],
     minify: 'esbuild',
     assetsInlineLimit: 4096, // Inline small assets as base64
   },

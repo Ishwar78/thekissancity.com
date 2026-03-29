@@ -63,9 +63,10 @@ const AboutUsSection = () => {
         setError(null);
         const response = await fetch('/api/about-us');
         if (!response.ok) {
-          throw new Error('Failed to fetch About Us data');
+          throw new Error('Failed to fetch About Us data');  
         }
         const data = await response.json();
+        console.log('About Us API response:', data);
         setAboutUsData(data);
       } catch (err) {
         console.error('Error fetching About Us data:', err);

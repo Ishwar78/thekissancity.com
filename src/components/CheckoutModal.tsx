@@ -238,7 +238,7 @@ export const CheckoutModal: React.FC<Props> = ({ open, setOpen }) => {
         key: keyId,
         amount,
         currency,
-        name: "UNI10",
+        name: "thekissancity",
         description: `Order for ₹${total}`,
         order_id: orderId,
         handler: async (res: any) => {

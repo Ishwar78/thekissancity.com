@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { Loader2, X, Star } from "lucide-react";
+import { Loader2, X, Star, Upload } from "lucide-react";
 
 interface Review {
   _id: string;
@@ -45,12 +45,89 @@ export const ReviewModal = ({ isOpen, onClose, productId, productName, fallbackI
     rating: 0,
     text: ""
   });
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
 
   useEffect(() => {
     if (!isOpen) {
       setReview({ rating: 0, text: "" });
+      setSelectedImages([]);
+      setImagePreviews([]);
     }
   }, [isOpen]);
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const validFiles = files.filter(file => {
+      const isValidType = file.type.startsWith('image/');
+      const isValidSize = file.size <= 5 * 1024 * 1024; // 5MB limit
+      if (!isValidType) {
+        toast({
+          title: "Invalid File Type",
+          description: "Please select only image files",
+          variant: "destructive"
+        });
+      }
+      if (!isValidSize) {
+        toast({
+          title: "File Too Large",
+          description: "Images must be smaller than 5MB",
+          variant: "destructive"
+        });
+      }
+      return isValidType && isValidSize;
+    });
+
+    // Limit to 5 images
+    const newImages = [...selectedImages, ...validFiles].slice(0, 5);
+    setSelectedImages(newImages);
+
+    // Create previews
+    const newPreviews = [...imagePreviews];
+    validFiles.forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        newPreviews.push(reader.result as string);
+        setImagePreviews([...newPreviews]);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const removeImage = (index: number) => {
+    const newImages = selectedImages.filter((_, i) => i !== index);
+    const newPreviews = imagePreviews.filter((_, i) => i !== index);
+    setSelectedImages(newImages);
+    setImagePreviews(newPreviews);
+  };
+
+  const uploadImages = async (): Promise<string[]> => {
+    if (selectedImages.length === 0) return [];
+
+    const uploadedUrls: string[] = [];
+    
+    for (const file of selectedImages) {
+      try {
+        const formData = new FormData();
+        formData.append('file', file); // Changed from 'image' to 'file'
+        
+        const response = await api('/api/uploads/images', { // Changed endpoint
+          method: 'POST',
+          body: formData,
+        });
+        
+        if (response.ok && response.json?.url) {
+          uploadedUrls.push(response.json.url);
+        } else {
+          console.error('Failed to upload image:', response);
+        }
+      } catch (error) {
+        console.error('Error uploading image:', error);
+      }
+    }
+    
+    return uploadedUrls;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,6 +137,7 @@ export const ReviewModal = ({ isOpen, onClose, productId, productName, fallbackI
       rating: review.rating,
       text: review.text.trim(),
       user: user?.email,
+      imageCount: selectedImages.length,
       fallbackInfo
     });
     
@@ -90,16 +168,21 @@ export const ReviewModal = ({ isOpen, onClose, productId, productName, fallbackI
       return;
     }
 
-    const requestBody = {
-      productId,
-      rating: review.rating,
-      text: review.text.trim()
-    };
-    
-    console.log('🔍 [REVIEW] Request body to be sent:', requestBody);
-
     setSubmitting(true);
     try {
+      console.log('🔍 [REVIEW] Uploading images...');
+      const uploadedImages = await uploadImages();
+      console.log('🔍 [REVIEW] Images uploaded:', uploadedImages);
+
+      const requestBody = {
+        productId,
+        rating: review.rating,
+        text: review.text.trim(),
+        images: uploadedImages
+      };
+      
+      console.log('🔍 [REVIEW] Request body to be sent:', requestBody);
+
       console.log('🔍 [REVIEW] Making API call...');
       const { ok, json, status } = await api("/api/reviews", {
         method: "POST",
@@ -122,6 +205,8 @@ export const ReviewModal = ({ isOpen, onClose, productId, productName, fallbackI
           description: "Your review has been posted successfully"
         });
         setReview({ rating: 0, text: "" });
+        setSelectedImages([]);
+        setImagePreviews([]);
         onClose();
       } else {
         console.error('🔍 [REVIEW] API Error Response:', json);
@@ -214,11 +299,70 @@ export const ReviewModal = ({ isOpen, onClose, productId, productName, fallbackI
               </p>
             </div>
             
-            <div className="flex gap-3 pt-4">
+            {/* Image Upload Section */}
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Product Images (Optional)
+              </label>
+              <div className="space-y-3">
+                {/* Image Upload Button */}
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                  <input
+                    type="file"
+                    id="review-images-modal"
+                    multiple
+                    accept="image/*"
+                    onChange={handleImageSelect}
+                    className="hidden"
+                    disabled={submitting}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => document.getElementById('review-images-modal')?.click()}
+                    disabled={submitting || selectedImages.length >= 5}
+                    className="flex items-center gap-2 w-full sm:w-auto justify-center"
+                  >
+                    <Upload className="h-4 w-4" />
+                    Add Images
+                  </Button>
+                  <span className="text-sm text-gray-500 text-center sm:text-left">
+                    {selectedImages.length}/5 images (max 5MB each)
+                  </span>
+                </div>
+
+                {/* Image Previews */}
+                {imagePreviews.length > 0 && (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3">
+                    {imagePreviews.map((preview, index) => (
+                      <div key={index} className="relative group">
+                        <img
+                          src={preview}
+                          alt={`Review image ${index + 1}`}
+                          className="w-full h-20 sm:h-24 object-cover rounded-lg border"
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="icon"
+                          onClick={() => removeImage(index)}
+                          disabled={submitting}
+                          className="absolute top-1 right-1 h-5 w-5 sm:h-6 sm:w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="h-2 sm:h-3 w-2 sm:w-3" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-4">
               <Button 
                 type="submit" 
                 disabled={submitting || review.rating === 0 || review.text.trim().length < 20}
-                className="flex-1"
+                className="w-full sm:flex-1"
               >
                 {submitting ? (
                   <>
@@ -234,6 +378,7 @@ export const ReviewModal = ({ isOpen, onClose, productId, productName, fallbackI
                 variant="outline"
                 onClick={onClose}
                 disabled={submitting}
+                className="w-full sm:w-auto"
               >
                 Cancel
               </Button>

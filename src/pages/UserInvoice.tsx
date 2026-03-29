@@ -54,7 +54,7 @@ export default function UserInvoice() {
           if (b2.ok && (b2 as any).json?.ok) {
             const d = (b2 as any).json.data || {};
             setBiz({
-              name: d.domain || 'UNI10',
+              name: d.domain || 'thekissancity',
               address: d.business?.address || '',
               phone: d.business?.phone || '',
               email: d.business?.email || '',

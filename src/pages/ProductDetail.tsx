@@ -224,14 +224,14 @@ const ProductDetail = () => {
 
   useEffect(() => {
     if (!product) {
-      document.title = "uni10 - Premium Streetwear & Lifestyle";
+      document.title = "thekissancity - Premium Streetwear & Lifestyle";
       return;
     }
     const productTitle = product.title || product.name || "Product";
     const productPrice = Number(product.price || 0);
     const priceStr = productPrice.toLocaleString("en-IN");
-    const pageTitle = product.seo?.title || `${productTitle} - ₹${priceStr} | uni10`;
-    const description = product.seo?.description || product.description || `Shop ${productTitle} at uni10. Premium streetwear and lifestyle products.`;
+    const pageTitle = product.seo?.title || `${productTitle} - ₹${priceStr} | KisaanCity`;
+    const description = product.seo?.description || product.description || `Shop ${productTitle} at KisaanCity. Premium streetwear and lifestyle products.`;
     const imageUrl = resolveImage(product.image_url || (product.images?.[0] || ""));
     document.title = pageTitle;
     const setMeta = (sel: string, attr: string, val: string, content: string) => {
@@ -485,7 +485,7 @@ const ProductDetail = () => {
   }
 
   if (!product) {
-    document.title = "Product Not Found | uni10";
+    document.title = "Product Not Found | thekissancity";
     return (
       <div className="min-h-screen bg-white">
         <Navbar />
@@ -600,9 +600,12 @@ const ProductDetail = () => {
                       <span className="text-emerald-500 text-xs">★</span>
                     </div>
                     <span className="text-[10px] text-gray-400 mt-1">
-                      {(product?.reviewCount || 4500) >= 1000
-                        ? `${((product?.reviewCount || 4500) / 1000).toFixed(1)}k`
-                        : product?.reviewCount || 4500} ratings
+                      {(() => {
+                        const randomRating = Math.floor(Math.random() * (300000 - 200000 + 1)) + 200000;
+                        return randomRating >= 1000
+                          ? `${(randomRating / 1000).toFixed(0)}k ratings`
+                          : `${randomRating} ratings`;
+                      })()}
                     </span>
                   </div>
                 </div>
@@ -628,13 +631,13 @@ const ProductDetail = () => {
                 </div> */}
                  {product.paragraph1 && (
                     <div className="flex items-center gap-2 text-xs">
-                      <span className="text-amber-600 mt-0.5 shrink-0">
+                      <span className="text-green-700 mt-0.5 shrink-0">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
   <path d="M9 12l2 2 4-4"></path>
 </svg>
                       </span>
-                      <p className="text-amber-700 font-medium leading-relaxed">{product.paragraph1}</p>
+                      <p className="text-green-700 font-medium leading-relaxed">{product.paragraph1}</p>
                     </div>
                   )}
 

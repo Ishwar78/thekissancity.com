@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Instagram, Twitter, Facebook, Mail, Phone, MapPin } from "lucide-react";
+import { Instagram, Twitter, Facebook, Mail, Phone, MapPin, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { api } from "@/lib/api";
 
@@ -63,13 +63,13 @@ export const Footer = () => {
             </Link>
 
             <p className="text-xs md:text-sm text-gray-300 leading-relaxed mb-4 md:mb-6 max-w-xs">
-             Kissan City is a brand name owned by Nut and Nector Pvt Ltd and is bridging the gap between the rural heartland and urban doorstep.
+             The Kissan City is a brand name owned by Nut and Nector Pvt Ltd and is bridging the gap between the rural heartland and urban doorstep.
             </p>
             <div className="space-y-2 md:space-y-3">
               <div className="flex items-center gap-2 md:gap-3 text-xs md:text-sm text-gray-300 hover:text-yellow-400 transition-colors">
                 <Mail className="h-3 w-3 md:h-4 md:w-4 text-white flex-shrink-0" />
                 <a href="mailto:support@kisaancity.in">
-                  support@kisaancity.in
+                  connnect@thekissancity.com
                 </a>
               </div>
               
@@ -200,7 +200,7 @@ export const Footer = () => {
             </p>
             <div className="flex gap-3 md:gap-4">
               <a
-                href="/"
+                href="https://www.instagram.com/thekissancity_official?igsh=aWQ2NGV6ZDQycnA3&utm_source=qr"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white hover:text-black transition-all duration-200"
@@ -208,13 +208,20 @@ export const Footer = () => {
                 <Instagram className="h-4 w-4 md:h-5 md:w-5" />
               </a>
               <a
-                href="/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white hover:text-black transition-all duration-200"
-              >
-                <Twitter className="h-4 w-4 md:h-5 md:w-5" />
-              </a>
+               href="https://twitter.com/thekissancity"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white hover:text-black transition-all duration-200"
+>
+  <svg
+    className="h-4 w-4 md:h-5 md:w-5"
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.259 5.629 5.905-5.629Zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+  </svg>
+</a>
               <a
                 href="/"
                 target="_blank"
@@ -233,7 +240,7 @@ export const Footer = () => {
         {/* Bottom Footer */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6">
           <p className="text-xs md:text-sm text-gray-300 text-center md:text-left">
-            &copy; {currentYear} <span className="font-semibold text-white">Kissan City</span>. All
+            &copy; {currentYear} <span className="font-semibold text-white">The Kissan City</span>. All
             rights reserved.
           </p>
 

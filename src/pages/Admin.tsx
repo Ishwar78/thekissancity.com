@@ -185,7 +185,7 @@ function createDefaultRazorpaySettings(): RazorpaySettingsForm {
 function createDefaultShiprocketSettings(): ShiprocketSettingsForm {
   return {
     enabled: true,
-    email: 'logistics@uni10.in',
+    email: 'logistics@thekissancity.in',
     password: 'Test@1234',
     apiKey: 'ship_test_key_123456',
     secret: 'ship_test_secret_abcdef',
@@ -196,7 +196,7 @@ function createDefaultShiprocketSettings(): ShiprocketSettingsForm {
 function createDefaultSettings(): IntegrationSettings {
   return {
     id: undefined,
-    domain: 'www.uni10.in',
+    domain: 'www.thekissancity.in',
     payment: createDefaultPaymentSettings(),
     razorpay: createDefaultRazorpaySettings(),
     shipping: {
@@ -356,7 +356,7 @@ async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> 
       if (p.includes('/api/auth/users')) {
         return [
           { _id: 'demo-1', name: 'Sachin', email: 'sachin@gmail.com', role: 'user' },
-          { _id: 'demo-2', name: 'UNI10 Admin', email: 'uni10@gmail.com', role: 'admin' },
+          { _id: 'demo-2', name: 'thekissancity Admin', email: 'thekissancity@gmail.com', role: 'admin' },
         ] as unknown as T;
       }
       if (p.includes('/api/orders')) {
@@ -739,7 +739,7 @@ const Admin = () => {
 
   // Billing info state
   const [billingForm, setBillingForm] = useState<BillingInfoForm>({
-    companyName: 'UNI10',
+    companyName: 'thekissancity',
     logo: '',
     address: '',
     contactNumber: '',
@@ -755,7 +755,7 @@ const Admin = () => {
   const [uploadingLogo, setUploadingLogo] = useState(false);
 
   // Contact settings state
-  const [contactForm, setContactForm] = useState<{ phones: string[]; emails: string[]; address: { line1?: string; line2?: string; city?: string; state?: string; pincode?: string }; mapsUrl?: string }>(() => ({ phones: ['+91 99715 41140'], emails: ['supportinfo@gmail.com','uni10@gmail.com'], address: {}, mapsUrl: '' }));
+  const [contactForm, setContactForm] = useState<{ phones: string[]; emails: string[]; address: { line1?: string; line2?: string; city?: string; state?: string; pincode?: string }; mapsUrl?: string }>(() => ({ phones: ['+91 99715 41140'], emails: ['supportinfo@gmail.com','thekissancity@gmail.com'], address: {}, mapsUrl: '' }));
   const [contactLoading, setContactLoading] = useState(true);
   const [contactSaving, setContactSaving] = useState(false);
 
@@ -1169,7 +1169,7 @@ const Admin = () => {
       if (res.ok && res.json && res.json.data) {
         const data = res.json.data;
         const phones = Array.isArray(data.phones) && data.phones.length ? data.phones : ['+91 99715 41140'];
-        const emails = Array.isArray(data.emails) && data.emails.length ? data.emails : ['supportinfo@gmail.com','uni10@gmail.com'];
+        const emails = Array.isArray(data.emails) && data.emails.length ? data.emails : ['supportinfo@gmail.com','thekissancity@gmail.com'];
         const address = data.address || {};
         const mapsUrl = data.mapsUrl || '';
         setContactForm({ phones, emails, address, mapsUrl });
@@ -1181,7 +1181,7 @@ const Admin = () => {
       if (res2.ok && res2.json && res2.json.data && res2.json.data.contact) {
         const data = res2.json.data.contact;
         const phones = Array.isArray(data.phones) && data.phones.length ? data.phones : ['+91 99715 41140'];
-        const emails = Array.isArray(data.emails) && data.emails.length ? data.emails : ['supportinfo@gmail.com','uni10@gmail.com'];
+        const emails = Array.isArray(data.emails) && data.emails.length ? data.emails : ['supportinfo@gmail.com','thekissancity@gmail.com'];
         const address = data.address || {};
         const mapsUrl = data.mapsUrl || '';
         setContactForm({ phones, emails, address, mapsUrl });
@@ -1189,10 +1189,10 @@ const Admin = () => {
       }
 
       // Last resort defaults
-      setContactForm({ phones: ['+91 99715 41140'], emails: ['supportinfo@gmail.com','uni10@gmail.com'], address: {}, mapsUrl: '' });
+      setContactForm({ phones: ['+91 99715 41140'], emails: ['supportinfo@gmail.com','thekissancity@gmail.com'], address: {}, mapsUrl: '' });
     } catch (e:any) {
       console.warn('Failed to load contact settings', e?.message || e);
-      setContactForm({ phones: ['+91 99715 41140'], emails: ['supportinfo@gmail.com','uni10@gmail.com'], address: {}, mapsUrl: '' });
+      setContactForm({ phones: ['+91 99715 41140'], emails: ['supportinfo@gmail.com','thekissancity@gmail.com'], address: {}, mapsUrl: '' });
     } finally {
       setContactLoading(false);
     }
@@ -1266,7 +1266,7 @@ const Admin = () => {
       if (res.ok && res.json && res.json.data) {
         const data = res.json.data;
         setBillingForm({
-          companyName: String(data.companyName || 'UNI10'),
+          companyName: String(data.companyName || 'thekissancity'),
           address: String(data.address || ''),
           contactNumber: String(data.contactNumber || ''),
           email: String(data.email || ''),
@@ -1275,7 +1275,7 @@ const Admin = () => {
         });
       } else {
         setBillingForm({
-          companyName: 'UNI10',
+          companyName: 'thekissancity',
           address: '',
           contactNumber: '',
           email: '',
@@ -1286,7 +1286,7 @@ const Admin = () => {
     } catch (e:any) {
       console.warn('Failed to load billing info', e?.message || e);
       setBillingForm({
-        companyName: 'UNI10',
+        companyName: 'thekissancity',
         address: '',
         contactNumber: '',
         email: '',
@@ -6052,7 +6052,7 @@ const handleProductSubmit = async (e: React.FormEvent) => {
                   id="companyName"
                   value={billingForm.companyName}
                   onChange={(e) => setBillingForm((prev) => ({ ...prev, companyName: e.target.value }))}
-                  placeholder="e.g., UNI10"
+                  placeholder="e.g., thekissancity"
                   disabled={billingSaving}
                   required
                 />
@@ -6115,7 +6115,7 @@ const handleProductSubmit = async (e: React.FormEvent) => {
                     id="logo"
                     value={billingForm.logo}
                     onChange={(e) => setBillingForm((prev) => ({ ...prev, logo: e.target.value }))}
-                    placeholder="e.g., https://example.com/logo.png or /uni10-logo.png"
+                    placeholder="e.g., https://example.com/logo.png or /thekissancity-logo.png"
                     disabled={billingSaving || uploadingLogo}
                   />
                   <Button
