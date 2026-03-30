@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Info, FileText, ChevronDown, CheckCircle, Shield, Lock, Eye, Database, Globe, Users, Mail, Phone, Key, AlertCircle, Settings, Trash2, Clock, Cookie } from 'lucide-react';
+import { api } from '../lib/api';
 
 interface Point {
   point: string;
@@ -91,13 +92,12 @@ export const PrivacyPolicyPage = () => {
   useEffect(() => {
     const fetchPolicy = async () => {
       try {
-        const response = await fetch('/api/privacy-policy');
+        const response = await api('/api/privacy-policy');
         
         if (!response.ok) {
           throw new Error('Failed to fetch privacy policy');
         }
-        
-        const data = await response.json();
+        const data = response.json;
         
         if (data?.data) {
           setPolicy(data.data as PrivacyPolicyData);

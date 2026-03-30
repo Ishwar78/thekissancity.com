@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { FileText, ChevronDown, CheckCircle, Info, Shield, Clock, CreditCard, ArrowLeftRight, Truck, AlertCircle, RefreshCw, Users, Gavel, Mail, Phone, Globe, Lock, Key } from 'lucide-react';
+import { FileText, ChevronDown, CheckCircle, AlertTriangle, Users, Shield, Clock, Award, ArrowRight, Gavel, CreditCard, RefreshCw, Truck, Mail, Phone, Key, Globe, Info, ArrowLeftRight, Lock } from 'lucide-react';
+import { api } from '../lib/api';
 
 // Interfaces matching the backend schema
 interface Paragraph {
@@ -67,11 +68,11 @@ export const TermsOfServicePage = () => {
   useEffect(() => {
     const fetchPolicy = async () => {
       try {
-        const response = await fetch('/api/terms-of-service');
+        const response = await api('/api/terms-of-service');
         if (!response.ok) {
           throw new Error('Failed to fetch terms of service');
         }
-        const data = await response.json();
+        const data = response.json;
         if (data?.data) {
           setPolicy(data.data as TermsOfServiceData);
           // Initialize all sections as open

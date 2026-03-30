@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ChevronDown, RotateCcw, Clock, Package, CreditCard, Truck, Shield, AlertCircle, RefreshCw, ArrowLeftRight, FileText } from 'lucide-react';
+import { api } from '../lib/api';
 
 interface PolicySection {
   title: string;
@@ -39,13 +40,13 @@ export const ReturnPolicyPage = () => {
   useEffect(() => {
     const fetchPolicy = async () => {
       try {
-        const response = await fetch('/api/return-policy');
+        const response = await api('/api/return-policy');
         
         if (!response.ok) {
           throw new Error('Failed to fetch return policy');
         }
         
-        const data = await response.json();
+        const data = response.json;
         
         if (data?.data) {
           setPolicy(data.data as ReturnPolicyData);

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ChevronDown, Package, Clock, MapPin, CreditCard } from 'lucide-react';
+import { api } from '../lib/api';
 
 interface PolicySection {
   title: string;
@@ -31,13 +32,13 @@ export const ShippingPolicyPage = () => {
     const fetchPolicy = async () => {
       try {
         // Replace with your actual API endpoint
-        const response = await fetch('/api/shipping-policy');
+        const response = await api('/api/shipping-policy');
         
         if (!response.ok) {
           throw new Error('Failed to fetch shipping policy');
         }
         
-        const data = await response.json();
+        const data = response.json;
         
         if (data?.data) {
           setPolicy(data.data as ShippingPolicyData);

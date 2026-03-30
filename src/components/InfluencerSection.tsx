@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Loader2, ArrowRight, ChevronLeft, ChevronRight, Volume2, VolumeX, Play } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { api } from '../lib/api';
 
 interface Product {
   _id: string;
@@ -15,8 +16,6 @@ interface InfluencerDataItem {
   createdAt: string;
   updatedAt: string;
 }
-
-declare const api: (url: string) => Promise<{ ok: boolean; json: any }>;
 
 export default function InfluencerSection() {
   const [influencerData, setInfluencerData] = useState<InfluencerDataItem[]>([]);
@@ -59,16 +58,9 @@ export default function InfluencerSection() {
       setLoading(true); setError(null);
       try {
         let data;
-        if (typeof api === 'function') {
-          const res = await api('/api/influencer-data/public');
-          if (!res.ok) throw new Error(res.json?.message || 'Failed to fetch');
-          data = res.json.data;
-        } else {
-          const response = await fetch('/api/influencer-data/public');
-          const json = await response.json();
-          if (!response.ok) throw new Error(json?.message || 'Failed to fetch');
-          data = json.data;
-        }
+        const res = await api('/api/influencer-data/public');
+        if (!res.ok) throw new Error(res.json?.message || 'Failed to fetch');
+        data = res.json.data;
         setInfluencerData(data);
         if (data.length > 0) { setSelectedVideo(data[0]); setCurrentVideoIndex(0); }
       } catch (err: any) {

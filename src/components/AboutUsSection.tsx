@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronDown, ChevronUp, Leaf, Mountain, Heart } from 'lucide-react';
+import { api } from '../lib/api';
 
 interface AboutUsData {
   eyebrow: {
@@ -61,11 +62,11 @@ const AboutUsSection = () => {
       try {
         setLoading(true);
         setError(null);
-        const response = await fetch('/api/about-us');
+        const response = await api('/api/about-us');
         if (!response.ok) {
           throw new Error('Failed to fetch About Us data');  
         }
-        const data = await response.json();
+        const data = response.json;
         console.log('About Us API response:', data);
         setAboutUsData(data);
       } catch (err) {

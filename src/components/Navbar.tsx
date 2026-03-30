@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
 import { Dropdown } from "@/components/Dropdown";
 import { MobileDropdown } from "@/components/MobileDropdown";
+import { api } from '../lib/api';
 import {
   Dialog,
   DialogTrigger,
@@ -35,12 +36,12 @@ export const Navbar = ({ cartItemCount = 0 }: NavbarProps) => {
     let ignore = false;
     (async () => {
       try {
-        const categoriesResponse = await fetch('/api/categories');
-        const categoriesResult = await categoriesResponse.json();
+        const categoriesResponse = await api('/api/categories');
+        const categoriesResult = categoriesResponse.json;
         const categoriesList = categoriesResult.ok && Array.isArray(categoriesResult.data) ? categoriesResult.data : [];
 
-        const productsResponse = await fetch('/api/products?limit=200');
-        const productsResult = await productsResponse.json();
+        const productsResponse = await api('/api/products?limit=200');
+        const productsResult = productsResponse.json;
         const productsList = productsResult.ok && Array.isArray(productsResult.data) ? productsResult.data : [];
 
         if (!ignore) {
