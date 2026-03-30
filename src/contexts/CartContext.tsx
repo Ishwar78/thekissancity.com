@@ -34,7 +34,7 @@ type CartContextType = {
   placeOrder: (payload: any) => Promise<{ ok: boolean; data?: any; error?: any }>;
 };
 
-const STORAGE_KEY = "uni_cart_v1";
+const STORAGE_KEY = "kissancity_cart_v1";
 const LEGACY_KEY = "cart_v1";
 const CartContext = createContext<CartContextType | undefined>(undefined);
 

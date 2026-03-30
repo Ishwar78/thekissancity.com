@@ -3,7 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
 
-const WISHLIST_STORAGE_KEY = 'uni_wishlist_ids';
+const WISHLIST_STORAGE_KEY = 'kissancity_wishlist_ids';
 
 type WishlistContextType = {
   wishlistIds: Set<string>;

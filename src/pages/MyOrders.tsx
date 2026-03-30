@@ -101,13 +101,13 @@ const MyOrders = () => {
         
         // Clear stale localStorage orders if API returns empty but localStorage has data
         try {
-          const localOrdersRaw = localStorage.getItem('uni_orders_v1');
+          const localOrdersRaw = localStorage.getItem('kissancity_orders_v1');
           if (localOrdersRaw) {
             const localOrders = JSON.parse(localOrdersRaw);
             if (localOrders.length > 0 && apiOrders.length === 0) {
               console.log('🧹 Clearing stale localStorage orders - API returned empty but localStorage has data');
-              localStorage.removeItem('uni_orders_v1');
-              localStorage.removeItem('uni_last_order_id');
+              localStorage.removeItem('kissancity_orders_v1');
+              localStorage.removeItem('kissancity_last_order_id');
             }
           }
         } catch (e) {

@@ -364,7 +364,7 @@ const CheckoutPayment = () => {
         );
 
         try {
-          const raw = localStorage.getItem('uni_orders_v1');
+          const raw = localStorage.getItem('kissancity_orders_v1');
           const arr = raw ? (JSON.parse(raw) as any[]) : [];
           const totalWithShipping = total + shippingCharges;
           const order = {
@@ -391,8 +391,8 @@ const CheckoutPayment = () => {
               color: i.meta?.color,
             })),
           } as any;
-          localStorage.setItem('uni_orders_v1', JSON.stringify([order, ...arr]));
-          localStorage.setItem('uni_last_order_id', newOrderId);
+          localStorage.setItem('kissancity_orders_v1', JSON.stringify([order, ...arr]));
+          localStorage.setItem('kissancity_last_order_id', newOrderId);
         } catch (e) {
           console.error('Failed to persist local order', e);
         }
@@ -566,7 +566,7 @@ const CheckoutPayment = () => {
             }
 
             try {
-              const raw = localStorage.getItem('uni_orders_v1');
+              const raw = localStorage.getItem('kissancity_orders_v1');
               const arr = raw ? (JSON.parse(raw) as any[]) : [];
               const newOrderId = String((vjson.data?._id || vjson.data?.id) ?? 'local_' + Date.now());
               const order = {
@@ -593,8 +593,8 @@ const CheckoutPayment = () => {
                   color: i.meta?.color,
                 })),
               } as any;
-              localStorage.setItem('uni_orders_v1', JSON.stringify([order, ...arr]));
-              localStorage.setItem('uni_last_order_id', newOrderId);
+              localStorage.setItem('kissancity_orders_v1', JSON.stringify([order, ...arr]));
+              localStorage.setItem('kissancity_last_order_id', newOrderId);
             } catch (e) {
               console.error('Failed to persist local order', e);
             }

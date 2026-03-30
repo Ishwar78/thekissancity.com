@@ -72,7 +72,7 @@ const BestSellerCard = ({ product, index }: { product: Product; index: number })
     e.stopPropagation();
     const item = { id, title, price: displayPrice, image };
     if (!user) {
-      try { localStorage.setItem('uni_add_intent', JSON.stringify({ item, qty: 1 })); } catch {}
+      try { localStorage.setItem('kissancity_add_intent', JSON.stringify({ item, qty: 1 })); } catch {}
       navigate('/auth');
       return;
     }

@@ -55,12 +55,12 @@ const Auth = () => {
 
   const handleIntent = () => {
     try {
-      const raw = localStorage.getItem('uni_add_intent');
+      const raw = localStorage.getItem('kissancity_add_intent');
       if (!raw) return false;
       const { item, qty } = JSON.parse(raw);
       if (item && cart?.addToCart) {
         cart.addToCart(item, qty || 1);
-        localStorage.removeItem('uni_add_intent');
+        localStorage.removeItem('kissancity_add_intent');
         toast.success('Added to cart');
         return true;
       }

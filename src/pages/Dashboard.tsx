@@ -39,9 +39,9 @@ export type Order = {
 
 type OrdersResponse = { ok: boolean; data?: Order[] };
 
-const LS_ORDERS = "uni_orders_v1";
-const LS_CART = "uni_cart_v1";
-const LS_LAST = "uni_last_order_id";
+const LS_ORDERS = "kissancity_orders_v1";
+const LS_CART = "kissancity_cart_v1";
+const LS_LAST = "kissancity_last_order_id";
 
 const statuses = [
   "All",

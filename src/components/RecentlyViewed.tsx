@@ -144,7 +144,7 @@ export const RecentlyViewed = ({
     
     if (!user) {
       try { 
-        localStorage.setItem('uni_add_intent', JSON.stringify({ item, qty: 1 })); 
+        localStorage.setItem('kissancity_add_intent', JSON.stringify({ item, qty: 1 })); 
       } catch {}
       navigate('/auth');
       return;

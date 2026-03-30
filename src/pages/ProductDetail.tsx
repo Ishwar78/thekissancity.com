@@ -393,7 +393,7 @@ const ProductDetail = () => {
       itemsToAdd.push(item);
     }
     if (!user) {
-      try { localStorage.setItem("uni_add_intent", JSON.stringify({ items: itemsToAdd, qty: quantity })); } catch {}
+      try { localStorage.setItem("kissancity_add_intent", JSON.stringify({ items: itemsToAdd, qty: quantity })); } catch {}
       navigate("/auth");
       return;
     }
@@ -446,7 +446,7 @@ const ProductDetail = () => {
       itemsToAdd.push(item);
     }
     if (!user) {
-      try { localStorage.setItem("uni_add_intent", JSON.stringify({ items: itemsToAdd, qty: 1 })); } catch {}
+      try { localStorage.setItem("kissancity_add_intent", JSON.stringify({ items: itemsToAdd, qty: 1 })); } catch {}
       navigate("/auth");
       return;
     }
