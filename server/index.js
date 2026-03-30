@@ -173,27 +173,6 @@ app.use('/api/faqs', faqsRoutes);
 app.use('/api/regions', regionsRoutes);
 app.use('/api/product-slider', productSliderRoutes);
 
-
-/* ------------------- SERVER-SIDE SEO META TAG INJECTION ------------------- */
-// This middleware handles frontend routes and injects product-specific meta tags
-const { seoMetaInjectionMiddleware } = require('./middleware/seoMetaInjection');
-app.use(seoMetaInjectionMiddleware);
-
-// For any other requests, serve the index.html from the client-side build
-app.use((req, res, next) => {
-  if (req.path.startsWith('/api')) {
-    return next();
-  }
-
-  if (res.locals.seoHtml) {
-    res.setHeader('Content-Type', 'text/html; charset=UTF-8');
-    return res.send(res.locals.seoHtml);
-  }
-  
-  res.sendFile(path.resolve(__dirname, '..', 'dist', 'index.html'));
-});
-
-
 // Debug env endpoint (masking enabled)
 app.get('/api/_debug/env', (_req, res) => {
   const mask = (v) =>
@@ -209,6 +188,31 @@ app.get('/api/_debug/env', (_req, res) => {
       JWT_SECRET: mask(process.env.JWT_SECRET || ''),
     },
   });
+});
+
+/* ------------------- SERVER-SIDE SEO META TAG INJECTION ------------------- */
+// This middleware handles frontend routes and injects product-specific meta tags
+const { seoMetaInjectionMiddleware } = require('./middleware/seoMetaInjection');
+app.use((req, res, next) => {
+  // Skip SEO middleware for API routes
+  if (req.path.startsWith('/api')) {
+    return next();
+  }
+  seoMetaInjectionMiddleware(req, res, next);
+});
+
+// For any other requests, serve the index.html from the client-side build
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api')) {
+    return next();
+  }
+
+  if (res.locals.seoHtml) {
+    res.setHeader('Content-Type', 'text/html; charset=UTF-8');
+    return res.send(res.locals.seoHtml);
+  }
+  
+  res.sendFile(path.resolve(__dirname, '..', 'dist', 'index.html'));
 });
 
 

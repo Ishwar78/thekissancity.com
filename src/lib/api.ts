@@ -48,63 +48,60 @@ export async function api(path: string, options: RequestInit = {}) {
     }
   });
 
-  if (
-    API_BASE &&
-    isLocalhost(API_BASE) &&
-    !location.hostname.includes("localhost") &&
-    !location.hostname.includes("127.0.0.1")
-  ) {
-    const relUrl = path.startsWith("http")
-      ? path
-      : (path.startsWith("/api") ? path : `/api${path.startsWith("/") ? path : `/${path}`}`);
-
+  // Always use absolute URLs in production to avoid domain conflicts
+  if (import.meta.env.PROD || !isLocalhost(API_BASE)) {
+    console.log('🌐 [API] Using absolute URL path');
+    
     try {
       const token = (typeof window !== 'undefined') ? localStorage.getItem('token') : null;
-      const relHeaders = options.body instanceof FormData
+      const headers = options.body instanceof FormData
         ? { ...(options.headers || {}) } as Record<string,string>
         : { "Content-Type": "application/json", ...(options.headers || {}) } as Record<string,string>;
-      if (token) relHeaders['Authorization'] = `Bearer ${token}`;
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      console.log('🌐 [API] Headers being sent:', headers);
 
       const { headers: _, ...optionsWithoutHeaders } = options;
-      const res = await fetch(relUrl, {
+      const res = await fetch(finalUrl, {
         credentials: "include",
-        headers: relHeaders,
+        headers,
         cache: "no-store",
         ...optionsWithoutHeaders,
       });
 
       const json = await res.json().catch(() => ({}));
       return { ok: res.ok, status: res.status, json };
-    } catch (relErr) {
-      // Re-throwing the error to propagate it.
-      throw relErr;
+    } catch (error: any) {
+      console.error('🌐 [API] Absolute request error:', error);
+      // Re-throwing error to propagate it.
+      throw error;
     }
   }
 
-  console.log('🌐 [API] Using absolute URL path');
-  
+  // Fallback for localhost development
+  const relUrl = path.startsWith("http")
+    ? path
+    : (path.startsWith("/api") ? path : `/api${path.startsWith("/") ? path : `/${path}`}`);
+
   try {
     const token = (typeof window !== 'undefined') ? localStorage.getItem('token') : null;
-    const headers = options.body instanceof FormData
+    const relHeaders = options.body instanceof FormData
       ? { ...(options.headers || {}) } as Record<string,string>
       : { "Content-Type": "application/json", ...(options.headers || {}) } as Record<string,string>;
-    if (token) headers['Authorization'] = `Bearer ${token}`;
-
-    console.log('🌐 [API] Headers being sent:', headers);
+    if (token) relHeaders['Authorization'] = `Bearer ${token}`;
 
     const { headers: _, ...optionsWithoutHeaders } = options;
-    const res = await fetch(finalUrl, {
+    const res = await fetch(relUrl, {
       credentials: "include",
-      headers,
+      headers: relHeaders,
       cache: "no-store",
       ...optionsWithoutHeaders,
     });
 
     const json = await res.json().catch(() => ({}));
     return { ok: res.ok, status: res.status, json };
-  } catch (error: any) {
-    console.error('🌐 [API] Absolute request error:', error);
-    // Re-throwing error to propagate it.
-    throw error;
+  } catch (relErr) {
+    // Re-throwing the error to propagate it.
+    throw relErr;
   }
 }
