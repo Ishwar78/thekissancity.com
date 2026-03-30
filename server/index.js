@@ -145,6 +145,8 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 /* -------------------------------- ROUTES -------------------------------- */
 const bulkCouponsRoutes = require('./routes/bulkCoupons');
 app.use('/api/auth', authRoutes);
+app.use('/api/about-us', aboutUsRoutes);
+console.log('[ROUTES] About Us routes registered at /api/about-us');
 app.use('/api/products', productsRoutes);
 app.use('/api/orders', ordersRoutes);
 app.use('/api/categories', categoriesRoutes);
@@ -170,7 +172,6 @@ app.use('/api', influencerImageRoutes);
 app.use('/api/faqs', faqsRoutes);
 app.use('/api/regions', regionsRoutes);
 app.use('/api/product-slider', productSliderRoutes);
-app.use('/api/about-us', aboutUsRoutes);
 
 
 /* ------------------- SERVER-SIDE SEO META TAG INJECTION ------------------- */

@@ -5,9 +5,12 @@ const { requireAuth, requireAdmin } = require('../middleware/auth');
 
 // Get active About Us content
 router.get('/', async (req, res) => {
+  console.log('[ABOUT-US] Route hit - fetching About Us data');
   try {
     const aboutUs = await AboutUs.findOne({ isActive: true });
+    console.log('[ABOUT-US] Database query result:', aboutUs ? 'Found' : 'Not found');
     if (!aboutUs) {
+      console.log('[ABOUT-US] Returning default content');
       // Return default content if no data exists
       return res.json({
         eyebrow: { text: 'Kissan City', icon: 'Mountain' },
@@ -41,10 +44,44 @@ router.get('/', async (req, res) => {
         ]
       });
     }
+    console.log('[ABOUT-US] Returning database content');
     res.json(aboutUs);
   } catch (error) {
-    console.error('Error fetching About Us data:', error);
-    res.status(500).json({ error: 'Failed to fetch About Us data' });
+    console.error('[ABOUT-US] Error fetching About Us data:', error);
+    console.error('[ABOUT-US] Error details:', error.message);
+    // Return default content even on error
+    console.log('[ABOUT-US] Returning default content due to error');
+    res.json({
+      eyebrow: { text: 'Kissan City', icon: 'Mountain' },
+      title: { main: 'Our Story', highlighted: 'Story' },
+      content: {
+        main: [
+          { text: 'Every jar, every packet tells a story. A story of farmers in the misty valleys of Himachal Pradesh, tending to their organic farms with the same care their ancestors showed to the land.' },
+          { text: 'A story of women in Haryana villages, preparing pure desi ghee using the ancient bilona method, handed down through generations.' }
+        ],
+        expanded: [
+          { text: 'From rich, aromatic ghee to unprocessed honey and handpicked dry fruits, every item reflects quality, freshness, and the true taste of the mountains.' },
+          { text: 'Our mission is to deliver health, purity, and tradition straight from the hills to your home — food that is wholesome, natural, and crafted with care, just the way nature intended.' }
+        ]
+      },
+      image: {
+        src: '/Capture.PNG',
+        alt: 'Direct from source',
+        badge: { text: '100% Organic', icon: 'Leaf' },
+        banner: { text: 'Perfect for all occasions' }
+      },
+      icons: [
+        { text: 'Organic', icon: 'Leaf' },
+        { text: 'Hill Fresh', icon: 'Mountain' },
+        { text: 'Farmer-first', icon: 'Heart' }
+      ],
+      stats: [
+        { value: '500+', label: 'Partner Farmers' },
+        { value: '100%', label: 'Organic Certified' },
+        { value: '50+', label: 'Hill Products' },
+        { value: '10K+', label: 'Happy Homes' }
+      ]
+    });
   }
 });
 
