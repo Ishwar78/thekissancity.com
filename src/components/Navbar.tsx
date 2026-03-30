@@ -89,7 +89,7 @@ export const Navbar = ({ cartItemCount = 0 }: NavbarProps) => {
             {/* Logo */}
             <Link to="/" className="flex items-center gap-6" aria-label="Kissan City Home">
               <img
-                src="/"
+                src="/Untitled design.png"
                 alt="The Kissan City"
                 className="h-14 md:h-16 lg:h-[60px] w-auto select-none max-w-[260px]"
                 loading="eager"
