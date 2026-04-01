@@ -27,6 +27,7 @@ export const Navbar = ({ cartItemCount = 0 }: NavbarProps) => {
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [categories, setCategories] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
+  const [logoFailed, setLogoFailed] = useState(false);
   const desktopSearchRef = useRef<HTMLInputElement>(null);
 
   const { user, signOut } = useAuth();
@@ -88,13 +89,25 @@ export const Navbar = ({ cartItemCount = 0 }: NavbarProps) => {
 
             {/* Logo */}
             <Link to="/" className="flex items-center gap-6" aria-label="Kissan City Home">
-              <img
-                src="/Untitled design.png"
-                alt="The Kissan City"
-                className="h-14 md:h-16 lg:h-[60px] w-auto select-none max-w-[260px]"
-                loading="eager"
-                decoding="async"
-              />
+              {logoFailed ? (
+                <div className="h-14 md:h-16 lg:h-[60px] w-auto select-none max-w-[260px] flex items-center justify-center bg-gray-100 rounded-lg">
+                  <span className="text-gray-600 font-bold text-lg">Kissan City</span>
+                </div>
+              ) : (
+                <img
+                  src="/logo.png?v=20240331"
+                  alt="The Kissan City"
+                  className="h-14 md:h-16 lg:h-[60px] w-auto select-none max-w-[260px]"
+                  loading="eager"
+                  decoding="async"
+                  onError={(e) => {
+                    if (!logoFailed) {
+                      console.error('Logo failed to load:', e.currentTarget.src);
+                      setLogoFailed(true);
+                    }
+                  }}
+                />
+              )}
             </Link>
 
             {/* Mobile expanded search overlay */}
@@ -267,7 +280,7 @@ export const Navbar = ({ cartItemCount = 0 }: NavbarProps) => {
                     onBlur={(e) => {
                       e.target.style.borderColor = '#d1d5db';
                       e.target.style.boxShadow = 'none';
-                      e.target.style.backgroundColor = '#f9fafb';
+                      e.target.style.backgroundColor = '#ffffff';
                     }}
                   />
                   {searchQuery && (

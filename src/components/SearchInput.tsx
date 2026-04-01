@@ -45,7 +45,7 @@ export const SearchInput = ({
           value={localValue}
           onChange={(e) => setLocalValue(e.target.value)}
           className="pl-10 pr-10"
-          style={{ backgroundColor: '#f1f1f1', color: '#000000' }}
+          style={{ backgroundColor: '#ffffff', color: '#000000' }}
         />
         {localValue && (
           <Button

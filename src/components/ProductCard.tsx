@@ -403,6 +403,7 @@ export const ProductCard = ({
                 <div className="pc3-qty-row">
                   {quantityOptions
                     .filter(opt => opt && opt.displayLabel && opt.displayLabel.trim())
+                    .sort((a, b) => a.quantity - b.quantity)
                     .slice(0, 3)
                     .map((opt) => (
                       <span key={opt.id} className="pc3-qty-tag">{opt.displayLabel}</span>

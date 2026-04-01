@@ -102,7 +102,7 @@ app.use((req, _res, next) => {
 /* -------------------------------- CORS --------------------------------- */
 // Disable CORS restrictions for development
 const corsOptions = {
-  origin: [ 'http://localhost:8080', 'http://localhost:3000', 'http://127.0.0.1:8080', 'http://127.0.0.1:3000' , 'https://kissancity-1.onrender.com', 'https://thekissancity.com'],
+  origin: [ 'http://localhost:8080', 'http://localhost:3000', 'http://127.0.0.1:8080', 'http://127.0.0.1:3000' ,  'https://thekissancity.com'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
@@ -203,8 +203,17 @@ app.use((req, res, next) => {
 
 // For any other requests, serve the index.html from the client-side build
 app.use((req, res, next) => {
+  // Skip for API routes
   if (req.path.startsWith('/api')) {
     return next();
+  }
+  
+  // Serve static files directly if they exist
+  if (req.path.startsWith('/logo.') || req.path.match(/\.(png|jpg|jpeg|gif|svg|ico|css|js)$/)) {
+    const filePath = path.join(__dirname, '..', 'dist', req.path);
+    if (fs.existsSync(filePath)) {
+      return res.sendFile(filePath);
+    }
   }
 
   if (res.locals.seoHtml) {

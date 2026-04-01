@@ -161,16 +161,25 @@ const ProductDetail = () => {
     if (optionsSource.length === 0) return [];
     return optionsSource.map((item, index) => {
       const displayLabel = item.displayLabel || item.label || item.code || `${item.quantity || 1}${item.unit || 'g'}`;
-      const price = item.price || Number(product.price) || 0;
+      const basePrice = item.price || Number(product.price) || 0;
       const originalPrice = item.originalPrice || Number(product.originalPrice) || undefined;
       const stock = item.stock || item.qty || 999;
+      
+      // Apply product discount to option price
+      let finalPrice = basePrice;
+      if (product?.discount?.value > 0 && product.discount.type === "percentage") {
+        finalPrice = basePrice - (basePrice * product.discount.value) / 100;
+      } else if (product?.discount?.value > 0 && product.discount.type === "flat") {
+        finalPrice = Math.max(0, basePrice - product.discount.value);
+      }
+      
       return {
         id: item.id || item.code || `option-${index}`,
         quantity: item.quantity || parseInt(item.code) || 1,
         unit: item.unit || 'g' as const,
         packSize: item.packSize || 1,
         displayLabel,
-        price,
+        price: Math.round(finalPrice),
         originalPrice,
         stock,
         isActive: stock > 0,
@@ -378,6 +387,14 @@ const ProductDetail = () => {
       console.log('Updated itemPrice from option:', itemPrice);
     }
     
+    // Apply product discount to the final price
+    if (product?.discount?.value > 0 && product.discount.type === "percentage") {
+      itemPrice = itemPrice - (itemPrice * product.discount.value) / 100;
+    } else if (product?.discount?.value > 0 && product.discount.type === "flat") {
+      itemPrice = Math.max(0, itemPrice - product.discount.value);
+    }
+    itemPrice = Math.round(itemPrice);
+    
     console.log('Final itemPrice being used:', itemPrice);
     console.log('=== END DEBUG ===');
     if (selectedColors.length > 0) {
@@ -433,15 +450,31 @@ const ProductDetail = () => {
       return;
     }
     const itemsToAdd: any[] = [];
+    let itemPrice = Number(product.price || 0);
+    
+    // Apply discount for quantity options if selected
+    if (Array.isArray(product?.quantityOptions) && selectedSize) {
+      const selectedOption = product.quantityOptions?.find((opt: any) => opt.id === selectedSize || opt.code === selectedSize);
+      itemPrice = Number(selectedOption?.price) || itemPrice;
+    }
+    
+    // Apply product discount to the final price
+    if (product?.discount?.value > 0 && product.discount.type === "percentage") {
+      itemPrice = itemPrice - (itemPrice * product.discount.value) / 100;
+    } else if (product?.discount?.value > 0 && product.discount.type === "flat") {
+      itemPrice = Math.max(0, itemPrice - product.discount.value);
+    }
+    itemPrice = Math.round(itemPrice);
+    
     if (selectedColors.length > 0) {
       selectedColors.forEach(color => {
-        const item: any = { id: String(product._id || product.id), title, price: Number(product.price || 0), image: img, meta: {} as any };
+        const item: any = { id: String(product._id || product.id), title, price: itemPrice, image: img, meta: {} as any };
         if (selectedSize) item.meta.size = selectedSize;
         item.meta.color = color;
         itemsToAdd.push(item);
       });
     } else {
-      const item: any = { id: String(product._id || product.id), title, price: Number(product.price || 0), image: img, meta: {} as any };
+      const item: any = { id: String(product._id || product.id), title, price: itemPrice, image: img, meta: {} as any };
       if (selectedSize) item.meta.size = selectedSize;
       itemsToAdd.push(item);
     }
@@ -603,7 +636,7 @@ const ProductDetail = () => {
                       {(() => {
                         const randomRating = Math.floor(Math.random() * (300000 - 200000 + 1)) + 200000;
                         return randomRating >= 1000
-                          ? `${(randomRating / 1000).toFixed(0)}k ratings`
+                          ? `${(randomRating / 1000).toFixed(0)} ratings`
                           : `${randomRating} ratings`;
                       })()}
                     </span>
@@ -807,18 +840,31 @@ const ProductDetail = () => {
                 {/* Quantity Options */}
                 {product?.sizeInventory && product.sizeInventory.length > 0 && (
                   <ProductQuantitySelector
-                    options={product.sizeInventory.map((item, index) => ({
-                      id: item.code,
-                      quantity: parseInt(item.code) || 1,
-                      unit: 'ml' as const,
-                      packSize: 1,
-                      displayLabel: item.code,
-                      price: Number(product.price) || 0,
-                      originalPrice: Number(product.originalPrice) || undefined,
-                      stock: item.qty,
-                      isActive: item.qty > 0,
-                      sortOrder: index
-                    }))}
+                    options={product.sizeInventory.map((item, index) => {
+                      const basePrice = Number(product.price) || 0;
+                      const originalPrice = Number(product.originalPrice) || undefined;
+                      
+                      // Apply product discount to option price
+                      let finalPrice = basePrice;
+                      if (product?.discount?.value > 0 && product.discount.type === "percentage") {
+                        finalPrice = basePrice - (basePrice * product.discount.value) / 100;
+                      } else if (product?.discount?.value > 0 && product.discount.type === "flat") {
+                        finalPrice = Math.max(0, basePrice - product.discount.value);
+                      }
+                      
+                      return {
+                        id: item.code,
+                        quantity: parseInt(item.code) || 1,
+                        unit: 'ml' as const,
+                        packSize: 1,
+                        displayLabel: item.code,
+                        price: Math.round(finalPrice),
+                        originalPrice,
+                        stock: item.qty,
+                        isActive: item.qty > 0,
+                        sortOrder: index
+                      };
+                    })}
                     selectedOption={selectedSize}
                     onSelectionChange={(optionId) => { setSelectedSize(optionId); setSizeStockError(""); }}
                     disabled={false}
