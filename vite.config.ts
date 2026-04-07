@@ -21,6 +21,14 @@ export default defineConfig(({ mode }) => ({
         target: "http://localhost:5000",
         changeOrigin: true,
         secure: false,
+        configure: (proxy) => {
+          proxy.on('error', (err, req, res) => {
+            // Silently ignore ECONNREFUSED during server startup
+            if (err.code !== 'ECONNREFUSED') {
+              console.error('Proxy error:', err);
+            }
+          });
+        }
       },
       "/uploads": {
         target: "http://localhost:5000",

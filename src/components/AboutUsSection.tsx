@@ -92,22 +92,22 @@ const AboutUsSection = () => {
   const ImageCard = ({ height = 420 }: { height?: number }) => {
     if (!aboutUsData) return null;
 
-    const BadgeIcon = getIconComponent(aboutUsData.image.badge.icon);
+    const BadgeIcon = getIconComponent(aboutUsData.image?.badge?.icon || 'Leaf');
 
     return (
       <div className="au-image-card">
         <div className="au-img-top-bar" />
         <div className="au-img-wrap" style={{ height }}>
-          <img src={aboutUsData.image.src} alt={aboutUsData.image.alt} />
+          <img src={aboutUsData.image?.src} alt={aboutUsData.image?.alt} />
           <div className="au-img-overlay" />
           <div className="au-float-badge">
             <BadgeIcon size={10} />
-            {aboutUsData.image.badge.text}
+            {aboutUsData.image?.badge?.text}
           </div>
         </div>
         <div className="au-img-banner">
           <div className="au-img-banner-dot" />
-          <span className="au-img-banner-text">{aboutUsData.image.banner.text}</span>
+          <span className="au-img-banner-text">{aboutUsData.image?.banner?.text}</span>
           <div className="au-img-banner-dot" />
         </div>
       </div>
@@ -163,7 +163,7 @@ const AboutUsSection = () => {
     );
   }
 
-  const EyebrowIcon = getIconComponent(aboutUsData.eyebrow.icon);
+  const EyebrowIcon = getIconComponent(aboutUsData.eyebrow?.icon || 'Leaf');
 
   return (
     <section className="au-root" ref={sectionRef}>
@@ -416,22 +416,22 @@ const AboutUsSection = () => {
             </div>
 
             <div className="au-icons-row">
-              {aboutUsData.icons.map((icon, index) => {
-                const IconComponent = getIconComponent(icon.icon);
+              {(aboutUsData.icons || []).map((icon, index) => {
+                const IconComponent = getIconComponent(icon?.icon || 'Leaf');
                 return (
                   <span key={index} className="au-icon-pill">
                     <IconComponent size={11} />
-                    {icon.text}
+                    {icon?.text}
                   </span>
                 );
               })}
             </div>
 
             <div className={`au-stats au-reveal au-d3 ${visible ? 'au-in' : ''}`}>
-              {aboutUsData.stats.map((stat, index) => (
+              {(aboutUsData.stats || []).map((stat, index) => (
                 <div key={index} className="au-stat-card">
-                  <span className="au-stat-value">{stat.value}</span>
-                  <span className="au-stat-label">{stat.label}</span>
+                  <span className="au-stat-value">{stat?.value}</span>
+                  <span className="au-stat-label">{stat?.label}</span>
                 </div>
               ))}
             </div>

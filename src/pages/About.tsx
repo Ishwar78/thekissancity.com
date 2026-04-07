@@ -39,7 +39,7 @@ const mapToCard = (p: ProductRow) => {
       : p.image || "";
   const image = rawImg.startsWith("http")
     ? rawImg
-    : `${import.meta.env.VITE_API_BASE_URL || (import.meta.env.PROD ? "https://kissancity-1.onrender.com" : "http://localhost:5000")}/uploads/${rawImg}`;
+    : `${import.meta.env.VITE_API_BASE_URL || (import.meta.env.PROD ? "https://thekissancity.com" : "http://localhost:5000")}/uploads/${rawImg}`;
   const price = Number(p.price) || 0;
   const originalPrice = Number(p.originalPrice) || undefined;
   const slug = p.slug || title.toLowerCase().replace(/\s+/g, "-");

@@ -1630,7 +1630,7 @@ const Index = () => {
   {/* Banner Section */}
  <section
   style={{ backgroundColor: '#F5F0E8' }}
-  className="container mx-auto px-4 py-6 md:py-8 rounded-xl"
+  className="w-full py-6 md:py-8  "
  >
   <style>{`
     .na-section {
@@ -1720,9 +1720,9 @@ const Index = () => {
     .na-skel { background:#fff; border-radius:18px; overflow:hidden; box-shadow:0 2px 10px rgba(45,106,79,0.06); }
   `}</style>
 
-  <div className="na-section" ref={naRef}>
+  <div className="na-section px-4 md:px-8 pb-12" ref={naRef}>
 
-    <div className={`text-center mb-10 sm:mb-12 na-reveal ${naVisible ? "na-in" : ""}`}>
+    <div className={`text-center mb-4 sm:mb-6 na-reveal ${naVisible ? "na-in" : ""}`}>
       <span className="na-eyebrow">Just Landed</span>
       <h2 className="na-title">New <span>Arrivals</span></h2>
       <div className="na-underline" />
