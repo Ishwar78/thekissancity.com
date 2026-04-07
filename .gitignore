@@ -31,3 +31,7 @@ dist-ssr
 .env.production.local
 **/.env
 *.env.backup*
+
+# Large zip files
+*.zip
+**/*.zip
