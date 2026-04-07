@@ -9,6 +9,8 @@ import { CartProvider } from "@/contexts/CartContext";
 import { WishlistProvider } from "@/contexts/WishlistContext";
 import CouponPopup from "@/components/CouponPopup";
 import { useCouponPopup } from "@/hooks/useCouponPopup";
+import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
+import { PWAUpdatePrompt } from "@/components/PWAUpdatePrompt";
 import "@/styles/inputs.css";
 
 import Index from "./pages/Index";
@@ -184,6 +186,10 @@ const AppContent = () => {
       
       {/* Coupon Popup */}
       <CouponPopup isOpen={isOpen} onClose={closePopup} coupons={coupons} />
+      
+      {/* PWA Components */}
+      <PWAInstallPrompt />
+      <PWAUpdatePrompt />
     </>
   );
 };

@@ -84,7 +84,7 @@ const productSliderRoutes = require('./routes/productSlider');
 const aboutUsRoutes = require('./routes/aboutUs');
 
 const app = express();
-const PORT = process.env.PORT || 5055;
+const PORT = 5055; // Force port 5055 to avoid conflicts
 
 /* --------------------------- LOG EACH REQUEST --------------------------- */
 app.use((req, res, next) => {

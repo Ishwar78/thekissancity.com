@@ -1,27 +1,34 @@
 import { useEffect, useState } from "react";
-import { Download, X, CheckCircle, Home } from "lucide-react";
+import { Download, X, CheckCircle, Smartphone, Monitor } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
+interface BeforeInstallPromptEvent extends Event {
+  readonly platforms: string[];
+  readonly userChoice: Promise<{
+    outcome: "accepted" | "dismissed";
+    platform: string;
+  }>;
+  prompt(): Promise<void>;
+}
+
 export const PWAInstallPrompt = () => {
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showPrompt, setShowPrompt] = useState(false);
   const [installStatus, setInstallStatus] = useState<'idle' | 'installing' | 'installed' | 'failed'>('idle');
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [mobileInstructions, setMobileInstructions] = useState(false);
+  const [showMobileInstructions, setShowMobileInstructions] = useState(false);
+  const [showDesktopInstructions, setShowDesktopInstructions] = useState(false);
 
-  // ✅ Reliable PWA detection (ONLY correct signals)
+  // Check if app is already installed
   const isInstalledPWA = () => {
     // Android / Desktop Chrome, Edge, Brave
     if (window.matchMedia("(display-mode: standalone)").matches) return true;
-
     // iOS Safari
     if ((window.navigator as any).standalone === true) return true;
-
     // Trusted Web Activity (Play Store)
     if (document.referrer.startsWith("android-app://")) return true;
-
     return false;
   };
 
@@ -38,61 +45,34 @@ export const PWAInstallPrompt = () => {
     console.log("🔍 PWA Debug: Current URL:", window.location.href);
     console.log("🔍 PWA Debug: Is secure context?", window.isSecureContext);
     console.log("🔍 PWA Debug: Protocol:", window.location.protocol);
-    console.log("🔍 PWA Debug: Display mode:", window.matchMedia("(display-mode: standalone)").matches);
-    console.log("🔍 PWA Debug: iOS standalone:", (window.navigator as any).standalone);
-    console.log("🔍 PWA Debug: Referrer:", document.referrer);
-    
+
+    // Don't show if already installed
+    if (isInstalledPWA()) {
+      console.log("❌ PWA Debug: Already installed, skipping install prompt");
+      return;
+    }
+
     // Check PWA installability criteria
     const checkInstallability = async () => {
       try {
         // Check if service worker is ready
-        const registration = await navigator.serviceWorker.ready;
-        console.log("🔍 PWA Debug: Service worker ready:", !!registration);
+        if ('serviceWorker' in navigator) {
+          const registration = await navigator.serviceWorker.ready;
+          console.log("🔍 PWA Debug: Service worker ready:", !!registration);
+        }
         
         // Check manifest
-        const manifestResponse = await fetch('/app-manifest.json');
+        const manifestResponse = await fetch('/manifest.json');
         const manifest = await manifestResponse.json();
         console.log("🔍 PWA Debug: Manifest loaded:", manifest);
-        console.log("🔍 PWA Debug: Manifest icons:", manifest.icons);
         
-        // Check if icons are accessible
-        for (const icon of manifest.icons) {
-          const iconResponse = await fetch(icon.src, { method: 'HEAD' });
-          console.log(`🔍 PWA Debug: Icon ${icon.src} accessible:`, iconResponse.ok);
-        }
-        
-        // Check if site meets criteria manually
-        console.log(" PWA Debug: Installability check:");
-        console.log("  - Service worker:", !!registration);
-        console.log("  - Manifest exists:", !!manifest);
-        console.log("  - HTTPS/localhost:", window.location.protocol === 'https:' || window.location.hostname === 'localhost');
-        console.log("  - Not already installed:", !isInstalledPWA());
-        
-        // For HTTPS domains - check engagement timer
-        if (window.location.protocol === 'https:' && window.location.hostname !== 'localhost') {
-          console.log(" PWA Debug: HTTPS domain detected - checking engagement");
-          
-          // Check if user has been engaged (30+ seconds or interaction)
-          const hasEngagement = performance.now() > 30000 || document.hidden === false;
-          console.log(" PWA Debug: Engagement check:", {
-            timeOnPage: performance.now(),
-            hasEngagement,
-            documentHidden: document.hidden
-          });
-          
-          // For testing - bypass engagement timer
-          if (!hasEngagement) {
-            console.log(" PWA Debug: No engagement yet - showing prompt for testing");
+        // Show prompt after a delay for better UX
+        setTimeout(() => {
+          if (!isInstalledPWA()) {
             setShowPrompt(true);
-            return;
+            console.log("📱 PWA Debug: Showing install prompt after delay");
           }
-        }
-        
-        // For HTTP localhost testing - show prompt manually
-        if (window.location.protocol === 'http:' && window.location.hostname === 'localhost') {
-          console.log(" PWA Debug: HTTP localhost detected - showing prompt for testing");
-          setShowPrompt(true);
-        }
+        }, 5000); // Show after 5 seconds
         
       } catch (error) {
         console.error(" PWA Debug: Installability check failed:", error);
@@ -100,85 +80,29 @@ export const PWAInstallPrompt = () => {
     };
     
     checkInstallability();
-    
-    // 🔥 DEBUG: Check if beforeinstallprompt fires
-    window.addEventListener("beforeinstallprompt", (e) => {
-      console.log("🔥 beforeinstallprompt FIRED - Install is possible!", e);
-      console.log("🔥 beforeinstallprompt details:", {
-        platforms: (e as any).platforms,
-        userChoice: !!(e as any).userChoice,
-        prompt: !!(e as any).prompt
-      });
-    });
 
-    window.addEventListener("appinstalled", () => {
-      console.log("✅ appinstalled - App was installed!");
-      console.log("✅ appinstalled details:", {
-        timestamp: new Date().toISOString(),
-        url: window.location.href,
-        userAgent: navigator.userAgent
-      });
-    });
-
-    // ❌ Do NOT show prompt inside installed app
-    if (isInstalledPWA()) {
-      console.log("❌ PWA Debug: Already installed, skipping install prompt");
-      return;
-    }
-
-    console.log("🔍 PWA Debug: Setting up install prompt listeners");
-
+    // Listen for beforeinstallprompt event
     const handleBeforeInstallPrompt = (e: Event) => {
-      console.log("🔍 PWA Debug: handleBeforeInstallPrompt called", e);
-      console.log("🔍 PWA Debug: Event details:", {
-        type: e.type,
-        bubbles: e.bubbles,
-        cancelable: e.cancelable,
-        timeStamp: e.timeStamp
-      });
-      
+      console.log("🔍 PWA Debug: beforeinstallprompt event fired", e);
       e.preventDefault();
-      setDeferredPrompt(e);
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
       
-      // Log prompt capabilities
-      const promptEvent = e as any;
-      console.log("🔍 PWA Debug: Prompt capabilities:", {
-        hasPlatforms: !!promptEvent.platforms,
-        platforms: promptEvent.platforms,
-        hasUserChoice: !!promptEvent.userChoice,
-        hasPrompt: !!promptEvent.prompt
-      });
-      
-      // Check mobile directly inside handler (fix stale closure)
-      const ua = navigator.userAgent;
-      const mobile = /android|iphone|ipad/i.test(ua);
-      console.log("📱 PWA Debug: Mobile check inside handler:", mobile, ua);
-      
-      // Show install prompt for both mobile and desktop (fix Bug 2)
-      console.log("� PWA Debug: Showing install prompt (works on both mobile and desktop)");
-      setShowPrompt(true);
-      
-      console.log("🔍 PWA Debug: Install prompt should show now");
+      // Show prompt when event fires
+      if (!isInstalledPWA()) {
+        setShowPrompt(true);
+        console.log("📱 PWA Debug: Showing install prompt (native install available)");
+      }
     };
 
+    // Listen for appinstalled event
     const handleAppInstalled = () => {
       console.log("✅ PWA Debug: App installed event fired!");
-      console.log("✅ PWA Debug: Installation successful - checking display mode:", window.matchMedia("(display-mode: standalone)").matches);
-      console.log("✅ PWA Debug: iOS standalone check:", (window.navigator as any).standalone);
-      console.log("✅ PWA Debug: Current URL after install:", window.location.href);
-      
       setDeferredPrompt(null);
       setShowPrompt(false);
       setInstallStatus('installed');
       setShowSuccessMessage(true);
       
-      // Force a re-check after a delay
-      setTimeout(() => {
-        console.log("🔍 PWA Debug: Post-install check - Display mode:", window.matchMedia("(display-mode: standalone)").matches);
-        console.log("🔍 PWA Debug: Post-install check - iOS standalone:", (window.navigator as any).standalone);
-      }, 1000);
-      
-      toast.success("Kissan City App installed successfully!", {
+      toast.success("TheKissanCity App installed successfully!", {
         description: "You can now find it on your home screen",
         duration: 5000,
         icon: <CheckCircle className="h-4 w-4" />
@@ -205,130 +129,160 @@ export const PWAInstallPrompt = () => {
     console.log("🚀 PWA Debug: Is mobile:", isMobile);
     console.log("🚀 PWA Debug: User Agent:", navigator.userAgent);
     
-    if (!deferredPrompt) {
-      // For HTTPS domains - show manual instructions if no prompt
-      if (window.location.protocol === 'https:' && window.location.hostname !== 'localhost') {
-        console.log("📱 PWA Debug: HTTPS domain - showing manual install instructions");
-        setMobileInstructions(true);
-        return;
-      }
-      // For HTTP localhost testing - show manual instructions
-      if (window.location.protocol === 'http:' && window.location.hostname === 'localhost') {
-        console.log("📱 PWA Debug: HTTP localhost - showing manual install instructions");
-        setMobileInstructions(true);
-        return;
-      }
-      console.log("❌ PWA Debug: No deferred prompt available");
-      return;
-    }
-
-    setInstallStatus('installing');
-    console.log("⏳ PWA Debug: Starting installation process...");
-    
-    try {
-      console.log("📱 PWA Debug: Prompting user for installation...");
-      deferredPrompt.prompt();
+    if (deferredPrompt) {
+      // Native install available
+      setInstallStatus('installing');
+      console.log("⏳ PWA Debug: Starting native installation...");
       
-      console.log("⏳ PWA Debug: Waiting for user choice...");
-      const { outcome } = await deferredPrompt.userChoice;
-      
-      console.log("📊 PWA Debug: User choice:", outcome);
-      console.log("📊 PWA Debug: User choice details:", { outcome, accepted: outcome === "accepted" });
+      try {
+        await deferredPrompt.prompt();
+        console.log("⏳ PWA Debug: Waiting for user choice...");
+        const { outcome } = await deferredPrompt.userChoice;
+        
+        console.log("📊 PWA Debug: User choice:", outcome);
 
-      if (outcome === "accepted") {
-        console.log("✅ PWA Debug: User accepted installation");
-        setDeferredPrompt(null);
-        setShowPrompt(false);
-        setMobileInstructions(false);
-        setInstallStatus('installed');
-        
-        // Check if appinstalled event fires
-        setTimeout(() => {
-          console.log("🔍 PWA Debug: Checking if appinstalled event fired (5s timeout)");
-          console.log("🔍 PWA Debug: Current display mode:", window.matchMedia("(display-mode: standalone)").matches);
-        }, 5000);
-        
-        // Show immediate feedback
-        toast.success("Installing Kissan City App...", {
-          description: "The app will appear on your home screen shortly",
-          duration: 3000
+        if (outcome === "accepted") {
+          console.log("✅ PWA Debug: User accepted installation");
+          setDeferredPrompt(null);
+          setShowPrompt(false);
+          setInstallStatus('installed');
+          
+          toast.success("Installing TheKissanCity App...", {
+            description: "The app will appear on your home screen shortly",
+            duration: 3000
+          });
+        } else {
+          console.log("❌ PWA Debug: User cancelled installation");
+          setInstallStatus('idle');
+          toast.info("Installation cancelled", {
+            duration: 2000
+          });
+        }
+      } catch (error) {
+        console.error("❌ PWA Debug: Installation error:", error);
+        setInstallStatus('failed');
+        toast.error("Installation failed", {
+          description: "Please try again or contact support",
+          duration: 4000
         });
+      }
+    } else {
+      // No native install - show manual instructions
+      if (isMobile) {
+        setShowMobileInstructions(true);
       } else {
-        console.log("❌ PWA Debug: User cancelled installation");
-        setInstallStatus('idle');
-        toast.info("Installation cancelled", {
-          duration: 2000
-        });
+        setShowDesktopInstructions(true);
       }
-    } catch (error) {
-      console.error("❌ PWA Debug: Installation error:", error);
-      console.error("❌ PWA Debug: Error details:", {
-        name: error.name,
-        message: error.message,
-        stack: error.stack
-      });
-      setInstallStatus('failed');
-      toast.error("Installation failed", {
-        description: "Please try again or contact support",
-        duration: 4000
-      });
     }
   };
 
   const handleDismiss = () => {
     setShowPrompt(false);
-    setMobileInstructions(false);
+    setShowMobileInstructions(false);
+    setShowDesktopInstructions(false);
     toast.info("Install prompt dismissed", {
       description: "You can install later from the browser menu",
       duration: 3000
     });
   };
 
-  // ❌ Never render inside installed app
-  console.log("🔍 PWA Debug: Render check - showPrompt:", showPrompt, "isInstalled:", isInstalledPWA());
-  if ((!showPrompt && !mobileInstructions) || isInstalledPWA()) return null;
+  // Don't render if already installed or no prompt
+  if ((!showPrompt && !showMobileInstructions && !showDesktopInstructions) || isInstalledPWA()) {
+    return null;
+  }
 
   // Mobile instructions modal
-  if (mobileInstructions && isMobile) {
+  if (showMobileInstructions) {
     return (
       <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-in fade-in-0">
         <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 animate-in slide-in-from-bottom-10">
           <div className="text-center">
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Download className="h-8 w-8 text-green-600" />
+              <Smartphone className="h-8 w-8 text-green-600" />
             </div>
             
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Install Kissan City App
+              Install TheKissanCity App
             </h2>
             
             <div className="text-left mb-6 space-y-3">
               <div className="bg-blue-50 rounded-lg p-3">
-                <div className="font-semibold text-blue-800 mb-1">
-                  {window.location.protocol === 'https:' && window.location.hostname !== 'localhost' 
-                    ? '🌐 HTTPS Domain - Manual Install Required' 
-                    : '🧪 HTTP Localhost Testing Mode'}
-                </div>
+                <div className="font-semibold text-blue-800 mb-1">📱 Mobile Install Steps</div>
                 <div className="text-sm text-blue-600">
-                  {window.location.protocol === 'https:' && window.location.hostname !== 'localhost'
-                    ? 'Chrome engagement timer not met. For testing:'
-                    : 'Chrome doesn\'t show PWA install prompt on HTTP. For testing:'}
-                </div>
-              </div>
-              
-              <div className="bg-amber-50 rounded-lg p-3">
-                <div className="font-semibold text-amber-800 mb-1">💡 Manual Install Steps</div>
-                <div className="text-sm text-amber-600">
-                  1. Click the menu (⋮) in Chrome<br/>
-                  2. Select "Add to Home screen"<br/>
-                  3. Tap "Add" to install
+                  {/iphone|ipad|ipod/i.test(navigator.userAgent) ? (
+                    <>
+                      1. Tap Share button <span className="font-semibold">⎋</span><br/>
+                      2. Select "Add to Home Screen"<br/>
+                      3. Tap "Add" to install
+                    </>
+                  ) : (
+                    <>
+                      1. Tap menu (⋮) in Chrome<br/>
+                      2. Select "Add to Home screen"<br/>
+                      3. Tap "Add" to install
+                    </>
+                  )}
                 </div>
               </div>
             </div>
 
             <div className="flex gap-3">
               <Button 
-                onClick={() => setMobileInstructions(false)}
+                onClick={() => setShowMobileInstructions(false)}
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+              >
+                Got it!
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={handleDismiss}
+                className="flex-1"
+              >
+                Maybe Later
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Desktop instructions modal
+  if (showDesktopInstructions) {
+    return (
+      <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-in fade-in-0">
+        <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 animate-in slide-in-from-bottom-10">
+          <div className="text-center">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Monitor className="h-8 w-8 text-green-600" />
+            </div>
+            
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              Install TheKissanCity App
+            </h2>
+            
+            <div className="text-left mb-6 space-y-3">
+              <div className="bg-blue-50 rounded-lg p-3">
+                <div className="font-semibold text-blue-800 mb-1">💻 Desktop Install Steps</div>
+                <div className="text-sm text-blue-600">
+                  1. Click the install icon <span className="font-semibold">⚡</span> in address bar<br/>
+                  2. Click "Install TheKissanCity"<br/>
+                  3. App will be available in your applications
+                </div>
+              </div>
+              
+              <div className="bg-amber-50 rounded-lg p-3">
+                <div className="font-semibold text-amber-800 mb-1">🔍 No install icon?</div>
+                <div className="text-sm text-amber-600">
+                  Make sure you're using Chrome, Edge, or Firefox<br/>
+                  and visit the site over HTTPS for install option
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <Button 
+                onClick={() => setShowDesktopInstructions(false)}
                 className="flex-1 bg-green-600 hover:bg-green-700 text-white"
               >
                 Got it!
@@ -359,7 +313,7 @@ export const PWAInstallPrompt = () => {
           <div className="flex-1">
             <h3 className="font-bold text-sm mb-1 text-white">Successfully Installed!</h3>
             <p className="text-xs text-white">
-              Find Kissan City on your home screen for quick access
+              Find TheKissanCity on your home screen for quick access
             </p>
           </div>
           
@@ -376,6 +330,7 @@ export const PWAInstallPrompt = () => {
     );
   }
 
+  // Main install prompt banner
   return (
     <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:max-w-md z-50 animate-in slide-in-from-bottom-5">
       <div className="bg-card border-border rounded-lg shadow-lg p-4 flex items-center gap-4">
@@ -384,7 +339,7 @@ export const PWAInstallPrompt = () => {
         </div>
 
         <div className="flex-1">
-          <h3 className="font-bold text-sm mb-1 text-foreground">Install Kissan City App</h3>
+          <h3 className="font-bold text-sm mb-1 text-foreground">Install TheKissanCity App</h3>
           <p className="text-xs text-muted-foreground">
             Get faster access and offline support
           </p>
@@ -403,7 +358,7 @@ export const PWAInstallPrompt = () => {
                 Installing...
               </>
             ) : (
-              isMobile ? 'Show Instructions' : 'Install'
+              isMobile ? 'Install' : 'Install App'
             )}
           </Button>
           <Button 

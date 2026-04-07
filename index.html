@@ -2,40 +2,68 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="referrer" content="no-referrer-when-downgrade" />
-    <title>Kissan City - Premium Quality Goods</title>
+    <title>TheKissanCity - Farm Fresh Goodness</title>
     <meta
       name="description"
-      content="Discover exclusive premium quality goods and lifestyle products at Kissan City. Shop premium quality apparel, accessories, and more."
+      content="Discover premium quality farm-fresh goods and lifestyle products at TheKissanCity. Shop fresh produce, apparel, accessories, and more."
     />
-    <meta name="author" content="Kissan City" />
+    <meta name="author" content="TheKissanCity" />
+    <meta name="keywords" content="farm fresh, organic, lifestyle products, premium goods, shopping" />
 
-    <!-- PWA -->
+    <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#22c55e" />
+    <meta name="background-color" content="#ffffff" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="Kissan City" />
-    <link rel="manifest" href="/app-manifest.json" />
+    <meta name="apple-mobile-web-app-title" content="TheKissanCity" />
+    <meta name="application-name" content="TheKissanCity" />
+    <meta name="msapplication-TileColor" content="#22c55e" />
+    <meta name="msapplication-config" content="/browserconfig.xml" />
     
     <!-- Prevent duplicate install prompts -->
     <meta name="apple-touch-fullscreen" content="yes" />
     <meta name="fullscreen" content="yes" />
+    
+    <!-- Manifest -->
+    <link rel="manifest" href="/manifest.json" />
 
-    <!-- Favicons (use Kissan City logo as favicon) -->
-    <!-- Main favicon for most browsers -->
+    <!-- Complete Icon Set -->
+    <!-- Standard Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/icon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/icon-16.png" />
+    <link rel="icon" type="image/png" sizes="72x72" href="/icon-72.png" />
+    <link rel="icon" type="image/png" sizes="96x96" href="/icon-96.png" />
+    <link rel="icon" type="image/png" sizes="128x128" href="/icon-128.png" />
+    <link rel="icon" type="image/png" sizes="144x144" href="/icon-144.png" />
+    <link rel="icon" type="image/png" sizes="152x152" href="/icon-152.png" />
     <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
-    <!-- High-res icon (some browsers pick this) -->
+    <link rel="icon" type="image/png" sizes="384x384" href="/icon-384.png" />
     <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png" />
-    <!-- Fallback / shortcut icon -->
-    <link rel="shortcut icon" href="/icon-192.png" />
-    <!-- Apple touch icon (iOS home screen) -->
-    <link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png" />
-
-    <!-- Preload navbar logo (optional) -->
+    
+    <!-- Fallback -->
+    <link rel="shortcut icon" href="/favicon.ico" />
+    
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" sizes="57x57" href="/icon-57.png" />
+    <link rel="apple-touch-icon" sizes="60x60" href="/icon-60.png" />
+    <link rel="apple-touch-icon" sizes="72x72" href="/icon-72.png" />
+    <link rel="apple-touch-icon" sizes="76x76" href="/icon-76.png" />
+    <link rel="apple-touch-icon" sizes="114x114" href="/icon-114.png" />
+    <link rel="apple-touch-icon" sizes="120x120" href="/icon-120.png" />
+    <link rel="apple-touch-icon" sizes="144x144" href="/icon-144.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="/icon-152.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/icon-180.png" />
+    
+    <!-- Microsoft Tiles -->
+    <meta name="msapplication-TileImage" content="/icon-144.png" />
+    
+    <!-- Preload Critical Assets -->
     <link rel="preload" as="image" href="/logo.jpeg" />
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hiA.woff2" />
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -45,31 +73,29 @@
       rel="stylesheet"
     />
 
-    <!-- Social -->
-    <meta property="og:title" content="Kissan City - Premium Quality Goods" />
-    <meta property="og:description" content="Discover exclusive streetwear and lifestyle products at Kissan City" />
+    <!-- Social Media Meta Tags -->
+    <meta property="og:title" content="TheKissanCity - Farm Fresh Goodness" />
+    <meta property="og:description" content="Discover premium quality farm-fresh goods and lifestyle products at TheKissanCity" />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="/icon-192.png" />
+    <meta property="og:url" content="https://thekissancity.com" />
+    <meta property="og:image" content="/icon-512.png" />
+    <meta property="og:image:width" content="512" />
+    <meta property="og:image:height" content="512" />
+    <meta property="og:site_name" content="TheKissanCity" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@kissancity" />
-    <meta name="twitter:image" content="/icon-192.png" />
+    <meta name="twitter:site" content="@TheKissanCity" />
+    <meta name="twitter:creator" content="@TheKissanCity" />
+    <meta name="twitter:title" content="TheKissanCity - Farm Fresh Goodness" />
+    <meta name="twitter:description" content="Discover premium quality farm-fresh goods and lifestyle products" />
+    <meta name="twitter:image" content="/icon-512.png" />
+    
+    <!-- Additional PWA Meta -->
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="support-web-app-capable" content="yes" />
   </head>
 
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker
-            .register('/sw.js?v=8')
-            .then((reg) => {
-              console.log('SW registered');
-              reg.update(); // Force SW to check for new version
-            })
-            .catch(() => console.log('SW registration failed'));
-        });
-      }
-    </script>
   </body>
 </html>
