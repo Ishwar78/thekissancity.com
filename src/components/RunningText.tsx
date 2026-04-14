@@ -27,7 +27,7 @@ export const RunningText = () => {
   }, []);
 
   const messages = [
-    "Kissan City – Pure Pahaadi Goodness",
+    "The Kissan City – Pure Pahaadi Goodness",
   "Authentic Desi Ghee, Raw Honey & Premium Dry Fruits",
   "From the Hills to Your Home",
   "Natural. Fresh. Traditional.",

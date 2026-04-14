@@ -30,7 +30,7 @@ export default function InfluencerImageGrid() {
     setLoading(true);
     setError(null);
     try {
-      const res = await api('/api/influencer-images/public');
+      const res = await api('/api/influencer-images/public?limit=20');
       if (!res.ok) throw new Error(res.json?.message || 'Failed to fetch');
       setInfluencerImages(res.json.data);
     } catch (err: any) {

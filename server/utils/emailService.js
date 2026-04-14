@@ -8,7 +8,8 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const logoUrl = 'https://cdn.builder.io/api/v1/image/assets%2F7b2b767a4d3c468b89c4e8bf7b4d65b2%2Fac8037fa93774a7ca523e332fb8612d3?format=webp&width=800';
+const baseUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+const logoUrl = `${baseUrl}/logo.png`;
 
 function generateOrderConfirmationEmail(order, user) {
   const itemsList = order.items
@@ -99,10 +100,10 @@ function generateOrderConfirmationEmail(order, user) {
         </p>
 
         <h3>What's Next?</h3>
-        <p>We'll send you an email update as soon as your order ships. You can track your delivery in the "My Orders" section on our website.</p>
+        <p>We'll send you an email update as soon as your order ships. You can track your delivery on our website.</p>
 
         <center>
-          <a href="https://kisaancity-1.onrender.com/my-orders" class="btn">Track Your Order</a>
+          <a href="${baseUrl}/track-order/${order._id}" class="btn">Track Your Order</a>
         </center>
 
         <div class="footer">
@@ -292,9 +293,74 @@ async function sendCustomEmail(to, subject, html) {
   }
 }
 
+function generatePasswordResetEmail(user, resetLink) {
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .logo { width: 150px; margin-bottom: 10px; }
+        .footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #f0f0f0; font-size: 12px; color: #999; }
+        .btn { display: inline-block; background: #6B4E3B; color: white; padding: 12px 30px; border-radius: 5px; text-decoration: none; margin: 20px 0; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <img src="${logoUrl}" alt="KisaanCity" class="logo" />
+          <h1 style="color: #333; margin: 10px 0;">Reset Your Password</h1>
+        </div>
+
+        <p>Hi <strong>${user.name || user.fullName || 'Valued Customer'}</strong>,</p>
+
+        <p>We received a request to reset your password for your KisaanCity account. Click the button below to set a new password:</p>
+
+        <center>
+          <a href="${resetLink}" class="btn">Reset Password</a>
+        </center>
+
+        <p>If the button doesn't work, you can copy and paste this link into your browser:<br/>
+        <a href="${resetLink}">${resetLink}</a></p>
+
+        <p>This link is valid for 1 hour. If you didn't request a password reset, you can safely ignore this email.</p>
+
+        <div class="footer">
+          <p>KisaanCity | CREATE YOUR IDENTITY</p>
+          <p>Questions? Email us at support@kissancity.in</p>
+          <p>&copy; 2025 KisaanCity. All rights reserved.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+}
+
+async function sendPasswordResetEmail(user, resetLink) {
+  try {
+    const mailOptions = {
+      from: process.env.GMAIL_USER || 'a60196141@gmail.com',
+      to: user.email,
+      subject: 'Password Reset Request - KisaanCity',
+      html: generatePasswordResetEmail(user, resetLink),
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log('Password reset email sent:', info.messageId);
+    return { ok: true, messageId: info.messageId };
+  } catch (error) {
+    console.error('Failed to send password reset email:', error);
+    return { ok: false, error: error.message };
+  }
+}
+
 module.exports = {
   sendOrderConfirmationEmail,
   sendStatusUpdateEmail,
   sendReturnApprovalEmail,
   sendCustomEmail,
+  sendPasswordResetEmail
 };
+

@@ -103,7 +103,7 @@ export default function UserInvoice() {
           <Card className="p-6">
             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
               <div className="flex items-center gap-3">
-                {biz?.logo && <img src={biz.logo} alt="Logo" className="w-12 h-12 rounded" />}
+                <img src={biz?.logo || '/logo1.png'} alt="Logo" className="w-12 h-12 rounded" />
                 <div>
                   <p className="font-bold text-lg">{biz?.name || 'Seller'}</p>
                   <p className="text-xs text-muted-foreground whitespace-pre-line">{biz?.address || ''}</p>

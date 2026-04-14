@@ -188,7 +188,7 @@ export const PWAInstallPrompt = () => {
         console.log("🔍 PWA Debug: Post-install check - iOS standalone:", (window.navigator as any).standalone);
       }, 1000);
       
-      toast.success("Kissan City App installed successfully!", {
+      toast.success("The Kissan City App installed successfully!", {
         description: "You can now find it on your home screen",
         duration: 5000,
         icon: <CheckCircle className="h-4 w-4" />
@@ -259,7 +259,7 @@ export const PWAInstallPrompt = () => {
         }, 5000);
         
         // Show immediate feedback
-        toast.success("Installing Kissan City App...", {
+        toast.success("Installing The Kissan City App...", {
           description: "The app will appear on your home screen shortly",
           duration: 3000
         });
@@ -309,7 +309,7 @@ export const PWAInstallPrompt = () => {
             </div>
             
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Install Kissan City App
+              Install The Kissan City App
             </h2>
             
             <div className="text-left mb-6 space-y-3">
@@ -369,7 +369,7 @@ export const PWAInstallPrompt = () => {
           <div className="flex-1">
             <h3 className="font-bold text-sm mb-1 text-white">Successfully Installed!</h3>
             <p className="text-xs text-white">
-              Find Kissan City on your home screen for quick access
+              Find The Kissan City on your home screen for quick access
             </p>
           </div>
           
@@ -394,7 +394,7 @@ export const PWAInstallPrompt = () => {
         </div>
 
         <div className="flex-1">
-          <h3 className="font-bold text-sm mb-1 text-foreground">Install Kissan City App</h3>
+          <h3 className="font-bold text-sm mb-1 text-foreground">Install The Kissan City App</h3>
           <p className="text-xs text-muted-foreground">
             Get faster access and offline support
           </p>

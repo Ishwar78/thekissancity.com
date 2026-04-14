@@ -58,7 +58,7 @@ const ICON_OPTIONS = [
 
 const DEFAULT_FORM_DATA: Omit<AboutUsData, '_id' | 'createdAt' | 'updatedAt'> = {
   eyebrow: {
-    text: 'Kissan City',
+    text: 'The Kissan City',
     icon: 'Mountain'
   },
   title: {
@@ -347,45 +347,70 @@ export const AboutUsManager = () => {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">About Us Management</h1>
-        <Button onClick={() => { setShowForm(true); setEditingEntry(null); setFormData(DEFAULT_FORM_DATA); }}>
-          <Plus className="w-4 h-4 mr-2" />
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-2">
+          <div className="w-1.5 h-8 bg-[#6B4E3B] rounded-full" />
+          About Us Management
+        </h1>
+        <button 
+          onClick={() => { setShowForm(true); setEditingEntry(null); setFormData(DEFAULT_FORM_DATA); }}
+          className="flex items-center gap-2 px-6 py-2.5 bg-[#6B4E3B] hover:bg-[#5D4037] text-white font-bold rounded-xl transition-all shadow-md hover:shadow-lg active:scale-95 group whitespace-nowrap"
+        >
+          <div className="bg-white/20 p-1 rounded-lg group-hover:bg-white/30 transition-colors">
+            <Plus className="w-4 h-4 text-white" />
+          </div>
           Add New Entry
-        </Button>
+        </button>
       </div>
 
       {/* Existing Entries */}
       <div className="grid gap-4">
         {aboutUsEntries.map((entry) => (
-          <Card key={entry._id}>
-            <CardHeader>
-              <div className="flex justify-between items-center">
-                <div>
-                  <CardTitle className="text-lg">{entry.title.main}</CardTitle>
-                  <div className="flex items-center gap-2 mt-2">
-                    <Badge variant={entry.isActive ? 'default' : 'secondary'}>
+          <Card key={entry._id} className="group overflow-hidden border-2 border-transparent hover:border-primary/10 hover:shadow-lg transition-all duration-300">
+            <CardHeader className="pb-3 px-6 pt-6">
+              <div className="flex justify-between items-start gap-4">
+                <div className="space-y-1.5">
+                  <CardTitle className="text-xl font-bold text-gray-900 group-hover:text-primary transition-colors">
+                    {entry.title.main}
+                  </CardTitle>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge className={`rounded-full px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                      entry.isActive ? 'bg-green-100 text-green-700 hover:bg-green-100' : 'bg-slate-100 text-slate-600 hover:bg-slate-100'
+                    }`}>
                       {entry.isActive ? 'Active' : 'Inactive'}
                     </Badge>
-                    <span className="text-sm text-gray-500">
-                      Created: {new Date(entry.createdAt || '').toLocaleDateString()}
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1">
+                      <div className="w-1 h-1 rounded-full bg-slate-400" />
+                      Created {new Date(entry.createdAt || '').toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
                     </span>
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => handleEdit(entry)}>
-                    <Edit className="w-4 h-4" />
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="h-9 w-9 p-0 rounded-lg border-2 hover:bg-primary/5 hover:border-primary/30 transition-all" 
+                    onClick={() => handleEdit(entry)}
+                  >
+                    <Edit className="w-4 h-4 text-slate-600" />
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => handleDelete(entry._id!)}>
-                    <Trash2 className="w-4 h-4" />
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="h-9 w-9 p-0 rounded-lg border-2 hover:bg-destructive/5 hover:border-destructive/30 hover:text-destructive transition-all" 
+                    onClick={() => handleDelete(entry._id!)}
+                  >
+                    <Trash2 className="w-4 h-4 text-slate-600 hover:text-inherit" />
                   </Button>
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600 line-clamp-2">
-                {entry.content.main[0]?.text}
-              </p>
+            <CardContent className="px-6 pb-6">
+              <div className="relative">
+                <p className="text-sm text-slate-600 leading-relaxed line-clamp-2 italic italic-bg-muted/30 p-3 rounded-xl border-l-4 border-primary/20 bg-muted/20">
+                  {entry.content.main[0]?.text || 'No content provided.'}
+                </p>
+              </div>
             </CardContent>
           </Card>
         ))}
@@ -411,7 +436,7 @@ export const AboutUsManager = () => {
 
             <form onSubmit={handleSubmit} className="p-6 space-y-6">
               {/* Eyebrow */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="eyebrow-text">Eyebrow Text</Label>
                   <Input
@@ -421,7 +446,7 @@ export const AboutUsManager = () => {
                       ...prev,
                       eyebrow: { ...prev.eyebrow, text: e.target.value }
                     }))}
-                    placeholder="Kissan City"
+                    placeholder="The Kissan City"
                   />
                 </div>
                 <div>
@@ -448,7 +473,7 @@ export const AboutUsManager = () => {
               </div>
 
               {/* Title */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="title-main">Main Title</Label>
                   <Input
@@ -575,7 +600,7 @@ export const AboutUsManager = () => {
                 </div>
 
                 {/* Badge Settings */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="badge-text">Badge Text</Label>
                     <Input
@@ -727,10 +752,15 @@ export const AboutUsManager = () => {
                 <Button type="button" variant="outline" onClick={() => { setShowForm(false); setEditingEntry(null); }}>
                   Cancel
                 </Button>
-                <Button type="submit">
-                  <Save className="w-4 h-4 mr-2" />
+                <button 
+                  type="submit"
+                  className="flex items-center gap-2 px-6 py-2.5 bg-[#6B4E3B] hover:bg-[#5D4037] text-white font-bold rounded-xl transition-all shadow-md hover:shadow-lg active:scale-95 group"
+                >
+                  <div className="bg-white/20 p-1 rounded-lg group-hover:bg-white/30 transition-colors">
+                    <Save className="w-4 h-4 text-white" />
+                  </div>
                   {editingEntry ? 'Update' : 'Create'}
-                </Button>
+                </button>
               </div>
             </form>
           </div>

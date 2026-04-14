@@ -8,7 +8,10 @@ async function getAuthToken() {
   }
 
   try {
-    const response = await fetch(`${SHIPROCKET_BASE_URL}/auth/login`, {
+    console.log('=== SHIPROCKET AUTH START ===');
+    console.log('API Key exists:', !!process.env.SHIPROCKET_API_KEY);
+
+    const response = await fetch(`${SHIPROCKET_BASE_URL}/external/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -19,15 +22,23 @@ async function getAuthToken() {
       }),
     });
 
+    console.log('Auth response status:', response.status);
+
     if (!response.ok) {
       const error = await response.json().catch(() => ({ message: 'Unknown error' }));
+      console.error('Shiprocket auth error response:', error);
       throw new Error(error.message || 'Auth failed');
     }
 
     const data = await response.json();
+    console.log('Auth response data keys:', Object.keys(data));
+    console.log('Token exists:', !!data.token);
+    console.log('Token sample:', data.token ? data.token.substring(0, 20) + '...' : 'none');
+
     cachedToken = data.token;
     tokenExpiry = Date.now() + (23 * 60 * 60 * 1000);
 
+    console.log('=== SHIPROCKET AUTH END ===');
     return cachedToken;
   } catch (error) {
     console.error('Shiprocket auth error:', error.message);
@@ -203,10 +214,106 @@ async function getAreaWiseCharges(pincode) {
   }
 }
 
+async function getPickupLocations() {
+  try {
+    const token = await getAuthToken();
+
+    const response = await fetch(`${SHIPROCKET_BASE_URL}/external/company/pickup-locations`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      return [];
+    }
+
+    const data = await response.json();
+    return data.data || [];
+  } catch (error) {
+    console.error('Failed to fetch pickup locations:', error.message);
+    return [];
+  }
+}
+
+async function createOrder(orderData) {
+  try {
+    const token = await getAuthToken();
+
+    console.log('=== SHIPROCKET ORDER CREATION START ===');
+    console.log('Order data:', JSON.stringify(orderData, null, 2));
+    console.log('Token sample:', token ? token.substring(0, 20) + '...' : 'none');
+
+    const response = await fetch(`${SHIPROCKET_BASE_URL}/external/orders/create/adhoc`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(orderData),
+    });
+
+    console.log('Order creation response status:', response.status);
+
+    const data = await response.json();
+
+    // Check if response contains an error message even if status is 200
+    if (data.message && data.message.includes('Pickup location') && data.data?.data) {
+      console.log('Pickup location error detected, extracting valid locations');
+      const pickupLocations = data.data.data;
+      console.log('Valid pickup locations:', JSON.stringify(pickupLocations, null, 2));
+
+      if (pickupLocations.length > 0) {
+        const validPickupLocation = pickupLocations[0].pickup_location;
+        console.log('Retrying with pickup location:', validPickupLocation);
+
+        orderData.pickup_location = validPickupLocation;
+
+        const retryResponse = await fetch(`${SHIPROCKET_BASE_URL}/external/orders/create/adhoc`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(orderData),
+        });
+
+        console.log('Retry response status:', retryResponse.status);
+
+        if (retryResponse.ok) {
+          const retryData = await retryResponse.json();
+          console.log('Shiprocket order created successfully on retry:', retryData);
+          console.log('=== SHIPROCKET ORDER CREATION END ===');
+          return retryData;
+        } else {
+          const retryError = await retryResponse.json().catch(() => ({ message: 'Failed to create order' }));
+          console.error('Shiprocket retry error:', retryError);
+          throw new Error(retryError.message || 'Failed to create order in Shiprocket');
+        }
+      }
+    }
+
+    if (!response.ok) {
+      console.error('Shiprocket order creation error:', data);
+      throw new Error(data.message || 'Failed to create order in Shiprocket');
+    }
+
+    console.log('Shiprocket order created successfully:', data);
+    console.log('=== SHIPROCKET ORDER CREATION END ===');
+    return data;
+  } catch (error) {
+    console.error('Shiprocket create order error:', error.message);
+    throw error;
+  }
+}
+
 module.exports = {
   getAuthToken,
   getTrackingDetails,
   searchOrdersByPhone,
   getShipmentTrack,
   getAreaWiseCharges,
+  createOrder,
 };

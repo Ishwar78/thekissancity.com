@@ -30,7 +30,7 @@ export default function AllInfluencersPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await api('/api/influencer-images/public');
+      const res = await api('/api/influencer-images/public?limit=60');
       if (!res.ok) {
         throw new Error(res.json?.message || 'Failed to fetch influencer images');
       }
@@ -92,6 +92,7 @@ export default function AllInfluencersPage() {
                     <img
                       src={item.imageUrl}
                       alt={item.influencerName}
+                      loading="lazy"
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     />
                     <div className={`absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent transition-opacity duration-500 ${

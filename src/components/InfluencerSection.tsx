@@ -58,7 +58,7 @@ export default function InfluencerSection() {
       setLoading(true); setError(null);
       try {
         let data;
-        const res = await api('/api/influencer-data/public');
+        const res = await api('/api/influencer-data/public?limit=10');
         if (!res.ok) throw new Error(res.json?.message || 'Failed to fetch');
         data = res.json.data;
         setInfluencerData(data);
@@ -416,7 +416,7 @@ export default function InfluencerSection() {
                   >
                     <video
                       src={item.videoUrl}
-                      muted playsInline preload="metadata"
+                      muted playsInline preload="none"
                       className="w-full h-full object-cover"
                       onLoadedMetadata={(e) => {
                         const v = e.currentTarget;

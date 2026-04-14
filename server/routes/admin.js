@@ -131,15 +131,15 @@ router.get('/orders/:id', requireAuth, requireAdmin, async (req, res) => {
       },
       items: Array.isArray(doc.items)
         ? doc.items.map((it) => ({
-            productId: it.id || it.productId || '',
-            title: it.title || it.name || 'Item',
-            image: it.image || '',
-            price: Number(it.price || 0),
-            qty: Number(it.qty || 0),
-            size: it.size || (it.variant?.size ? it.variant.size : undefined),
-            color: it.color || (it.variant?.color ? it.variant.color : undefined),
-            variant: it.variant || null,
-          }))
+          productId: it.id || it.productId || '',
+          title: it.title || it.name || 'Item',
+          image: it.image || '',
+          price: Number(it.price || 0),
+          qty: Number(it.qty || 0),
+          size: it.size || (it.variant?.size ? it.variant.size : undefined),
+          color: it.color || (it.variant?.color ? it.variant.color : undefined),
+          variant: it.variant || null,
+        }))
         : [],
     };
 
@@ -389,13 +389,13 @@ router.post('/reviews/reply', requireAuth, requireAdmin, async (req, res) => {
     if (!reviewId || !text || !String(text).trim()) {
       return res.status(400).json({ ok: false, message: 'reviewId and text are required' });
     }
-    const sanitize = (s) => String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+    const sanitize = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
     const review = await Review.findById(reviewId);
     if (!review) return res.status(404).json({ ok: false, message: 'Review not found' });
     review.replies = Array.isArray(review.replies) ? review.replies : [];
-    review.replies.push({ authorId: req.user._id, text: sanitize(String(text).slice(0,2000)), createdAt: new Date() });
+    review.replies.push({ authorId: req.user._id, text: sanitize(String(text).slice(0, 2000)), createdAt: new Date() });
     await review.save();
-    const updated = await Review.findById(review._id).populate('userId','name email').populate('replies.authorId','name email role').lean();
+    const updated = await Review.findById(review._id).populate('userId', 'name email').populate('replies.authorId', 'name email role').lean();
     return res.json({ ok: true, data: updated });
   } catch (e) {
     console.error('Admin reply error:', e);

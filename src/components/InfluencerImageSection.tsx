@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { AdminAddInfluencerImage } from './AdminAddInfluencerImage';
-import { Image, User, Package, Loader2, Edit, Trash2, X } from 'lucide-react';
-import { api } from '@/lib/api'; // Assuming @/lib/api is the correct path for your API utility
+import { Image, User, Package, Loader2, Edit, Trash2, X, Plus } from 'lucide-react';
+import { api } from '@/lib/api'; //  @/lib/api is the correct path for your API utility
 
 interface Product {
   _id: string;
@@ -80,22 +80,40 @@ export default function InfluencerImageSection() {
 
   return (
     <div className="px-3 pb-3">
-      <div className="flex justify-between items-center mb-3">
-        <h2 className="text-2xl font-bold text-gray-800">Influencer Image Spotlight</h2>
-        <Button onClick={() => setShowAddForm(!showAddForm)} className="rounded-full">
-          {showAddForm ? (editingItem ? 'Cancel Edit' : 'Cancel Add') : 'Add New Image'}
-        </Button>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+          <div className="w-1.5 h-6 bg-[#6B4E3B] rounded-full" />
+          Influencer Image Spotlight
+        </h2>
+        <button
+          onClick={() => setShowAddForm(!showAddForm)}
+          className="flex items-center gap-2 px-6 py-2.5 bg-[#6B4E3B] hover:bg-[#5D4037] text-white font-bold rounded-xl transition-all shadow-md hover:shadow-lg active:scale-95 group whitespace-nowrap"
+        >
+          {showAddForm ? (
+            <>
+              <X className="h-4 w-4" />
+              {editingItem ? 'Cancel Edit' : 'Cancel Add'}
+            </>
+          ) : (
+            <>
+              <div className="bg-white/20 p-1 rounded-lg group-hover:bg-white/30 transition-colors">
+                <Plus className="h-4 w-4 text-white" />
+              </div>
+              Add New Image
+            </>
+          )}
+        </button>
       </div>
 
       {showAddForm && (
         <div className="mb-4">
-          <AdminAddInfluencerImage 
+          <AdminAddInfluencerImage
             editingItem={editingItem}
-            onImageAdded={() => { 
-              fetchInfluencerImages(); 
-              setShowAddForm(false); 
+            onImageAdded={() => {
+              fetchInfluencerImages();
+              setShowAddForm(false);
               setEditingItem(null);
-            }} 
+            }}
           />
         </div>
       )}
@@ -165,7 +183,7 @@ export default function InfluencerImageSection() {
                 </div>
               )}
 
-              <img 
+              <img
                 src={(() => {
                   const timestamp = Date.now();
                   const cacheBustedUrl = item.imageUrl.includes('?') ? `${item.imageUrl}&_t=${timestamp}` : `${item.imageUrl}?_t=${timestamp}`;
@@ -177,9 +195,9 @@ export default function InfluencerImageSection() {
                     timestamp
                   });
                   return cacheBustedUrl;
-                })()} 
-                alt={item.influencerName} 
-                className="w-full h-auto object-cover" 
+                })()}
+                alt={item.influencerName}
+                className="w-full h-auto object-cover"
               />
               <div className="p-4">
                 <h3 className="font-semibold text-lg text-gray-900 mb-2 line-clamp-1">{item.productId?.title || 'Product'}</h3>

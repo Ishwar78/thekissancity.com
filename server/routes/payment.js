@@ -10,8 +10,10 @@ const Razorpay = require('razorpay');
 const Order = require('../models/Order');
 const Product = require('../models/Product');
 const SiteSetting = require('../models/SiteSetting');
+const User = require('../models/User');
 const { authOptional, requireAuth } = require('../middleware/auth');
 const { sendOrderConfirmationEmail } = require('../utils/emailService');
+const { createOrder: createShiprocketOrder } = require('../utils/shiprocketService');
 
 /* ------------------------------- Helpers -------------------------------- */
 
@@ -19,6 +21,95 @@ async function getSettingsDoc() {
   let settings = await SiteSetting.findOne();
   if (!settings) settings = await SiteSetting.create({});
   return settings;
+}
+
+// Helper to create order in ShipRocket
+async function createShiprocketShipment(order) {
+  try {
+    const settings = await getSettingsDoc();
+    const shiprocketSettings = settings?.shipping?.shiprocket;
+
+    if (!shiprocketSettings || !shiprocketSettings.enabled) {
+      console.log('ShipRocket integration is disabled, skipping shipment creation');
+      return null;
+    }
+
+    // Set environment variables for ShipRocket auth
+    process.env.SHIPROCKET_API_EMAIL = shiprocketSettings.email;
+    process.env.SHIPROCKET_API_PASSWORD = shiprocketSettings.password;
+    process.env.SHIPROCKET_PICKUP_PINCODE = shiprocketSettings.pickupPincode || '110001';
+
+    // Construct order data for ShipRocket
+    const orderItems = order.items.map(item => ({
+      name: item.title,
+      sku: item.id || item.productId,
+      units: item.qty,
+      selling_price: Number(item.price),
+      discount: Number(item.discountAmount || 0),
+      tax: 0,
+      hsn: '',
+    }));
+
+    const shiprocketOrderData = {
+      order_id: String(order._id),
+      order_date: new Date().toISOString().split('T')[0],
+      pickup_location: 'Primary',
+      channel_id: shiprocketSettings.channelId || '',
+      comment: '',
+      billing_customer_name: order.name,
+      billing_last_name: '',
+      billing_address: order.address,
+      billing_address_2: order.streetAddress || '',
+      billing_city: order.city,
+      billing_pincode: order.pincode,
+      billing_state: order.state,
+      billing_country: 'India',
+      billing_email: '',
+      billing_phone: order.phone,
+      shipping_is_billing: true,
+      shipping_customer_name: order.name,
+      shipping_last_name: '',
+      shipping_address: order.address,
+      shipping_address_2: order.streetAddress || '',
+      shipping_city: order.city,
+      shipping_pincode: order.pincode,
+      shipping_state: order.state,
+      shipping_country: 'India',
+      shipping_email: '',
+      shipping_phone: order.phone,
+      order_type: 'ESSENTIALS',
+      payment_method: order.paymentMethod === 'COD' ? 'cod' : 'prepaid',
+      sub_total: Number(order.total),
+      length: 10,
+      breadth: 10,
+      height: 10,
+      weight: 0.5,
+      order_items: orderItems,
+    };
+
+    const response = await createShiprocketOrder(shiprocketOrderData);
+
+    if (response && response.order_id) {
+      console.log(`ShipRocket order created successfully. Order ID: ${response.order_id}`);
+      
+      // Update order with tracking number if available
+      if (response.shipment_id) {
+        await Order.findByIdAndUpdate(order._id, {
+          trackingNumber: response.shipment_id,
+          trackingId: response.shipment_id,
+        });
+        console.log(`Updated order ${order._id} with tracking number: ${response.shipment_id}`);
+      }
+
+      return response;
+    }
+
+    return null;
+  } catch (error) {
+    console.error('Error creating ShipRocket shipment:', error.message);
+    // Don't throw error - we don't want to fail the order if ShipRocket fails
+    return null;
+  }
 }
 
 // Return a live Razorpay instance (env first, DB fallback)
@@ -257,12 +348,65 @@ router.post('/verify', requireAuth, async (req, res) => {
 
       await order.save();
 
-      const User = require('../models/User');
-      const user = await User.findById(req.user._id);
-      if (user?.email) {
-        sendOrderConfirmationEmail(order, user).catch(err =>
-          console.error('Failed to send confirmation email:', err)
-        );
+      // Send order confirmation email for Razorpay orders
+      try {
+        console.log('=== RAZORPAY ORDER EMAIL SENDING START ===');
+        console.log('Order ID:', order._id);
+        console.log('Request user:', req.user);
+        console.log('Request user._id:', req.user._id);
+
+        let recipientEmail = null;
+        let customerName = name || req.user.name || 'Customer';
+
+        if (req.user && req.user._id) {
+          console.log('Fetching user from database...');
+          const userObj = await User.findById(req.user._id);
+          console.log('User object from DB:', userObj);
+          if (userObj) {
+            if (userObj.email) {
+              recipientEmail = userObj.email;
+              console.log('Found recipient email:', recipientEmail);
+            } else {
+              console.log('User object has no email field');
+            }
+            if (userObj.name || userObj.fullName) customerName = userObj.name || userObj.fullName;
+          } else {
+            console.log('User not found in database');
+          }
+        } else {
+          console.log('No req.user or req.user._id');
+        }
+
+        if (recipientEmail) {
+          console.log('Attempting to send order confirmation email to:', recipientEmail);
+          console.log('Customer name:', customerName);
+          const emailResult = await sendOrderConfirmationEmail(order, { email: recipientEmail, name: customerName });
+          console.log('Email sending result:', emailResult);
+          if (emailResult.ok) {
+            console.log(`✅ Razorpay order confirmation email sent to ${recipientEmail}`);
+          } else {
+            console.log(`❌ Failed to send email. Error: ${emailResult.error}`);
+          }
+        } else {
+          console.log('❌ No recipient email found for Razorpay order confirmation');
+        }
+        console.log('=== RAZORPAY ORDER EMAIL SENDING END ===');
+      } catch (emailErr) {
+        console.error('❌ Failed to send Razorpay order confirmation email:', emailErr);
+      }
+
+      // Create shipment in ShipRocket
+      try {
+        console.log('=== SHIPROCKET SHIPMENT CREATION START ===');
+        const shiprocketResponse = await createShiprocketShipment(order);
+        if (shiprocketResponse) {
+          console.log('✅ ShipRocket shipment created successfully');
+        } else {
+          console.log('ℹ️ ShipRocket shipment creation skipped or failed');
+        }
+        console.log('=== SHIPROCKET SHIPMENT CREATION END ===');
+      } catch (shiprocketErr) {
+        console.error('❌ Failed to create ShipRocket shipment:', shiprocketErr);
       }
 
       return res.json({
@@ -370,12 +514,41 @@ router.post('/manual', requireAuth, async (req, res) => {
 
     await order.save();
 
-    const User = require('../models/User');
-    const user = await User.findById(req.user._id);
-    if (user?.email) {
-      sendOrderConfirmationEmail(order, user).catch(err =>
-        console.error('Failed to send confirmation email:', err)
-      );
+    // Send order confirmation email for manual UPI orders
+    try {
+      let recipientEmail = null;
+      let customerName = name || req.user.name || 'Customer';
+
+      if (req.user && req.user._id) {
+        const userObj = await User.findById(req.user._id);
+        if (userObj) {
+          if (userObj.email) recipientEmail = userObj.email;
+          if (userObj.name || userObj.fullName) customerName = userObj.name || userObj.fullName;
+        }
+      }
+
+      if (recipientEmail) {
+        await sendOrderConfirmationEmail(order, { email: recipientEmail, name: customerName });
+        console.log(`Manual UPI order confirmation email sent to ${recipientEmail}`);
+      } else {
+        console.log('No recipient email found for manual UPI order confirmation');
+      }
+    } catch (emailErr) {
+      console.error('Failed to send manual UPI order confirmation email:', emailErr);
+    }
+
+    // Create shipment in ShipRocket for manual UPI orders
+    try {
+      console.log('=== SHIPROCKET SHIPMENT CREATION START (MANUAL UPI) ===');
+      const shiprocketResponse = await createShiprocketShipment(order);
+      if (shiprocketResponse) {
+        console.log('✅ ShipRocket shipment created successfully for manual UPI order');
+      } else {
+        console.log('ℹ️ ShipRocket shipment creation skipped or failed for manual UPI order');
+      }
+      console.log('=== SHIPROCKET SHIPMENT CREATION END (MANUAL UPI) ===');
+    } catch (shiprocketErr) {
+      console.error('❌ Failed to create ShipRocket shipment for manual UPI order:', shiprocketErr);
     }
 
     return res.json({

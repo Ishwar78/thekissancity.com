@@ -5,6 +5,10 @@ export interface OrderItem {
   qty: number;
   image: string;
   variant?: Record<string, any>;
+  gram?: string;
+  size?: string;
+  color?: string;
+  meta?: Record<string, any>;
 }
 
 export interface Order {

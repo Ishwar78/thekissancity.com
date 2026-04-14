@@ -31,7 +31,7 @@ export default function AllVideosPage() {
       setLoading(true);
       setError(null);
       try {
-        const res = await api('/api/influencer-data/public');
+        const res = await api('/api/influencer-data/public?limit=40');
         if (!res.ok) {
           throw new Error(res.json?.message || 'Failed to fetch videos');
         }
@@ -138,7 +138,7 @@ export default function AllVideosPage() {
                 <video
                   src={video.videoUrl}
                   className="w-full h-full object-cover"
-                  preload="metadata"
+                  preload="none"
                   muted
                   playsInline
                   onLoadedMetadata={(e) => {

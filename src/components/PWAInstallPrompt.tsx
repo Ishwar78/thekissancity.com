@@ -43,7 +43,7 @@ export const PWAInstallPrompt = () => {
       setShowPrompt(false);
       setShowSuccess(true);
       (window as any).__pwaPromptEvent = null;
-      toast.success("Kissan City installed!", {
+      toast.success("The Kissan City installed!", {
         description: "Find it on your home screen",
         duration: 5000,
         icon: <CheckCircle className="h-4 w-4" />,
@@ -83,7 +83,7 @@ export const PWAInstallPrompt = () => {
         setDeferredPrompt(null);
         (window as any).__pwaPromptEvent = null;
         setShowPrompt(false);
-        toast.success("Installing Kissan City...", { duration: 3000 });
+        toast.success("Installing The Kissan City...", { duration: 3000 });
       } else {
         toast.info("Installation cancelled", { duration: 2000 });
       }
@@ -109,7 +109,7 @@ export const PWAInstallPrompt = () => {
           <CheckCircle className="h-6 w-6 text-white flex-shrink-0" />
           <div className="flex-1">
             <p className="font-bold text-sm text-white">Successfully Installed!</p>
-            <p className="text-xs text-white/80">Find Kissan City on your home screen</p>
+            <p className="text-xs text-white/80">Find The Kissan City on your home screen</p>
           </div>
           <Button size="sm" variant="ghost" onClick={() => setShowSuccess(false)}
             className="text-white hover:bg-green-600">
@@ -129,7 +129,7 @@ export const PWAInstallPrompt = () => {
           <Download className="h-6 w-6 text-primary-foreground" />
         </div>
         <div className="flex-1">
-          <h3 className="font-bold text-sm text-foreground">Install Kissan City App</h3>
+          <h3 className="font-bold text-sm text-foreground">Install The Kissan City App</h3>
           <p className="text-xs text-muted-foreground">Faster access · Works offline</p>
         </div>
         <div className="flex gap-2">

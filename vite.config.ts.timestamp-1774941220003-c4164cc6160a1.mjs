@@ -18,12 +18,12 @@ var vite_config_default = defineConfig(({ mode }) => ({
     },
     proxy: {
       "/api": {
-        target: "http://localhost:5000",
+        target: "https://thekissancity.com/",
         changeOrigin: true,
         secure: false
       },
       "/uploads": {
-        target: "http://localhost:5000",
+        target: "https://thekissancity.com/",
         changeOrigin: true,
         secure: false
       }

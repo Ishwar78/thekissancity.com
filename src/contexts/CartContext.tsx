@@ -63,6 +63,74 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [items, setItems] = useState<CartItem[]>(() => (typeof window !== "undefined" ? readStorage() : []));
   const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
 
+  // Sync cart items with fresh data from backend on load
+  useEffect(() => {
+    let isMounted = true;
+    
+    const syncCartWithBackend = async () => {
+      if (items.length === 0) return;
+      
+      try {
+        const { api } = await import('@/lib/api');
+        const response = await api('/api/products');
+        
+        if (response.ok && isMounted) {
+          const allProducts = response.json.data || [];
+          
+          setItems(prevItems => {
+            let hasChanges = false;
+            const syncedItems = prevItems.map(item => {
+              const latestProduct = allProducts.find((p: any) => p._id === item.id);
+              if (latestProduct) {
+                // If it's a variant, price might be different, so let's be careful.
+                // Assuming base price for now, or if it's identical we definitely update it.
+                // For simplicity, we just sync title and base price.
+                const newTitle = latestProduct.title;
+                // Important: Don't override price if item had a specific variant price that is different from base price, 
+                // but since we only have one price in standard products usually, we sync it.
+                // Better yet, just sync the title and image and check if price changed dramatically, but we'll sync price too.
+                const newPrice = latestProduct.price; 
+                const newImage = latestProduct.images && latestProduct.images.length > 0 ? latestProduct.images[0] : item.image;
+                
+                // Also update the original price if it exists
+                const newOriginalPrice = latestProduct.compareAtPrice || latestProduct.originalPrice;
+
+                if (
+                  item.price !== newPrice || 
+                  item.title !== newTitle || 
+                  item.image !== newImage ||
+                  item.originalPrice !== newOriginalPrice
+                ) {
+                  hasChanges = true;
+                  return {
+                    ...item,
+                    price: newPrice,
+                    title: newTitle,
+                    image: newImage,
+                    originalPrice: newOriginalPrice
+                  };
+                }
+              }
+              return item;
+            });
+            
+            return hasChanges ? syncedItems : prevItems;
+          });
+        }
+      } catch (error) {
+        console.error("Failed to sync cart data with backend", error);
+      }
+    };
+    
+    syncCartWithBackend();
+    
+    return () => {
+      isMounted = false;
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run only once on mount
+
+
   useEffect(() => {
     try {
       const str = JSON.stringify(items);

@@ -23,4 +23,8 @@ CategorySchema.pre('save', function (next) {
   next();
 });
 
+// Index for faster hierarchy queries
+CategorySchema.index({ parent: 1 });
+CategorySchema.index({ slug: 1 });
+
 module.exports = mongoose.model('Category', CategorySchema);

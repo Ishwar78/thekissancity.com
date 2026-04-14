@@ -48,7 +48,7 @@ export const PostInstallExperience = () => {
           </div>
 
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Welcome to Kissan City!
+            Welcome to The Kissan City!
           </h2>
           
           <p className="text-gray-600 mb-6">

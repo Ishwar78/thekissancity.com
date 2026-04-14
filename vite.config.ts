@@ -18,7 +18,7 @@ export default defineConfig(({ mode }) => ({
     },
     proxy: {
       "/api": {
-        target: "http://localhost:5000",
+        target: "https://thekissancity.com/",
         changeOrigin: true,
         secure: false,
         configure: (proxy) => {
@@ -31,7 +31,7 @@ export default defineConfig(({ mode }) => ({
         }
       },
       "/uploads": {
-        target: "http://localhost:5000",
+        target: "https://thekissancity.com/",
         changeOrigin: true,
         secure: false,
       },

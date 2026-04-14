@@ -34,9 +34,7 @@ const resolveImage = (src?: string) => {
   const s = String(src || '');
   if (!s) return '/placeholder.svg';
   if (s.startsWith('http')) {
-    // Add cache-busting timestamp to force fresh image loading
-    const separator = s.includes('?') ? '&' : '?';
-    return `${s}${separator}_t=${Date.now()}`;
+    return s; // Return URL as-is to allow browser caching
   }
   return s.startsWith('/') ? s : `/uploads/${s}`;
 };
@@ -92,9 +90,9 @@ const Products = () => {
   const fetchProducts = async () => {
     console.log('fetchProducts called in Products.tsx with productUpdateKey:', productUpdateKey);
     try {
-      // Add more aggressive cache-busting
-      const cacheBuster = Date.now() + Math.random();
-      const { ok, json } = await api(`/api/products?_t=${cacheBuster}&_r=${Math.random()}`);
+      // Use minimal cache-busting - only when needed (e.g., after product updates)
+      const cacheBuster = productUpdateKey > 0 ? `&_t=${Date.now()}` : '';
+      const { ok, json } = await api(`/api/products${cacheBuster}`);
       if (!ok) throw new Error(json?.message || json?.error || 'Failed to load');
       const list = Array.isArray(json?.data) ? (json.data as ProductRow[]) : [];
       

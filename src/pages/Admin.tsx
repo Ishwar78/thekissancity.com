@@ -1,9 +1,7 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { useCouponRefresh } from "@/hooks/useCouponRefresh";
 
-import { useNavigate } from 'react-router-dom';
-import { Navbar } from '@/components/Navbar';
-import { Footer } from '@/components/Footer';
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { AdminPages } from '@/components/AdminPages';
 import { AdminInfluencerData } from '@/components/AdminInfluencerData';
 import InfluencerImageSection from '@/components/InfluencerImageSection';
@@ -17,6 +15,7 @@ import { AboutUsManager } from "../components/admin/AboutUsManager";
 import { AdminEditReviewModal, AdminReview } from '@/components/AdminEditReviewModal';
 import { Pagination } from '@/components/Pagination';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
+import { useAuth } from '@/contexts/AuthContext';
 import { Product, Order, User } from '@/types/database.types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -31,34 +30,35 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import {
-    Loader2,
-    Trash2,
-    Edit,
-    Eye,
-    Plus,
-    LayoutDashboard,
-    Package,
-    Receipt,
-    Users2,
-    CreditCard,
-    Truck,
-    Tags,
-    MessageCircle,
-    Megaphone,
-    Star,
-    Percent,
-    Menu,
-    X,
-    Upload,
-    Video,
-    SquarePen,
-    FileText,
-    TrendingUp, ShoppingCart, Users, BarChartIcon, Image, MapPin, Mail,
-  } from 'lucide-react';
+  Loader2,
+  Trash2,
+  Edit,
+  Eye,
+  Plus,
+  LayoutDashboard,
+  Package,
+  Receipt,
+  Users2,
+  CreditCard,
+  Truck,
+  Tags,
+  MessageCircle,
+  Megaphone,
+  Star,
+  Percent,
+  Menu,
+  X,
+  Upload,
+  Video,
+  SquarePen,
+  FileText,
+  TrendingUp, ShoppingCart, Users, BarChartIcon, Image, MapPin, Mail, LogOut,
+} from 'lucide-react';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -76,7 +76,7 @@ import slugify from 'slugify';
 
 
 
- const API_BASE = (import.meta as any).env?.VITE_API_BASE_URL || '';
+const API_BASE = (import.meta as any).env?.VITE_API_BASE_URL || '';
 // Using an empty API_BASE defaults to relative '/api' paths which works in preview where backend is proxied.
 
 const ENDPOINTS = {
@@ -109,9 +109,8 @@ type ShiprocketSettingsForm = {
   enabled: boolean;
   email: string;
   password: string;
-  apiKey: string;
-  secret: string;
   channelId: string;
+  pickupPincode: string;
 };
 
 type BillingInfoForm = {
@@ -132,35 +131,35 @@ type IntegrationSettings = {
 };
 
 const NAV_ITEMS = [
-    { id: 'overview', label: 'Overview', icon: LayoutDashboard },
-    { id: 'products', label: 'Products', icon: Package },
-    { id: 'categories', label: 'Categories', icon: Tags },
-    { id: 'regions', label: 'Regions', icon: MapPin },
-    { id: 'coupons', label: 'Coupon Management', icon: Percent },
-    { id: 'bulk-coupons', label: 'Bulk Coupons', icon: Mail },
-    { id: 'pages', label: 'Pages', icon: LayoutDashboard },
-    { id: 'orders', label: 'Orders', icon: Receipt },
-    { id: 'returns', label: 'Return Requests', icon: Receipt },
-    { id: 'tracking', label: 'Order Tracking', icon: Truck },
-    { id: 'users', label: 'Users', icon: Users2 },
-    { id: 'reviews', label: 'User Reviews', icon: Star },
-    { id: 'create-review', label: 'Create Review', icon: Plus },
-    { id: 'notifications', label: 'Notifications', icon: Megaphone },
-    { id: 'home', label: 'Home Ticker & New Arrivals', icon: LayoutDashboard },
-    { id: 'support', label: 'Support Center', icon: MessageCircle },
-    { id: 'contact', label: 'Contact Settings', icon: MessageCircle },
-    { id: 'shipping-policy', label: 'Shipping Policy', icon: FileText },
-    { id: 'return-policy', label: 'Return Policy', icon: FileText },
-    { id: 'privacy-policy', label: 'Privacy Policy', icon: FileText },
-    { id: 'terms-of-service', label: 'Terms of Service', icon: FileText },
-    { id: 'billing', label: 'Company Billing Details', icon: CreditCard },
-    { id: 'payment', label: 'Payment Settings', icon: CreditCard },
-    { id: 'razorpaySettings', label: 'Razorpay Settings', icon: CreditCard },
-    { id: 'shiprocket', label: 'Shiprocket Settings', icon: Truck },
-    { id: 'influencer-data', label: 'Influencer Data', icon: Video },
-    { id: 'influencer-images', label: 'Influencer Images', icon: Image },
-    { id: 'about-us', label: 'About Us Section', icon: FileText },
-    { id: 'faqs', label: 'FAQ Management', icon: FileText },
+  { id: 'overview', label: 'Overview', icon: LayoutDashboard },
+  { id: 'products', label: 'Products', icon: Package },
+  { id: 'categories', label: 'Categories', icon: Tags },
+  { id: 'regions', label: 'Regions', icon: MapPin },
+  { id: 'coupons', label: 'Coupon Management', icon: Percent },
+  { id: 'bulk-coupons', label: 'Bulk Coupons', icon: Mail },
+  { id: 'pages', label: 'Pages', icon: LayoutDashboard },
+  { id: 'orders', label: 'Orders', icon: Receipt },
+  { id: 'returns', label: 'Return Requests', icon: Receipt },
+  { id: 'tracking', label: 'Order Tracking', icon: Truck },
+  { id: 'users', label: 'Users', icon: Users2 },
+  { id: 'reviews', label: 'User Reviews', icon: Star },
+  { id: 'create-review', label: 'Create Review', icon: Plus },
+  { id: 'notifications', label: 'Notifications', icon: Megaphone },
+  { id: 'home', label: 'Home Ticker & New Arrivals', icon: LayoutDashboard },
+  { id: 'support', label: 'Support Center', icon: MessageCircle },
+  { id: 'contact', label: 'Contact Settings', icon: MessageCircle },
+  { id: 'shipping-policy', label: 'Shipping Policy', icon: FileText },
+  { id: 'return-policy', label: 'Return Policy', icon: FileText },
+  { id: 'privacy-policy', label: 'Privacy Policy', icon: FileText },
+  { id: 'terms-of-service', label: 'Terms of Service', icon: FileText },
+  { id: 'billing', label: 'Company Billing Details', icon: CreditCard },
+  { id: 'payment', label: 'Payment Settings', icon: CreditCard },
+  { id: 'razorpaySettings', label: 'Razorpay Settings', icon: CreditCard },
+  { id: 'shiprocket', label: 'Shiprocket Settings', icon: Truck },
+  { id: 'influencer-data', label: 'Influencer Data', icon: Video },
+  { id: 'influencer-images', label: 'Influencer Images', icon: Image },
+  { id: 'about-us', label: 'About Us Section', icon: FileText },
+  { id: 'faqs', label: 'FAQ Management', icon: FileText },
 ] as const;
 
 function createDefaultPaymentSettings(): PaymentSettingsForm {
@@ -187,9 +186,8 @@ function createDefaultShiprocketSettings(): ShiprocketSettingsForm {
     enabled: true,
     email: 'logistics@thekissancity.in',
     password: 'Test@1234',
-    apiKey: 'ship_test_key_123456',
-    secret: 'ship_test_secret_abcdef',
     channelId: 'TEST_CHANNEL_001',
+    pickupPincode: '110001',
   };
 }
 
@@ -265,18 +263,14 @@ function normalizeSettings(raw: any): IntegrationSettings {
           typeof raw?.shipping?.shiprocket?.password === 'string' && raw.shipping.shiprocket.password
             ? raw.shipping.shiprocket.password
             : defaults.shipping.shiprocket.password,
-        apiKey:
-          typeof raw?.shipping?.shiprocket?.apiKey === 'string' && raw.shipping.shiprocket.apiKey.trim()
-            ? raw.shipping.shiprocket.apiKey.trim()
-            : defaults.shipping.shiprocket.apiKey,
-        secret:
-          typeof raw?.shipping?.shiprocket?.secret === 'string' && raw.shipping.shiprocket.secret.trim()
-            ? raw.shipping.shiprocket.secret.trim()
-            : defaults.shipping.shiprocket.secret,
         channelId:
           typeof raw?.shipping?.shiprocket?.channelId === 'string' && raw.shipping.shiprocket.channelId.trim()
             ? raw.shipping.shiprocket.channelId.trim()
             : defaults.shipping.shiprocket.channelId,
+        pickupPincode:
+          typeof raw?.shipping?.shiprocket?.pickupPincode === 'string' && raw.shipping.shiprocket.pickupPincode.trim()
+            ? raw.shipping.shiprocket.pickupPincode.trim()
+            : defaults.shipping.shiprocket.pickupPincode,
       },
     },
   };
@@ -296,7 +290,7 @@ async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> 
 
   const doFetch = async (targetUrl: string) => {
     const token = (typeof window !== 'undefined') ? localStorage.getItem('token') : null;
-    const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) } as Record<string,string>;
+    const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) } as Record<string, string>;
     if (token) headers['Authorization'] = `Bearer ${token}`;
 
     // Use credentials include by default so cookie auth works when same-origin;
@@ -359,6 +353,37 @@ async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> 
           { _id: 'demo-2', name: 'thekissancity Admin', email: 'thekissancity@gmail.com', role: 'admin' },
         ] as unknown as T;
       }
+      if (p.includes('/api/admin/orders/') && p.match(/\/api\/admin\/orders\/[a-f0-9]+/i)) {
+        // Single order detail request
+        return {
+          id: 'order-demo-1',
+          createdAt: new Date().toISOString(),
+          status: 'pending',
+          paymentMethod: 'COD',
+          totals: { total: 1498 },
+          shipping: {
+            name: 'Demo User',
+            phone: '9876543210',
+            address1: '123 Demo Street',
+            address2: '',
+            city: 'Demo City',
+            state: 'Demo State',
+            pincode: '123456',
+            landmark: '',
+          },
+          items: [
+            {
+              productId: 'prod-1',
+              title: 'Demo Tee',
+              image: '',
+              price: 499,
+              qty: 2,
+              size: 'M',
+              color: 'Black',
+            },
+          ],
+        } as unknown as T;
+      }
       if (p.includes('/api/orders')) {
         return [
           {
@@ -407,7 +432,7 @@ type ProductFormState = {
   stock: number;
   paragraph1: string;
   paragraph2: string;
-  
+
   // New quantity/pack/unit structure
   quantityOptions: Array<{
     id: string;
@@ -421,7 +446,7 @@ type ProductFormState = {
     isActive: boolean;
     sortOrder: number;
   }>;
-  
+
   sizeChartUrl: string;
   sizeChartTitle: string;
   sizeChart: {
@@ -478,10 +503,10 @@ const EMPTY_FORM: ProductFormState = {
   stock: 0,
   paragraph1: '',
   paragraph2: '',
-  
+
   // New quantity/pack/unit structure
   quantityOptions: [],
-  
+
   sizeChartUrl: '',
   sizeChartTitle: '',
   sizeChart: {
@@ -552,10 +577,39 @@ const EMPTY_REGION_FORM: RegionFormState = {
 
 const Admin = () => {
   const { isAdmin, loading: authLoading, user: adminUser } = useAdminAuth();
+  const { signOut } = useAuth();
   const navigate = useNavigate();
   const { triggerRefresh } = useCouponRefresh();
 
-  const [activeSection, setActiveSection] = useState<Section>('overview');  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState<Section>('overview');
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Initialize activeSection from URL query param
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam) {
+      const validSection = NAV_ITEMS.find(item => item.id === tabParam);
+      if (validSection) {
+        setActiveSection(validSection.id as Section);
+      }
+    }
+  }, [searchParams]);
+
+  // Sync state changes back to URL (optional but helpful for forward/back buttons)
+  const handleSectionChange = (section: Section) => {
+    setActiveSection(section);
+    setSearchParams({ tab: section });
+  };
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/admin/login');
+  };
+
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [ordersCurrentPage, setOrdersCurrentPage] = useState(1);
@@ -615,7 +669,7 @@ const Admin = () => {
   const [userDrawerOpen, setUserDrawerOpen] = useState(false);
   const [userForm, setUserForm] = useState<any>({ name: '', email: '', phone: '', role: 'user', status: 'active', address1: '' });
   const [userSaving, setUserSaving] = useState(false);
-  const [userErrors, setUserErrors] = useState<Record<string,string>>({});
+  const [userErrors, setUserErrors] = useState<Record<string, string>>({});
 
   // Product bulk selection state
   const [selectedProductIds, setSelectedProductIds] = useState<Set<string>>(new Set());
@@ -755,7 +809,7 @@ const Admin = () => {
   const [uploadingLogo, setUploadingLogo] = useState(false);
 
   // Contact settings state
-  const [contactForm, setContactForm] = useState<{ phones: string[]; emails: string[]; address: { line1?: string; line2?: string; city?: string; state?: string; pincode?: string }; mapsUrl?: string }>(() => ({ phones: ['+91 99715 41140'], emails: ['supportinfo@gmail.com','thekissancity@gmail.com'], address: {}, mapsUrl: '' }));
+  const [contactForm, setContactForm] = useState<{ phones: string[]; emails: string[]; address: { line1?: string; line2?: string; city?: string; state?: string; pincode?: string }; mapsUrl?: string }>(() => ({ phones: ['+91 99715 41140'], emails: ['supportinfo@gmail.com', 'thekissancity@gmail.com'], address: {}, mapsUrl: '' }));
   const [contactLoading, setContactLoading] = useState(true);
   const [contactSaving, setContactSaving] = useState(false);
 
@@ -837,12 +891,12 @@ const Admin = () => {
 
   const handleBulkCouponSubmit = async (data: any) => {
     try {
-      const endpoint = editingBulkCoupon 
+      const endpoint = editingBulkCoupon
         ? `/api/bulk-coupons/${editingBulkCoupon._id}`
         : '/api/bulk-coupons';
-      
+
       const method = editingBulkCoupon ? 'PUT' : 'POST';
-      
+
       const response = await api(endpoint, {
         method,
         body: JSON.stringify(data),
@@ -869,11 +923,9 @@ const Admin = () => {
       const response = await fetch(`/api/bulk-coupons/${coupon._id}`);
       if (response.ok) {
         const fullCouponData = await response.json();
-        console.log('Full coupon data for editing:', fullCouponData);
         setEditingBulkCoupon(fullCouponData.data || fullCouponData);
       } else {
         // Fallback to basic coupon data if detailed fetch fails
-        console.log('Using basic coupon data as fallback');
         setEditingBulkCoupon(coupon);
       }
     } catch (error) {
@@ -947,10 +999,10 @@ const Admin = () => {
       stock: Number(product.stock ?? 0),
       paragraph1: product.paragraph1 ?? '',
       paragraph2: product.paragraph2 ?? '',
-      
+
       // New quantity/pack/unit structure
       quantityOptions: Array.isArray(product.quantityOptions) ? product.quantityOptions : [],
-      
+
       sizeChartUrl: product.sizeChartUrl ?? '',
       sizeChartTitle: product.sizeChartTitle ?? '',
       sizeChart: product.sizeChart ? {
@@ -983,8 +1035,8 @@ const Admin = () => {
       colors: Array.isArray((product as any).colors)
         ? (product as any).colors
         : (Array.isArray((product as any).attributes?.colors)
-            ? (product as any).attributes.colors
-            : []),
+          ? (product as any).attributes.colors
+          : []),
       colorInventory: Array.isArray(product.colorInventory) ? product.colorInventory : [],
       colorImages: (product as any).colorImages && typeof (product as any).colorImages === 'object' ? (product as any).colorImages : {},
       colorVariants: Array.isArray((product as any).colorVariants) ? (product as any).colorVariants : [],
@@ -1088,38 +1140,39 @@ const Admin = () => {
   }, [activeSection, overviewRange, navigate]);
 
   const fetchAdminResources = async () => {
-    console.log('🔄 fetchAdminResources called');
     try {
       setFetching(true);
-      console.log('📡 Fetching products, orders, and users...');
       const [productList, orderList, userList] = await Promise.all([
-        apiFetch(ENDPOINTS.products),
-        apiFetch(ENDPOINTS.orders),
+        apiFetch(`${ENDPOINTS.products}?limit=200&skipReviews=false`),
+        apiFetch(`${ENDPOINTS.orders}?limit=100`),
         apiFetch(ENDPOINTS.users),
       ]);
-      
-      console.log('📦 Products received:', (productList as any[])?.length || 0);
-      console.log('📋 Orders received:', (orderList as any[])?.length || 0);
-      console.log('👥 Users received:', (userList as any[])?.length || 0);
-      
+
       setProducts(productList as any[] || []);
       setOrders(orderList as any[] || []);
       setUsers(userList as any[] || []);
-      // Populate orderInvoices from existing invoices (non-blocking)
+      // Populate orderInvoices from existing invoices (parallel fetch for performance)
       const invoiceMap: Record<string, string | null> = {};
-      for (const order of (orderList as any[]) || []) {
-        const orderId = String(order._id || order.id);
-        if ((order as any).invoiceId) {
+      const invoicePromises = (orderList as any[] || [])
+        .filter((order) => (order as any).invoiceId)
+        .map(async (order) => {
+          const orderId = String(order._id || order.id);
           try {
             const invoiceData = await apiFetch<any>(`/api/invoices/${(order as any).invoiceId}`);
             if (invoiceData?.invoiceNo) {
-              invoiceMap[orderId] = invoiceData.invoiceNo;
+              return { orderId, invoiceNo: invoiceData.invoiceNo };
             }
           } catch (error) {
-            // Silently skip if invoice fetch fails - don't break admin load
+            // Silently skip if invoice fetch fails
           }
+          return null;
+        });
+      const invoiceResults = await Promise.all(invoicePromises);
+      invoiceResults.forEach((result) => {
+        if (result) {
+          invoiceMap[result.orderId] = result.invoiceNo;
         }
-      }
+      });
       // Only set if we successfully fetched some invoices, otherwise keep empty
       if (Object.keys(invoiceMap).length > 0) {
         setOrderInvoices(invoiceMap);
@@ -1136,7 +1189,6 @@ const Admin = () => {
         totalProducts: (productList as any[]).length,
       });
     } catch (error: any) {
-      console.error('❌ fetchAdminResources error:', error);
       toast.error(`Failed to fetch admin data: ${error?.message ?? 'Unknown error'}`);
       setProducts([]);
       setOrders([]);
@@ -1144,7 +1196,6 @@ const Admin = () => {
       setStats({ totalUsers: 0, totalSales: 0, totalProducts: 0 });
     } finally {
       setFetching(false);
-      console.log('✅ fetchAdminResources completed');
     }
   };
 
@@ -1169,7 +1220,7 @@ const Admin = () => {
       if (res.ok && res.json && res.json.data) {
         const data = res.json.data;
         const phones = Array.isArray(data.phones) && data.phones.length ? data.phones : ['+91 99715 41140'];
-        const emails = Array.isArray(data.emails) && data.emails.length ? data.emails : ['supportinfo@gmail.com','thekissancity@gmail.com'];
+        const emails = Array.isArray(data.emails) && data.emails.length ? data.emails : ['supportinfo@gmail.com', 'thekissancity@gmail.com'];
         const address = data.address || {};
         const mapsUrl = data.mapsUrl || '';
         setContactForm({ phones, emails, address, mapsUrl });
@@ -1181,7 +1232,7 @@ const Admin = () => {
       if (res2.ok && res2.json && res2.json.data && res2.json.data.contact) {
         const data = res2.json.data.contact;
         const phones = Array.isArray(data.phones) && data.phones.length ? data.phones : ['+91 99715 41140'];
-        const emails = Array.isArray(data.emails) && data.emails.length ? data.emails : ['supportinfo@gmail.com','thekissancity@gmail.com'];
+        const emails = Array.isArray(data.emails) && data.emails.length ? data.emails : ['supportinfo@gmail.com', 'thekissancity@gmail.com'];
         const address = data.address || {};
         const mapsUrl = data.mapsUrl || '';
         setContactForm({ phones, emails, address, mapsUrl });
@@ -1189,10 +1240,10 @@ const Admin = () => {
       }
 
       // Last resort defaults
-      setContactForm({ phones: ['+91 99715 41140'], emails: ['supportinfo@gmail.com','thekissancity@gmail.com'], address: {}, mapsUrl: '' });
-    } catch (e:any) {
+      setContactForm({ phones: ['+91 99715 41140'], emails: ['supportinfo@gmail.com', 'thekissancity@gmail.com'], address: {}, mapsUrl: '' });
+    } catch (e: any) {
       console.warn('Failed to load contact settings', e?.message || e);
-      setContactForm({ phones: ['+91 99715 41140'], emails: ['supportinfo@gmail.com','thekissancity@gmail.com'], address: {}, mapsUrl: '' });
+      setContactForm({ phones: ['+91 99715 41140'], emails: ['supportinfo@gmail.com', 'thekissancity@gmail.com'], address: {}, mapsUrl: '' });
     } finally {
       setContactLoading(false);
     }
@@ -1207,15 +1258,15 @@ const Admin = () => {
         const ticker = Array.isArray(data.ticker) ? data.ticker : [];
         const limit = Number(data.newArrivalsLimit || 0) || 20;
         const featureRows = Array.isArray(data.featureRows) ? data.featureRows : [];
-        setHomeTicker(ticker.map((x:any)=>({ id: String(x.id || ''), text: String(x.text || ''), url: x.url || '', startAt: x.startAt || '', endAt: x.endAt || '', priority: Number(x.priority || 0) })));
+        setHomeTicker(ticker.map((x: any) => ({ id: String(x.id || ''), text: String(x.text || ''), url: x.url || '', startAt: x.startAt || '', endAt: x.endAt || '', priority: Number(x.priority || 0) })));
         setHomeLimit(limit);
-        setHomeFeatureRows(featureRows.map((fr:any)=>({ key: String(fr.key || ''), title: String(fr.title || ''), link: String(fr.link || ''), imageAlt: String(fr.imageAlt || '') })));
+        setHomeFeatureRows(featureRows.map((fr: any) => ({ key: String(fr.key || ''), title: String(fr.title || ''), link: String(fr.link || ''), imageAlt: String(fr.imageAlt || '') })));
       } else {
         setHomeTicker([]);
         setHomeLimit(20);
         setHomeFeatureRows([]);
       }
-    } catch (e:any) {
+    } catch (e: any) {
       console.warn('Failed to load home settings', e?.message || e);
       setHomeTicker([]);
       setHomeLimit(20);
@@ -1230,15 +1281,15 @@ const Admin = () => {
       setHomeSaving(true);
       const payload = {
         home: {
-          ticker: homeTicker.map((x)=>({ ...x, text: String(x.text || '').trim() })).filter((x)=>x.text.length>0),
+          ticker: homeTicker.map((x) => ({ ...x, text: String(x.text || '').trim() })).filter((x) => x.text.length > 0),
           newArrivalsLimit: homeLimit,
-          featureRows: homeFeatureRows.filter((fr)=>fr.key && fr.title && fr.link),
+          featureRows: homeFeatureRows.filter((fr) => fr.key && fr.title && fr.link),
         }
       };
       await apiFetch<any>(`/api/settings/home`, { method: 'PATCH', body: JSON.stringify(payload) });
       toast.success('Home settings updated');
       await fetchHomeSettings();
-    } catch (e:any) {
+    } catch (e: any) {
       toast.error(e?.message || 'Failed to save home settings');
     } finally {
       setHomeSaving(false);
@@ -1252,7 +1303,7 @@ const Admin = () => {
       await apiFetch<any>(`/api/admin/settings/contact?v=${Date.now()}`, { method: 'PATCH', body: JSON.stringify(payload) });
       toast.success('Contact settings updated');
       await fetchContactSettings();
-    } catch (e:any) {
+    } catch (e: any) {
       toast.error(e?.message || 'Failed to save contact settings');
     } finally {
       setContactSaving(false);
@@ -1283,7 +1334,7 @@ const Admin = () => {
           logo: '',
         });
       }
-    } catch (e:any) {
+    } catch (e: any) {
       console.warn('Failed to load billing info', e?.message || e);
       setBillingForm({
         companyName: 'thekissancity',
@@ -1339,7 +1390,7 @@ const Admin = () => {
       }
       toast.success('Company billing details saved');
       await fetchBillingInfo();
-    } catch (e:any) {
+    } catch (e: any) {
       toast.error(e?.message || 'Failed to save billing info');
     } finally {
       setBillingSaving(false);
@@ -1353,7 +1404,7 @@ const Admin = () => {
       const data = await apiFetch<any[]>(url);
       const arr = Array.isArray(data) ? data : (Array.isArray((data as any)?.data) ? (data as any).data : []);
       // If backend supports parent relations, compute topCategories
-      const top = arr.filter((c:any) => !c.parent && !c.parentId);
+      const top = arr.filter((c: any) => !c.parent && !c.parentId);
       setTopCategories(top.length ? top : arr);
       setCategories(arr);
 
@@ -1400,7 +1451,7 @@ const Admin = () => {
 
       const all = await apiFetch<any[]>(`${ENDPOINTS.categories}?v=${Date.now()}`);
       const allArr = Array.isArray(all) ? all : (Array.isArray((all as any)?.data) ? (all as any).data : []);
-      const filtered = allArr.filter((c:any) => (c.parent === parentId || c.parentId === parentId || String(c.parent || c.parentId || '') === String(parentId)));
+      const filtered = allArr.filter((c: any) => (c.parent === parentId || c.parentId === parentId || String(c.parent || c.parentId || '') === String(parentId)));
       setChildrenByParent((m) => ({ ...m, [parentId]: filtered }));
     } catch (e: any) {
       console.warn('Failed to load subcategories', e?.message || e);
@@ -1445,7 +1496,11 @@ const Admin = () => {
     setOrderDetailLoading(true);
     try {
       const data = await apiFetch<any>(`/api/admin/orders/${id}`);
-      setOrderDetail(data);
+      if (!data || Object.keys(data).length === 0) {
+        setOrderDetailError('No order data received');
+      } else {
+        setOrderDetail(data);
+      }
     } catch (e: any) {
       setOrderDetailError(e?.message || 'Failed to load order');
     } finally {
@@ -1462,15 +1517,15 @@ const Admin = () => {
     try {
       setCatSaving(true);
       // Use public categories endpoint
-      await apiFetch(`${ENDPOINTS.categories}`, { 
-        method: 'POST', 
-        body: JSON.stringify({ 
-          name: catName.trim(), 
-          slug: slugify(catName.trim(), { lower: true, strict: true }), 
-          parentId: undefined, 
+      await apiFetch(`${ENDPOINTS.categories}`, {
+        method: 'POST',
+        body: JSON.stringify({
+          name: catName.trim(),
+          slug: slugify(catName.trim(), { lower: true, strict: true }),
+          parentId: undefined,
           description: catDesc,
-          imageUrl: catImageUrl 
-        }) 
+          imageUrl: catImageUrl
+        })
       });
       toast.success('Category added successfully');
       setCatName('');
@@ -1486,7 +1541,6 @@ const Admin = () => {
   };
 
   const deleteCategory = async (id: string) => {
-    console.log('deleteCategory called for ID:', id);
     const ok = confirm('Delete this category?');
     if (!ok) return;
     try {
@@ -1510,7 +1564,6 @@ const Admin = () => {
     }
     try {
       setSubcatSaving(true);
-      console.log("[addSubcategory] Payload before API call:", { name: categoryForm.name.trim(), slug: slugify(categoryForm.name.trim(), { lower: true, strict: true }), parentId: selectedParentId, description: categoryForm.description, imageUrl: categoryForm.imageUrl });
       await apiFetch(`${ENDPOINTS.categories}`, { method: 'POST', body: JSON.stringify({ name: categoryForm.name.trim(), slug: slugify(categoryForm.name.trim(), { lower: true, strict: true }), parentId: selectedParentId, description: categoryForm.description, imageUrl: categoryForm.imageUrl }) });
       toast.success('Subcategory added');
       setCategoryForm(EMPTY_CATEGORY_FORM);
@@ -1578,13 +1631,13 @@ const Admin = () => {
     }
     try {
       setRegionSaving(true);
-      await apiFetch(`${ENDPOINTS.regions}`, { 
-        method: 'POST', 
-        body: JSON.stringify({ 
-          name: regionForm.name.trim(), 
+      await apiFetch(`${ENDPOINTS.regions}`, {
+        method: 'POST',
+        body: JSON.stringify({
+          name: regionForm.name.trim(),
           description: regionForm.description.trim(),
           imageUrl: regionForm.imageUrl.trim()
-        }) 
+        })
       });
       toast.success('Region added successfully');
       setRegionForm(EMPTY_REGION_FORM);
@@ -1665,7 +1718,7 @@ const Admin = () => {
           body: fd,
         });
         let json: any = null;
-        try { json = await res.json(); } catch {}
+        try { json = await res.json(); } catch { }
         if (!res.ok) throw new Error(json?.message || json?.error || `${res.status} ${res.statusText}`);
         return json;
       } catch (err: any) {
@@ -1722,7 +1775,7 @@ const Admin = () => {
       const s = String(u || '');
       if (!s) return '';
       if (s.startsWith('http')) {
-        try { const parsed = new URL(s); if (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1') return `/api${parsed.pathname}`; } catch {}
+        try { const parsed = new URL(s); if (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1') return `/api${parsed.pathname}`; } catch { }
         return s;
       }
       if (s.startsWith('/uploads')) return s;
@@ -1745,7 +1798,7 @@ const Admin = () => {
           body: fd,
         });
         let json: any = null;
-        try { json = await res.json(); } catch {}
+        try { json = await res.json(); } catch { }
         if (!res.ok) throw new Error(json?.message || json?.error || `${res.status} ${res.statusText}`);
         return json;
       } catch (err: any) {
@@ -1838,7 +1891,7 @@ const Admin = () => {
       const s = String(u || '');
       if (!s) return '';
       if (s.startsWith('http')) {
-        try { const parsed = new URL(s); if (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1') return `/api${parsed.pathname}`; } catch {}
+        try { const parsed = new URL(s); if (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1') return `/api${parsed.pathname}`; } catch { }
         return s;
       }
       if (s.startsWith('/uploads')) return s;
@@ -1861,7 +1914,7 @@ const Admin = () => {
           body: fd,
         });
         let json: any = null;
-        try { json = await res.json(); } catch {}
+        try { json = await res.json(); } catch { }
         if (!res.ok) throw new Error(json?.message || json?.error || `${res.status} ${res.statusText}`);
         return json;
       } catch (err: any) {
@@ -1937,7 +1990,7 @@ const Admin = () => {
     }
   };
 
-const handleDialogOpenChange = (dialogOpen: boolean) => {
+  const handleDialogOpenChange = (dialogOpen: boolean) => {
     setIsDialogOpen(!!dialogOpen);
     if (!dialogOpen) {
       resetForm();
@@ -1977,23 +2030,23 @@ const handleDialogOpenChange = (dialogOpen: boolean) => {
             const sizeChartData = productForm.sizeChart;
             const sizeChartPayload = sizeChartData && (sizeChartData.title.trim() || sizeChartData.rows?.length > 0 || sizeChartData.guidelines.trim())
               ? {
-                  title: sizeChartData.title.trim() || undefined,
-                  fieldLabels: {
-                    chest: sizeChartData.fieldLabels?.chest?.trim() || 'Chest',
-                    waist: sizeChartData.fieldLabels?.waist?.trim() || 'Waist',
-                    length: sizeChartData.fieldLabels?.length?.trim() || 'Length',
-                  },
-                  rows: Array.isArray(sizeChartData.rows)
-                    ? sizeChartData.rows.filter(r => r.sizeLabel?.trim()).map(r => ({
-                        sizeLabel: r.sizeLabel?.trim(),
-                        chest: r.chest?.trim(),
-                        waist: r.waist?.trim(),
-                        length: r.length?.trim(),
-                      }))
-                    : [],
-                  guidelines: sizeChartData.guidelines.trim() || undefined,
-                  diagramUrl: sizeChartData.diagramUrl?.trim() || undefined,
-                }
+                title: sizeChartData.title.trim() || undefined,
+                fieldLabels: {
+                  chest: sizeChartData.fieldLabels?.chest?.trim() || 'Chest',
+                  waist: sizeChartData.fieldLabels?.waist?.trim() || 'Waist',
+                  length: sizeChartData.fieldLabels?.length?.trim() || 'Length',
+                },
+                rows: Array.isArray(sizeChartData.rows)
+                  ? sizeChartData.rows.filter(r => r.sizeLabel?.trim()).map(r => ({
+                    sizeLabel: r.sizeLabel?.trim(),
+                    chest: r.chest?.trim(),
+                    waist: r.waist?.trim(),
+                    length: r.length?.trim(),
+                  }))
+                  : [],
+                guidelines: sizeChartData.guidelines.trim() || undefined,
+                diagramUrl: sizeChartData.diagramUrl?.trim() || undefined,
+              }
               : undefined;
 
             const payload = {
@@ -2062,7 +2115,7 @@ const handleDialogOpenChange = (dialogOpen: boolean) => {
     }
   };
 
-const handleProductSubmit = async (e: React.FormEvent) => {
+  const handleProductSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const price = Number(productForm.price);
@@ -2081,23 +2134,23 @@ const handleProductSubmit = async (e: React.FormEvent) => {
       const sizeChartData = productForm.sizeChart;
       const sizeChartPayload = sizeChartData && (sizeChartData.title.trim() || sizeChartData.rows?.length > 0 || sizeChartData.guidelines.trim())
         ? {
-            title: sizeChartData.title.trim() || undefined,
-            fieldLabels: {
-              chest: sizeChartData.fieldLabels?.chest?.trim() || 'Chest',
-              waist: sizeChartData.fieldLabels?.waist?.trim() || 'Waist',
-              length: sizeChartData.fieldLabels?.length?.trim() || 'Length',
-            },
-            rows: Array.isArray(sizeChartData.rows)
-              ? sizeChartData.rows.filter(r => r.sizeLabel?.trim()).map(r => ({
-                  sizeLabel: r.sizeLabel?.trim(),
-                  chest: r.chest?.trim(),
-                  waist: r.waist?.trim(),
-                  length: r.length?.trim(),
-                }))
-              : [],
-            guidelines: sizeChartData.guidelines.trim() || undefined,
-            diagramUrl: sizeChartData.diagramUrl?.trim() || undefined,
-          }
+          title: sizeChartData.title.trim() || undefined,
+          fieldLabels: {
+            chest: sizeChartData.fieldLabels?.chest?.trim() || 'Chest',
+            waist: sizeChartData.fieldLabels?.waist?.trim() || 'Waist',
+            length: sizeChartData.fieldLabels?.length?.trim() || 'Length',
+          },
+          rows: Array.isArray(sizeChartData.rows)
+            ? sizeChartData.rows.filter(r => r.sizeLabel?.trim()).map(r => ({
+              sizeLabel: r.sizeLabel?.trim(),
+              chest: r.chest?.trim(),
+              waist: r.waist?.trim(),
+              length: r.length?.trim(),
+            }))
+            : [],
+          guidelines: sizeChartData.guidelines.trim() || undefined,
+          diagramUrl: sizeChartData.diagramUrl?.trim() || undefined,
+        }
         : undefined;
 
       // Determine category name from selectedcategoryId
@@ -2163,10 +2216,6 @@ const handleProductSubmit = async (e: React.FormEvent) => {
         isBestSeller: productForm.isBestSeller !== undefined ? productForm.isBestSeller : false,
       };
 
-      console.log('Saving product with discount:', payload.discount);
-      console.log('🔍 DEBUG - image_url being saved:', payload.image_url);
-      console.log('🔍 DEBUG - first image from array:', (productForm.images && productForm.images.length > 0) ? productForm.images[0] : 'NO IMAGES');
-
       if (editingProduct) {
         await apiFetch(`${ENDPOINTS.products}/${(editingProduct as any).id || (editingProduct as any)._id}`, {
           method: 'PUT',
@@ -2197,36 +2246,15 @@ const handleProductSubmit = async (e: React.FormEvent) => {
   };
 
   const deleteProduct = async (id: string) => {
-    console.log('🗑️ deleteProduct called for ID:', id);
-    console.log('📋 Current products count before delete:', products.length);
-    
     const ok = confirm('Delete this product?');
     if (!ok) return;
 
     try {
-      // Show loading state
-      console.log('🔄 Starting deletion process');
-      
-      // Delete from backend first
-      console.log('🌐 Sending delete request to backend');
-      const response = await apiFetch(`${ENDPOINTS.products}/${id}`, { method: 'DELETE' });
-      
-      // Only show success toast after backend confirms deletion
-      console.log('✅ Backend confirmed deletion');
+      await apiFetch(`${ENDPOINTS.products}/${id}`, { method: 'DELETE' });
       toast.success('Product deleted permanently');
-      
-      // Update UI after successful backend deletion
-      setProducts((prev) => {
-        const updated = prev.filter((p: any) => String(p._id || p.id) !== String(id));
-        console.log('📊 Products count after deletion:', updated.length);
-        return updated;
-      });
-      
+      setProducts((prev) => prev.filter((p: any) => String(p._id || p.id) !== String(id)));
     } catch (error: any) {
-      console.error('❌ Delete failed:', error);
       toast.error(`Failed to delete product: ${error?.message ?? 'Unknown error'}`);
-      // Revert on failure - fetch fresh data
-      console.log('🔄 Reverting - fetching fresh data');
       void fetchAdminResources();
     }
   };
@@ -2342,14 +2370,14 @@ const handleProductSubmit = async (e: React.FormEvent) => {
   };
 
   const validateUserForm = (form: any) => {
-    const errs: Record<string,string> = {};
+    const errs: Record<string, string> = {};
     if (!form.name || !String(form.name).trim()) errs.name = 'Name is required';
     const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!form.email || !emailRe.test(String(form.email))) errs.email = 'Invalid email';
     const phoneRe = /^[0-9\-\s()+]{6,20}$/;
     if (form.phone && !phoneRe.test(String(form.phone))) errs.phone = 'Invalid phone';
-    if (!['user','admin'].includes(form.role)) errs.role = 'Invalid role';
-    if (!['active','suspended'].includes(form.status)) errs.status = 'Invalid status';
+    if (!['user', 'admin'].includes(form.role)) errs.role = 'Invalid role';
+    if (!['active', 'suspended'].includes(form.status)) errs.status = 'Invalid status';
     return errs;
   };
 
@@ -2360,7 +2388,7 @@ const handleProductSubmit = async (e: React.FormEvent) => {
     try {
       setUserSaving(true);
       const payload: any = {};
-      ['name','email','phone','role','status','address1'].forEach((k) => {
+      ['name', 'email', 'phone', 'role', 'status', 'address1'].forEach((k) => {
         if ((userForm as any)[k] !== (editingUser as any)[k] && (userForm as any)[k] !== undefined) payload[k] = (userForm as any)[k];
       });
       if (Object.keys(payload).length === 0) {
@@ -2404,7 +2432,7 @@ const handleProductSubmit = async (e: React.FormEvent) => {
     if (!products || products.length === 0) return;
     setSelectedProductIds((s) => {
       const next = new Set(s);
-      const ids = products.map((p:any) => (p._id || p.id));
+      const ids = products.map((p: any) => (p._id || p.id));
       const allSelected = ids.every((id) => next.has(id));
       if (allSelected) {
         ids.forEach((id) => next.delete(id));
@@ -2422,7 +2450,7 @@ const handleProductSubmit = async (e: React.FormEvent) => {
     try {
       // fetch all product ids (large limit) - backend should provide a better endpoint in prod
       const all = await apiFetch<any[]>(`${ENDPOINTS.products}?limit=10000`);
-      const ids = Array.isArray(all) ? all.map((p:any)=>p._id||p.id).filter(Boolean) : [];
+      const ids = Array.isArray(all) ? all.map((p: any) => p._id || p.id).filter(Boolean) : [];
       setSelectedProductIds(new Set(ids));
       setSelectAllResults(true);
       setSelectAllOnPage(true);
@@ -2978,221 +3006,222 @@ const handleProductSubmit = async (e: React.FormEvent) => {
           <p className="text-base text-gray-600 leading-relaxed max-w-2xl">Create and manage discount coupons</p>
         </div>
 
-    <Dialog open={couponDialogOpen} onOpenChange={handleCouponDialogOpenChange}>
-      <DialogTrigger asChild>
-        <Button className="rounded-full h-12 px-6 text-base font-semibold btn-brown-gradient shadow-lg hover:shadow-xl transition-all duration-300">
-          <Plus className="h-5 w-5 mr-2" />
-          Create Coupon
-        </Button>
-      </DialogTrigger>
+        <Dialog open={couponDialogOpen} onOpenChange={handleCouponDialogOpenChange}>
+          <DialogTrigger asChild>
+            <button className="rounded-full h-12 px-6 text-base font-semibold btn-brown-gradient shadow-lg hover:shadow-xl transition-all duration-300 bg-black text-white border-black hover:bg-gray-800 hover:text-white focus-visible:bg-gray-800 focus-visible:text-white active:bg-gray-800 active:text-white">
+              <Plus className="h-5 w-5 mr-2" />
+              Create Coupon
+            </button>
+          </DialogTrigger>
 
-      <DialogContent className="rounded-2xl max-w-2xl max-h-[90vh] flex flex-col" style={{ backgroundColor: '#faf3eb' }}>
-        <DialogHeader className="pb-6 flex-shrink-0" style={{ borderBottom: '1px solid #e5d4c1' }}>
-         <DialogTitle className="text-2xl font-semibold" style={{ color: '#6b4423' }}>
-  {editingCoupon ? 'Edit Coupon' : 'Create New Coupon'}
-</DialogTitle>
+          <DialogContent className="rounded-2xl max-w-2xl max-h-[90vh] flex flex-col" style={{ backgroundColor: '#faf3eb' }}>
+            <DialogHeader className="pb-6 flex-shrink-0" style={{ borderBottom: '1px solid #e5d4c1' }}>
+              <DialogTitle className="text-2xl font-semibold" style={{ color: '#6b4423' }}>
+                {editingCoupon ? 'Edit Coupon' : 'Create New Coupon'}
+              </DialogTitle>
 
-          <DialogDescription className="text-base" style={{ color: '#8b5a3c' }}>
-            Add a discount coupon for customers
-          </DialogDescription>
-        </DialogHeader>
+              <DialogDescription className="text-base" style={{ color: '#8b5a3c' }}>
+                Add a discount coupon for customers
+              </DialogDescription>
+            </DialogHeader>
 
-        <div className="space-y-6 p-2 overflow-y-auto flex-1" style={{ maxHeight: 'calc(90vh - 180px)' }}>
-          <div className="space-y-3">
-            <Label htmlFor="coupon-code" className="text-base font-semibold" style={{ color: '#6b4423' }}>Coupon Code</Label>
-            <Input
-              id="coupon-code"
-              placeholder="e.g., SAVE10"
-              value={couponForm.code}
-              onChange={(e) =>
-                setCouponForm((p) => ({ ...p, code: e.target.value.toUpperCase() }))
-              }
-              disabled={couponSaving}
-              className="h-11 text-base rounded-lg border-2 focus:border-[#6b4423] focus:ring-2 focus:ring-[#6b4423]/20 transition-all duration-200"
-              style={{ backgroundColor: '#ffffff', borderColor: '#d1b89a' }}
-            />
-          </div>
+            <div className="space-y-6 p-2 overflow-y-auto flex-1" style={{ maxHeight: 'calc(90vh - 180px)' }}>
+              <div className="space-y-3">
+                <Label htmlFor="coupon-code" className="text-base font-semibold" style={{ color: '#6b4423' }}>Coupon Code</Label>
+                <Input
+                  id="coupon-code"
+                  placeholder="e.g., SAVE10"
+                  value={couponForm.code}
+                  onChange={(e) =>
+                    setCouponForm((p) => ({ ...p, code: e.target.value.toUpperCase() }))
+                  }
+                  disabled={couponSaving}
+                  className="h-11 text-base rounded-lg border-2 focus:border-[#6b4423] focus:ring-2 focus:ring-[#6b4423]/20 transition-all duration-200"
+                  style={{ backgroundColor: '#ffffff', borderColor: '#d1b89a' }}
+                />
+              </div>
 
-          <div className="space-y-3">
-            <Label htmlFor="coupon-discount" className="text-base font-semibold" style={{ color: '#6b4423' }}>Discount (%)</Label>
-            <Input
-              id="coupon-discount"
-              type="number"
-              min="1"
-              max="100"
-              value={couponForm.discount}
-              onChange={(e) => setCouponForm((p) => ({ ...p, discount: Number(e.target.value) }))}
-              disabled={couponSaving}
-              className="h-11 text-base rounded-lg border-2 focus:border-[#6b4423] focus:ring-2 focus:ring-[#6b4423]/20 transition-all duration-200"
-              style={{ backgroundColor: '#ffffff', borderColor: '#d1b89a' }}
-            />
-          </div>
+              <div className="space-y-3">
+                <Label htmlFor="coupon-discount" className="text-base font-semibold" style={{ color: '#6b4423' }}>Discount (%)</Label>
+                <Input
+                  id="coupon-discount"
+                  type="number"
+                  min="1"
+                  max="100"
+                  value={couponForm.discount}
+                  onChange={(e) => setCouponForm((p) => ({ ...p, discount: Number(e.target.value) }))}
+                  disabled={couponSaving}
+                  className="h-11 text-base rounded-lg border-2 focus:border-[#6b4423] focus:ring-2 focus:ring-[#6b4423]/20 transition-all duration-200"
+                  style={{ backgroundColor: '#ffffff', borderColor: '#d1b89a' }}
+                />
+              </div>
 
-          <div className="space-y-3">
-            <Label htmlFor="coupon-expiry" className="text-base font-semibold" style={{ color: '#6b4423' }}>Expiry Date</Label>
-            <Input
-              id="coupon-expiry"
-              type="date"
-              value={couponForm.expiryDate}
-              onChange={(e) => setCouponForm((p) => ({ ...p, expiryDate: e.target.value }))}
-              disabled={couponSaving}
-              className="h-11 text-base rounded-lg border-2 focus:border-[#6b4423] focus:ring-2 focus:ring-[#6b4423]/20 transition-all duration-200"
-              style={{ backgroundColor: '#ffffff', borderColor: '#d1b89a' }}
-            />
-          </div>
-          <div className="space-y-3">
-            <Label htmlFor="coupon-offer-text" className="text-base font-semibold" style={{ color: '#6b4423' }}>Offer Text</Label>
-            <Input
-              id="coupon-offer-text"
-              placeholder="e.g., Get it for as low as ₹1,170"
-              value={couponForm.offerText}
-              onChange={(e) =>
-                setCouponForm((p) => ({ ...p, offerText: e.target.value }))
-              }
-              disabled={couponSaving}
-              className="h-11 text-base rounded-lg border-2 focus:border-[#6b4423] focus:ring-2 focus:ring-[#6b4423]/20 transition-all duration-200"
-              style={{ backgroundColor: '#ffffff', borderColor: '#d1b89a' }}
-            />
-          </div>
-          <div className="space-y-3">
-            <Label htmlFor="coupon-description" className="text-base font-semibold" style={{ color: '#6b4423' }}>Description</Label>
-            <Textarea
-              id="coupon-description"
-              placeholder="e.g., New Year Offer: Buy 2, Get 10% Off"
-              value={couponForm.description}
-              onChange={(e) =>
-                setCouponForm((p) => ({ ...p, description: e.target.value }))
-              }
-              disabled={couponSaving}
-              className="min-h-[100px] text-base rounded-lg border-2 focus:border-[#6b4423] focus:ring-2 focus:ring-[#6b4423]/20 transition-all duration-200 resize-none"
-              style={{ backgroundColor: '#ffffff', borderColor: '#d1b89a' }}
-            />
-          </div>
-          <div className="space-y-3">
-            <Label htmlFor="coupon-terms-and-conditions" className="text-base font-semibold" style={{ color: '#6b4423' }}>Terms & Conditions</Label>
-            <Textarea
-              id="coupon-terms-and-conditions"
-              placeholder="e.g., Discount is applicable on all items."
-              value={couponForm.termsAndConditions}
-              onChange={(e) =>
-                setCouponForm((p) => ({ ...p, termsAndConditions: e.target.value }))
-              }
-              disabled={couponSaving}
-              className="min-h-[100px] text-base rounded-lg border-2 focus:border-[#6b4423] focus:ring-2 focus:ring-[#6b4423]/20 transition-all duration-200 resize-none"
-              style={{ backgroundColor: '#ffffff', borderColor: '#d1b89a' }}
-            />
-          </div>
+              <div className="space-y-3">
+                <Label htmlFor="coupon-expiry" className="text-base font-semibold" style={{ color: '#6b4423' }}>Expiry Date</Label>
+                <Input
+                  id="coupon-expiry"
+                  type="date"
+                  value={couponForm.expiryDate}
+                  onChange={(e) => setCouponForm((p) => ({ ...p, expiryDate: e.target.value }))}
+                  disabled={couponSaving}
+                  className="h-11 text-base rounded-lg border-2 focus:border-[#6b4423] focus:ring-2 focus:ring-[#6b4423]/20 transition-all duration-200"
+                  style={{ backgroundColor: '#ffffff', borderColor: '#d1b89a' }}
+                />
+              </div>
+              <div className="space-y-3">
+                <Label htmlFor="coupon-offer-text" className="text-base font-semibold" style={{ color: '#6b4423' }}>Offer Text</Label>
+                <Input
+                  id="coupon-offer-text"
+                  placeholder="e.g., Get it for as low as ₹1,170"
+                  value={couponForm.offerText}
+                  onChange={(e) =>
+                    setCouponForm((p) => ({ ...p, offerText: e.target.value }))
+                  }
+                  disabled={couponSaving}
+                  className="h-11 text-base rounded-lg border-2 focus:border-[#6b4423] focus:ring-2 focus:ring-[#6b4423]/20 transition-all duration-200"
+                  style={{ backgroundColor: '#ffffff', borderColor: '#d1b89a' }}
+                />
+              </div>
+              <div className="space-y-3">
+                <Label htmlFor="coupon-description" className="text-base font-semibold" style={{ color: '#6b4423' }}>Description</Label>
+                <Textarea
+                  id="coupon-description"
+                  placeholder="e.g., New Year Offer: Buy 2, Get 10% Off"
+                  value={couponForm.description}
+                  onChange={(e) =>
+                    setCouponForm((p) => ({ ...p, description: e.target.value }))
+                  }
+                  disabled={couponSaving}
+                  className="min-h-[100px] text-base rounded-lg border-2 focus:border-[#6b4423] focus:ring-2 focus:ring-[#6b4423]/20 transition-all duration-200 resize-none"
+                  style={{ backgroundColor: '#ffffff', borderColor: '#d1b89a' }}
+                />
+              </div>
+              <div className="space-y-3">
+                <Label htmlFor="coupon-terms-and-conditions" className="text-base font-semibold" style={{ color: '#6b4423' }}>Terms & Conditions</Label>
+                <Textarea
+                  id="coupon-terms-and-conditions"
+                  placeholder="e.g., Discount is applicable on all items."
+                  value={couponForm.termsAndConditions}
+                  onChange={(e) =>
+                    setCouponForm((p) => ({ ...p, termsAndConditions: e.target.value }))
+                  }
+                  disabled={couponSaving}
+                  className="min-h-[100px] text-base rounded-lg border-2 focus:border-[#6b4423] focus:ring-2 focus:ring-[#6b4423]/20 transition-all duration-200 resize-none"
+                  style={{ backgroundColor: '#ffffff', borderColor: '#d1b89a' }}
+                />
+              </div>
 
-          <div className="flex gap-3 justify-end pt-6 flex-shrink-0 border-t" style={{ borderColor: '#e5d4c1' }}>
-            <Button 
-              variant="outline" 
-              onClick={() => setCouponDialogOpen(false)} 
-              disabled={couponSaving}
-              className="h-11 px-6 text-base font-semibold border-2 rounded-lg transition-all duration-300 hover:bg-gray-50"
-              style={{ borderColor: '#d1b89a', color: '#6b4423' }}
-            >
-              Cancel
-            </Button>
-            <Button 
-              onClick={editingCoupon ? updateCoupon : createCoupon} 
-              disabled={couponSaving}
-              className="h-11 px-6 text-base font-semibold btn-green-gradient shadow-lg hover:shadow-xl transition-all duration-300"
-            >
-              {couponSaving && <Loader2 className="h-5 w-5 mr-2 animate-spin" />}
-              {editingCoupon ? 'Update' : 'Create'}
-            </Button>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-  </div>
-
-  <Card className="rounded-2xl shadow-xl border-0 overflow-hidden" style={{ backgroundColor: '#faf3eb' }}>
-    <CardContent className="p-6">
-      <div className="overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow className="border-b-2" style={{ borderBottomColor: '#e5d4c1' }}>
-              <TableHead className="text-base font-semibold px-4 py-4" style={{ color: '#6b4423', backgroundColor: '#f0e5d0' }}>Coupon Code</TableHead>
-              <TableHead className="text-base font-semibold px-4 py-4" style={{ color: '#6b4423', backgroundColor: '#f0e5d0' }}>Discount (%)</TableHead>
-              <TableHead className="text-base font-semibold px-4 py-4" style={{ color: '#6b4423', backgroundColor: '#f0e5d0' }}>Expiry Date</TableHead>
-              <TableHead className="text-base font-semibold px-4 py-4" style={{ color: '#6b4423', backgroundColor: '#f0e5d0' }}>Used By</TableHead>
-              <TableHead className="text-base font-semibold px-4 py-4 text-right" style={{ color: '#6b4423', backgroundColor: '#f0e5d0' }}>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-
-          <TableBody>
-            {couponsLoading ? (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center py-8 text-base" style={{ color: '#8b5a3c' }}>
-                  <div className="flex items-center justify-center">
-                    <Loader2 className="h-6 w-6 animate-spin mr-2" />
-                    Loading coupons...
-                  </div>
-                </TableCell>
-              </TableRow>
-            ) : coupons.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center py-8 text-base" style={{ color: '#8b5a3c' }}>
-                  <div className="space-y-2">
-                    <div className="text-4xl mb-2">🎫</div>
-                    <div className="font-medium">No coupons created yet</div>
-                    <div className="text-sm opacity-75">Create your first coupon to get started</div>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ) : (
-              coupons.map((coupon) => (
-                <TableRow key={coupon.id} className="border-b hover:bg-opacity-80 transition-all duration-200" style={{ borderBottomColor: '#e5d4c1', hoverBackgroundColor: '#f0e5d0' }}>
-                  <TableCell className="font-medium text-sm px-4 py-4" style={{ color: '#6b4423' }}>{coupon.code}</TableCell>
-                  <TableCell className="text-sm px-4 py-4" style={{ color: '#6b4423' }}>{coupon.discount}%</TableCell>
-                  <TableCell className="text-sm px-4 py-4" style={{ color: '#8b5a3c' }}>
-                    {new Date(coupon.expiryDate).toLocaleDateString("en-IN")}
-                  </TableCell>
-                  <TableCell className="text-sm px-4 py-4" style={{ color: '#8b5a3c' }}>{coupon.usedCount}</TableCell>
-                  <TableCell className="text-sm px-4 py-4">
-                    <div className="flex items-center justify-end gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setEditingCoupon(coupon);
-                          setCouponForm({
-                            code: coupon.code,
-                            discount: coupon.discount,
-                            expiryDate: coupon.expiryDate,
-                            offerText: coupon.offerText || '',
-                            description: coupon.description || '',
-                            termsAndConditions: coupon.termsAndConditions || '',
-                          });
-                          setCouponDialogOpen(true);
-                        }}
-                        className="border-2 rounded-lg transition-all duration-300 hover:bg-gray-50"
-                        style={{ borderColor: '#d1b89a', color: '#6b4423' }}
-                      >
-                        <SquarePen className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => deleteCoupon(coupon.id)}
-                        disabled={couponSaving}
-                        className="rounded-lg transition-all duration-300 hover:opacity-90"
-                        style={{ backgroundColor: '#dc2626' }}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+              <div className="flex gap-3 justify-end pt-6 flex-shrink-0 border-t" style={{ borderColor: '#e5d4c1' }}>
+                <button
+                  type="button"
+                  onClick={() => setCouponDialogOpen(false)}
+                  disabled={couponSaving}
+                  className="h-11 px-6 text-base font-semibold border-2 rounded-lg transition-all duration-300 hover:bg-gray-50 bg-white text-black border-gray-300 hover:border-gray-400 focus-visible:bg-gray-50 focus-visible:border-gray-400 active:bg-gray-50 active:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{ borderColor: '#d1b89a', color: '#6b4423' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={editingCoupon ? updateCoupon : createCoupon}
+                  disabled={couponSaving}
+                  className="h-11 px-6 text-base font-semibold btn-green-gradient shadow-lg hover:shadow-xl transition-all duration-300 bg-black text-white border-black hover:bg-gray-800 hover:text-white focus-visible:bg-gray-800 focus-visible:text-white active:bg-gray-800 active:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {couponSaving && <Loader2 className="h-5 w-5 mr-2 animate-spin" />}
+                  {editingCoupon ? 'Update' : 'Create'}
+                </button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
-    </CardContent>
-  </Card>
-</div>
+
+      <Card className="rounded-2xl shadow-xl border-0 overflow-hidden" style={{ backgroundColor: '#faf3eb' }}>
+        <CardContent className="p-6">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="border-b-2" style={{ borderBottomColor: '#e5d4c1' }}>
+                  <TableHead className="text-base font-semibold px-4 py-4" style={{ color: '#6b4423', backgroundColor: '#f0e5d0' }}>Coupon Code</TableHead>
+                  <TableHead className="text-base font-semibold px-4 py-4" style={{ color: '#6b4423', backgroundColor: '#f0e5d0' }}>Discount (%)</TableHead>
+                  <TableHead className="text-base font-semibold px-4 py-4" style={{ color: '#6b4423', backgroundColor: '#f0e5d0' }}>Expiry Date</TableHead>
+                  <TableHead className="text-base font-semibold px-4 py-4" style={{ color: '#6b4423', backgroundColor: '#f0e5d0' }}>Used By</TableHead>
+                  <TableHead className="text-base font-semibold px-4 py-4 text-right" style={{ color: '#6b4423', backgroundColor: '#f0e5d0' }}>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+
+              <TableBody>
+                {couponsLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center py-8 text-base" style={{ color: '#8b5a3c' }}>
+                      <div className="flex items-center justify-center">
+                        <Loader2 className="h-6 w-6 animate-spin mr-2" />
+                        Loading coupons...
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : coupons.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center py-8 text-base" style={{ color: '#8b5a3c' }}>
+                      <div className="space-y-2">
+                        <div className="text-4xl mb-2">🎫</div>
+                        <div className="font-medium">No coupons created yet</div>
+                        <div className="text-sm opacity-75">Create your first coupon to get started</div>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  coupons.map((coupon) => (
+                    <TableRow key={coupon.id} className="border-b hover:bg-opacity-80 transition-all duration-200" style={{ borderBottomColor: '#e5d4c1', hoverBackgroundColor: '#f0e5d0' }}>
+                      <TableCell className="font-medium text-sm px-4 py-4" style={{ color: '#6b4423' }}>{coupon.code}</TableCell>
+                      <TableCell className="text-sm px-4 py-4" style={{ color: '#6b4423' }}>{coupon.discount}%</TableCell>
+                      <TableCell className="text-sm px-4 py-4" style={{ color: '#8b5a3c' }}>
+                        {new Date(coupon.expiryDate).toLocaleDateString("en-IN")}
+                      </TableCell>
+                      <TableCell className="text-sm px-4 py-4" style={{ color: '#8b5a3c' }}>{coupon.usedCount}</TableCell>
+                      <TableCell className="text-sm px-4 py-4">
+                        <div className="flex items-center justify-end gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setEditingCoupon(coupon);
+                              setCouponForm({
+                                code: coupon.code,
+                                discount: coupon.discount,
+                                expiryDate: coupon.expiryDate,
+                                offerText: coupon.offerText || '',
+                                description: coupon.description || '',
+                                termsAndConditions: coupon.termsAndConditions || '',
+                              });
+                              setCouponDialogOpen(true);
+                            }}
+                            className="border-2 rounded-lg transition-all duration-300 hover:bg-gray-50"
+                            style={{ borderColor: '#d1b89a', color: '#6b4423' }}
+                          >
+                            <SquarePen className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => deleteCoupon(coupon.id)}
+                            disabled={couponSaving}
+                            className="rounded-lg transition-all duration-300 hover:opacity-90"
+                            style={{ backgroundColor: '#dc2626' }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
 
 
 
@@ -3245,11 +3274,11 @@ const handleProductSubmit = async (e: React.FormEvent) => {
 
 
   if (authLoading) {
-  return (
-    <div className="min-h-screen bg-background flex items-center justify-center">
-      <div className="flex items-center gap-2 text-muted-foreground">
-        <Loader2 className="h-4 w-4 animate-spin" />
-        <p>Verifying admin access...</p>
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          <p>Verifying admin access...</p>
           <Loader2 className="h-4 w-4 animate-spin" />
           <p>Verifying admin access...</p>
         </div>
@@ -3329,7 +3358,7 @@ const handleProductSubmit = async (e: React.FormEvent) => {
           </div>
           <div className="flex items-center gap-2">
             <div className="flex rounded-md border border-border overflow-hidden">
-              {(['7d','30d','90d'] as const).map((r) => (
+              {(['7d', '30d', '90d'] as const).map((r) => (
                 <button
                   key={r}
                   onClick={() => setOverviewRange(r)}
@@ -3340,7 +3369,7 @@ const handleProductSubmit = async (e: React.FormEvent) => {
               ))}
             </div>
             <div className="flex rounded-md border border-border overflow-hidden">
-              {(['line','bar'] as const).map((t) => (
+              {(['line', 'bar'] as const).map((t) => (
                 <button
                   key={t}
                   onClick={() => setChartType(t)}
@@ -3383,8 +3412,8 @@ const handleProductSubmit = async (e: React.FormEvent) => {
                     <YAxis yAxisId="right" orientation="right" />
                     <ChartTooltip content={<ChartTooltipContent />} />
                     <ChartLegend content={<ChartLegendContent />} />
-                    <Bar yAxisId="left" dataKey="revenue" fill="var(--color-revenue)" radius={[4,4,0,0]} />
-                    <Bar yAxisId="right" dataKey="orders" fill="var(--color-orders)" radius={[4,4,0,0]} />
+                    <Bar yAxisId="left" dataKey="revenue" fill="var(--color-revenue)" radius={[4, 4, 0, 0]} />
+                    <Bar yAxisId="right" dataKey="orders" fill="var(--color-orders)" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 )}
               </div>
@@ -3413,7 +3442,7 @@ const handleProductSubmit = async (e: React.FormEvent) => {
                 Bulk Delete ({selectedProductIds.size})
               </Button>
               {!selectAllResults && (
-                <button className="underline text-sm" onClick={(e)=>{ e.preventDefault(); void selectAllResultsClick(); }}>
+                <button className="underline text-sm" onClick={(e) => { e.preventDefault(); void selectAllResultsClick(); }}>
                   Select all results ({stats.totalProducts || 'N'})
                 </button>
               )}
@@ -3424,11 +3453,11 @@ const handleProductSubmit = async (e: React.FormEvent) => {
             onOpenChange={handleDialogOpenChange}
           >
             <DialogTrigger asChild>
-              <button 
-                onClick={() => { resetForm(); setIsDialogOpen(true); }} 
+              <button
+                onClick={() => { resetForm(); setIsDialogOpen(true); }}
                 className="w-full sm:w-auto bg-black text-white border-black hover:bg-gray-800 hover:text-white focus-visible:bg-gray-800 focus-visible:text-white active:bg-gray-800 active:text-white px-4 py-2 rounded-md font-medium transition-colors"
               >
-               Add Product
+                Add Product
               </button>
             </DialogTrigger>
             <DialogContent
@@ -3442,75 +3471,75 @@ const handleProductSubmit = async (e: React.FormEvent) => {
                 e.preventDefault();
               }}
             >
-            <DialogHeader>
-              <DialogTitle>{editingProduct ? 'Edit Product' : 'Add New Product'}</DialogTitle>
-              <DialogDescription>
-                {editingProduct ? 'Update product details to keep your catalogue accurate.' : 'Create a new product listing for the Kissan City store.'}
-              </DialogDescription>
-            </DialogHeader>
+              <DialogHeader>
+                <DialogTitle>{editingProduct ? 'Edit Product' : 'Add New Product'}</DialogTitle>
+                <DialogDescription>
+                  {editingProduct ? 'Update product details to keep your catalogue accurate.' : 'Create a new product listing for The Kissan City store.'}
+                </DialogDescription>
+              </DialogHeader>
 
-            <form onSubmit={handleProductSubmit} className="space-y-4 px-1 sm:px-0">
-              <div>
-                <Label htmlFor="name">Name</Label>
-                <Input
-                  id="name"
-                  value={productForm.name}
-                  onChange={(e) => setProductForm((p) => ({ ...p, name: e.target.value }))}
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  value={productForm.description}
-                  onChange={(e) => setProductForm((p) => ({ ...p, description: e.target.value }))}
-                  required
-                />
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+              <form onSubmit={handleProductSubmit} className="space-y-4 px-1 sm:px-0">
                 <div>
-                  <Label htmlFor="price">Price</Label>
+                  <Label htmlFor="name">Name</Label>
                   <Input
-                    id="price"
-                    type="number"
-                    min={0}
-                    step="0.01"
-                    value={productForm.price}
-                    onChange={(e) => setProductForm((p) => ({ ...p, price: Number(e.target.value) }))}
+                    id="name"
+                    value={productForm.name}
+                    onChange={(e) => setProductForm((p) => ({ ...p, name: e.target.value }))}
                     required
                   />
                 </div>
                 <div>
-                  <Label htmlFor="stock">Stock</Label>
-                  <Input
-                    id="stock"
-                    type="number"
-                    min={0}
-                    value={productForm.stock}
-                    onChange={(e) => setProductForm((p) => ({ ...p, stock: Number(e.target.value) }))}
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea
+                    id="description"
+                    value={productForm.description}
+                    onChange={(e) => setProductForm((p) => ({ ...p, description: e.target.value }))}
                     required
                   />
                 </div>
-              </div>
-              <div>
-                <Label htmlFor="paragraph1">Paragraph 1</Label>
-                <Textarea
-                  id="paragraph1"
-                  value={productForm.paragraph1}
-                  onChange={(e) => setProductForm((p) => ({ ...p, paragraph1: e.target.value }))}
-                />
-              </div>
-              <div>
-                <Label htmlFor="paragraph2">Paragraph 2</Label>
-                <Textarea
-                  id="paragraph2"
-                  value={productForm.paragraph2}
-                  onChange={(e) => setProductForm((p) => ({ ...p, paragraph2: e.target.value }))}
-                />
-              </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  <div>
+                    <Label htmlFor="price">Price</Label>
+                    <Input
+                      id="price"
+                      type="number"
+                      min={0}
+                      step="0.01"
+                      value={productForm.price}
+                      onChange={(e) => setProductForm((p) => ({ ...p, price: Number(e.target.value) }))}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="stock">Stock</Label>
+                    <Input
+                      id="stock"
+                      type="number"
+                      min={0}
+                      value={productForm.stock}
+                      onChange={(e) => setProductForm((p) => ({ ...p, stock: Number(e.target.value) }))}
+                      required
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="paragraph1">Paragraph 1</Label>
+                  <Textarea
+                    id="paragraph1"
+                    value={productForm.paragraph1}
+                    onChange={(e) => setProductForm((p) => ({ ...p, paragraph1: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="paragraph2">Paragraph 2</Label>
+                  <Textarea
+                    id="paragraph2"
+                    value={productForm.paragraph2}
+                    onChange={(e) => setProductForm((p) => ({ ...p, paragraph2: e.target.value }))}
+                  />
+                </div>
 
-              {/* <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                {/* <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
                   <Label htmlFor="sizeFitFit">Size &amp; Fit - Fit</Label>
                   <Input
@@ -3540,362 +3569,434 @@ const handleProductSubmit = async (e: React.FormEvent) => {
                   />
                 </div>
               </div> */}
-              <div>
-                <Label>Product Images</Label>
-                <ImageUploader
-                  images={productForm.images}
-                  onImagesChange={(imgs) => {
-                    const cleanedImgs = imgs.filter(img => img !== '/placeholder.svg');
-                    setProductForm((p) => ({
-                      ...p,
-                      images: cleanedImgs,
-                      image_url: cleanedImgs.length > 0 ? cleanedImgs[0] : ''
-                    }))
-                  }}
-                  onUpload={async (files) => {
-                    const uploadedUrls: string[] = [];
-                    for (const file of files) {
-                      try {
-                        const url = await getUploadUrl(file);
-                        uploadedUrls.push(url);
-                      } catch (err) {
-                        console.error('Failed to upload file:', err);
+                <div>
+                  <Label>Product Images</Label>
+                  <ImageUploader
+                    images={productForm.images}
+                    onImagesChange={(imgs) => {
+                      const cleanedImgs = imgs.filter(img => img !== '/placeholder.svg');
+                      setProductForm((p) => ({
+                        ...p,
+                        images: cleanedImgs,
+                        image_url: cleanedImgs.length > 0 ? cleanedImgs[0] : ''
+                      }))
+                    }}
+                    onUpload={async (files) => {
+                      const uploadedUrls: string[] = [];
+                      for (const file of files) {
+                        try {
+                          const url = await getUploadUrl(file);
+                          uploadedUrls.push(url);
+                        } catch (err) {
+                          console.error('Failed to upload file:', err);
+                        }
                       }
-                    }
-                    return uploadedUrls;
-                  }}
-                  isLoading={uploadingImage}
-                  maxImages={10}
-                />
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                <div>
-                  <Label htmlFor="category">Category</Label>
-                  <Select
-                    value={(productForm as any).categoryId}
-                    onValueChange={(val) => { setProductForm((p) => ({ ...p, categoryId: val, subcategoryId: '' })); void fetchChildren(val); }}
-                  >
-                    <SelectTrigger id="category">
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {topCategories.map((c: any) => (
-                        <SelectItem key={(c as any)._id || (c as any).id} value={(c as any)._id || (c as any).id}>
-                          {(c as any).name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                      return uploadedUrls;
+                    }}
+                    isLoading={uploadingImage}
+                    maxImages={10}
+                  />
                 </div>
-                <div>
-                  <Label htmlFor="subcategory">Subcategory</Label>
-                  <Select
-                    value={(productForm as any).subcategoryId}
-                    onValueChange={(val) => setProductForm((p) => ({ ...p, subcategoryId: val }))}
-                    disabled={!(productForm as any).categoryId}
-                  >
-                    <SelectTrigger id="subcategory">
-                      <SelectValue placeholder="Select subcategory" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {(childrenByParent[(productForm as any).categoryId] || []).map((sc: any) => (
-                        <SelectItem key={(sc as any)._id || (sc as any).id} value={(sc as any)._id || (sc as any).id}>
-                          {(sc as any).name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="region">Region</Label>
-                  <Select
-                    value={(productForm as any).regionId}
-                    onValueChange={(val) => setProductForm((p) => ({ ...p, regionId: val }))}
-                  >
-                    <SelectTrigger id="region">
-                      <SelectValue placeholder="Select region" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {regions.map((r: any) => (
-                        <SelectItem key={(r as any)._id || (r as any).id} value={(r as any)._id || (r as any).id}>
-                          {(r as any).name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="text-xs text-muted-foreground mt-1">
-                Can't find it?{' '}
-                <button
-                  type="button"
-                  className="underline"
-                  onClick={() => { setActiveSection('categories'); setIsDialogOpen(false); }}
-                >
-                  Manage categories
-                </button>
-                {' '}or{' '}
-                <button
-                  type="button"
-                  className="underline"
-                  onClick={() => { setActiveSection('regions'); setIsDialogOpen(false); }}
-                >
-                  Manage regions
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                <div>
-                  <Label>Product Status</Label>
-                  <div className="flex items-center gap-3 mt-2">
-                    <Switch
-                      checked={productForm.active !== undefined ? productForm.active : true}
-                      onCheckedChange={(checked) =>
-                        setProductForm((p) => ({ ...p, active: checked }))
-                      }
-                    />
-                    <span className="text-sm text-muted-foreground">
-                      {productForm.active !== false ? 'Active' : 'Inactive'}
-                    </span>
-                  </div>
-                </div>
-                <div>
-                  <Label>Featured Product</Label>
-                  <div className="flex items-center gap-3 mt-2">
-                    <Switch
-                      checked={productForm.featured !== undefined ? productForm.featured : false}
-                      onCheckedChange={(checked) =>
-                        setProductForm((p) => ({ ...p, featured: checked }))
-                      }
-                    />
-                    <span className="text-sm text-muted-foreground">
-                      {productForm.featured ? 'Featured' : 'Not featured'}
-                    </span>
-                  </div>
-                </div>
-                <div>
-                  <Label>Best Seller</Label>
-                  <div className="flex items-center gap-3 mt-2">
-                    <Switch
-                      checked={productForm.isBestSeller !== undefined ? productForm.isBestSeller : false}
-                      onCheckedChange={(checked) =>
-                        setProductForm((p) => ({ ...p, isBestSeller: checked }))
-                      }
-                    />
-                    <span className="text-sm text-muted-foreground">
-                      {productForm.isBestSeller ? 'Best Seller' : 'Regular product'}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* New Quantity Options Management */}
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <Label>Quantity Options (New)</Label>
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        const newOption = {
-                          id: Date.now().toString(),
-                          quantity: 0,
-                          unit: 'ml' as const,
-                          packSize: 1,
-                          displayLabel: '',
-                          price: 0,
-                          originalPrice: undefined,
-                          stock: 0,
-                          isActive: true,
-                          sortOrder: productForm.quantityOptions.length,
-                        };
-                        setProductForm((p) => ({
-                          ...p,
-                          quantityOptions: [...p.quantityOptions, newOption],
-                        }));
-                      }}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  <div>
+                    <Label htmlFor="category">Category</Label>
+                    <Select
+                      value={(productForm as any).categoryId}
+                      onValueChange={(val) => { setProductForm((p) => ({ ...p, categoryId: val, subcategoryId: '' })); void fetchChildren(val); }}
                     >
-                      Add Quantity Option
-                    </Button>
+                      <SelectTrigger id="category">
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {topCategories.map((c: any) => (
+                          <SelectItem key={(c as any)._id || (c as any).id} value={(c as any)._id || (c as any).id}>
+                            {(c as any).name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="subcategory">Subcategory</Label>
+                    <Select
+                      value={(productForm as any).subcategoryId}
+                      onValueChange={(val) => setProductForm((p) => ({ ...p, subcategoryId: val }))}
+                      disabled={!(productForm as any).categoryId}
+                    >
+                      <SelectTrigger id="subcategory">
+                        <SelectValue placeholder="Select subcategory" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {(childrenByParent[(productForm as any).categoryId] || []).map((sc: any) => (
+                          <SelectItem key={(sc as any)._id || (sc as any).id} value={(sc as any)._id || (sc as any).id}>
+                            {(sc as any).name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="region">Region</Label>
+                    <Select
+                      value={(productForm as any).regionId}
+                      onValueChange={(val) => setProductForm((p) => ({ ...p, regionId: val }))}
+                    >
+                      <SelectTrigger id="region">
+                        <SelectValue placeholder="Select region" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {regions.map((r: any) => (
+                          <SelectItem key={(r as any)._id || (r as any).id} value={(r as any)._id || (r as any).id}>
+                            {(r as any).name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
-                
-                <div className="space-y-3">
-                  {productForm.quantityOptions.length === 0 ? (
-                    <p className="text-xs text-muted-foreground">
-                      Click "Add Quantity Option" to add quantities like 300ml, 600ml (Pack of 2), etc.
-                    </p>
-                  ) : null}
-                  
-                  {productForm.quantityOptions.map((option, idx) => (
-                    <div key={option.id} className="border rounded-lg p-4 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <h4 className="font-medium text-sm">Option {idx + 1}</h4>
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => {
-                            setProductForm((p) => ({
-                              ...p,
-                              quantityOptions: p.quantityOptions.filter((_, i) => i !== idx),
-                            }));
-                          }}
-                        >
-                          Remove
-                        </Button>
-                      </div>
-                      
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        <div>
-                          <Label className="text-xs text-muted-foreground">Quantity</Label>
-                          <Input
-                            type="number"
-                            min={0}
-                            value={option.quantity}
-                            onChange={(e) => {
-                              const newOptions = [...productForm.quantityOptions];
-                              newOptions[idx].quantity = Number(e.target.value) || 0;
-                              setProductForm((p) => ({ ...p, quantityOptions: newOptions }));
-                            }}
-                            placeholder="300"
-                          />
-                        </div>
-                        
-                        <div>
-                          <Label className="text-xs text-muted-foreground">Unit</Label>
-                          <Select
-                            value={option.unit}
-                            onValueChange={(value: 'gm' | 'ml' | 'l' | 'pcs') => {
-                              const newOptions = [...productForm.quantityOptions];
-                              newOptions[idx].unit = value;
-                              setProductForm((p) => ({ ...p, quantityOptions: newOptions }));
-                            }}
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="gm">Grams (gm)</SelectItem>
-                              <SelectItem value="ml">Milliliters (ml)</SelectItem>
-                              <SelectItem value="l">Liters (l)</SelectItem>
-                              <SelectItem value="pcs">Pieces (pcs)</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        
-                        <div>
-                          <Label className="text-xs text-muted-foreground">Pack Size</Label>
-                          <Input
-                            type="number"
-                            min={1}
-                            value={option.packSize}
-                            onChange={(e) => {
-                              const newOptions = [...productForm.quantityOptions];
-                              newOptions[idx].packSize = Number(e.target.value) || 1;
-                              setProductForm((p) => ({ ...p, quantityOptions: newOptions }));
-                            }}
-                            placeholder="1"
-                          />
-                        </div>
-                        
-                        <div>
-                          <Label className="text-xs text-muted-foreground">Display Label</Label>
-                          <Input
-                            value={option.displayLabel}
-                            onChange={(e) => {
-                              const newOptions = [...productForm.quantityOptions];
-                              newOptions[idx].displayLabel = e.target.value;
-                              setProductForm((p) => ({ ...p, quantityOptions: newOptions }));
-                            }}
-                            placeholder="300ml"
-                          />
-                        </div>
-                      </div>
-                      
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        <div>
-                          <Label className="text-xs text-muted-foreground">Price (₹)</Label>
-                          <Input
-                            type="number"
-                            min={0}
-                            step="0.01"
-                            value={option.price}
-                            onChange={(e) => {
-                              const newOptions = [...productForm.quantityOptions];
-                              newOptions[idx].price = Number(e.target.value) || 0;
-                              setProductForm((p) => ({ ...p, quantityOptions: newOptions }));
-                            }}
-                            placeholder="299"
-                          />
-                        </div>
-                        
-                        <div>
-                          <Label className="text-xs text-muted-foreground">Original Price (₹)</Label>
-                          <Input
-                            type="number"
-                            min={0}
-                            step="0.01"
-                            value={option.originalPrice || ''}
-                            onChange={(e) => {
-                              const newOptions = [...productForm.quantityOptions];
-                              newOptions[idx].originalPrice = e.target.value ? Number(e.target.value) : undefined;
-                              setProductForm((p) => ({ ...p, quantityOptions: newOptions }));
-                            }}
-                            placeholder="399"
-                          />
-                        </div>
-                        
-                        <div>
-                          <Label className="text-xs text-muted-foreground">Stock</Label>
-                          <Input
-                            type="number"
-                            min={0}
-                            value={option.stock}
-                            onChange={(e) => {
-                              const newOptions = [...productForm.quantityOptions];
-                              newOptions[idx].stock = Number(e.target.value) || 0;
-                              setProductForm((p) => ({ ...p, quantityOptions: newOptions }));
-                            }}
-                            placeholder="50"
-                          />
-                        </div>
-                        
-                        <div>
-                          <Label className="text-xs text-muted-foreground">Sort Order</Label>
-                          <Input
-                            type="number"
-                            min={0}
-                            value={option.sortOrder}
-                            onChange={(e) => {
-                              const newOptions = [...productForm.quantityOptions];
-                              newOptions[idx].sortOrder = Number(e.target.value) || 0;
-                              setProductForm((p) => ({ ...p, quantityOptions: newOptions }));
-                            }}
-                            placeholder="0"
-                          />
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center gap-3">
-                        <Switch
-                          checked={option.isActive}
-                          onCheckedChange={(checked) => {
-                            const newOptions = [...productForm.quantityOptions];
-                            newOptions[idx].isActive = checked;
-                            setProductForm((p) => ({ ...p, quantityOptions: newOptions }));
+                <div className="text-xs text-muted-foreground mt-1">
+                  Can't find it?{' '}
+                  <button
+                    type="button"
+                    className="underline"
+                    onClick={() => { setActiveSection('categories'); setIsDialogOpen(false); }}
+                  >
+                    Manage categories
+                  </button>
+                  {' '}or{' '}
+                  <button
+                    type="button"
+                    className="underline"
+                    onClick={() => { setActiveSection('regions'); setIsDialogOpen(false); }}
+                  >
+                    Manage regions
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                  <div>
+                    <Label>Product Status</Label>
+                    <div className="flex items-center gap-3 mt-2">
+                      <button
+                        type="button"
+                        className="admin-toggle-btn"
+                        onClick={() => setProductForm((p) => ({ ...p, active: !p.active }))}
+                        style={{
+                          width: '44px',
+                          height: '24px',
+                          borderRadius: '12px',
+                          backgroundColor: productForm.active !== false ? '#5c4033' : '#d1d5db',
+                          position: 'relative',
+                          cursor: 'pointer',
+                          border: 'none',
+                          padding: 0,
+                          transition: 'background-color 0.2s'
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: '20px',
+                            height: '20px',
+                            borderRadius: '50%',
+                            backgroundColor: 'white',
+                            position: 'absolute',
+                            top: '2px',
+                            left: productForm.active !== false ? '22px' : '2px',
+                            transition: 'left 0.2s',
+                            boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
                           }}
                         />
-                        <Label className="text-sm">Active</Label>
-                      </div>
+                      </button>
+                      <span className="text-sm text-muted-foreground">
+                        {productForm.active !== false ? 'Active' : 'Inactive'}
+                      </span>
                     </div>
-                  ))}
+                  </div>
+                  <div>
+                    <Label>Featured Product</Label>
+                    <div className="flex items-center gap-3 mt-2">
+                      <button
+                        type="button"
+                        className="admin-toggle-btn"
+                        onClick={() => setProductForm((p) => ({ ...p, featured: !p.featured }))}
+                        style={{
+                          width: '44px',
+                          height: '24px',
+                          borderRadius: '12px',
+                          backgroundColor: productForm.featured ? '#5c4033' : '#d1d5db',
+                          position: 'relative',
+                          cursor: 'pointer',
+                          border: 'none',
+                          padding: 0,
+                          transition: 'background-color 0.2s'
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: '20px',
+                            height: '20px',
+                            borderRadius: '50%',
+                            backgroundColor: 'white',
+                            position: 'absolute',
+                            top: '2px',
+                            left: productForm.featured ? '22px' : '2px',
+                            transition: 'left 0.2s',
+                            boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
+                          }}
+                        />
+                      </button>
+                      <span className="text-sm text-muted-foreground">
+                        {productForm.featured ? 'Featured' : 'Not featured'}
+                      </span>
+                    </div>
+                  </div>
+                  <div>
+                    <Label>Best Seller</Label>
+                    <div className="flex items-center gap-3 mt-2">
+                      <button
+                        type="button"
+                        className="admin-toggle-btn"
+                        onClick={() => setProductForm((p) => ({ ...p, isBestSeller: !p.isBestSeller }))}
+                        style={{
+                          width: '44px',
+                          height: '24px',
+                          borderRadius: '12px',
+                          backgroundColor: productForm.isBestSeller ? '#5c4033' : '#d1d5db',
+                          position: 'relative',
+                          cursor: 'pointer',
+                          border: 'none',
+                          padding: 0,
+                          transition: 'background-color 0.2s'
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: '20px',
+                            height: '20px',
+                            borderRadius: '50%',
+                            backgroundColor: 'white',
+                            position: 'absolute',
+                            top: '2px',
+                            left: productForm.isBestSeller ? '22px' : '2px',
+                            transition: 'left 0.2s',
+                            boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
+                          }}
+                        />
+                      </button>
+                      <span className="text-sm text-muted-foreground">
+                        {productForm.isBestSeller ? 'Best Seller' : 'Regular product'}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-              </div>
 
-              {/* <div>
+                {/* New Quantity Options Management */}
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <Label>Quantity Options (New)</Label>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          const newOption = {
+                            id: Date.now().toString(),
+                            quantity: 0,
+                            unit: 'ml' as const,
+                            packSize: 1,
+                            displayLabel: '',
+                            price: 0,
+                            originalPrice: undefined,
+                            stock: 0,
+                            isActive: true,
+                            sortOrder: productForm.quantityOptions.length,
+                          };
+                          setProductForm((p) => ({
+                            ...p,
+                            quantityOptions: [...p.quantityOptions, newOption],
+                          }));
+                        }}
+                      >
+                        Add Quantity Option
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    {productForm.quantityOptions.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">
+                        Click "Add Quantity Option" to add quantities like 300ml, 600ml (Pack of 2), etc.
+                      </p>
+                    ) : null}
+
+                    {productForm.quantityOptions.map((option, idx) => (
+                      <div key={option.id} className="border rounded-lg p-4 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-medium text-sm">Option {idx + 1}</h4>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => {
+                              setProductForm((p) => ({
+                                ...p,
+                                quantityOptions: p.quantityOptions.filter((_, i) => i !== idx),
+                              }));
+                            }}
+                          >
+                            Remove
+                          </Button>
+                        </div>
+
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Quantity</Label>
+                            <Input
+                              type="number"
+                              min={0}
+                              value={option.quantity}
+                              onChange={(e) => {
+                                const newOptions = [...productForm.quantityOptions];
+                                newOptions[idx].quantity = Number(e.target.value) || 0;
+                                setProductForm((p) => ({ ...p, quantityOptions: newOptions }));
+                              }}
+                              placeholder="300"
+                            />
+                          </div>
+
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Unit</Label>
+                            <Select
+                              value={option.unit}
+                              onValueChange={(value: 'gm' | 'ml' | 'l' | 'pcs') => {
+                                const newOptions = [...productForm.quantityOptions];
+                                newOptions[idx].unit = value;
+                                setProductForm((p) => ({ ...p, quantityOptions: newOptions }));
+                              }}
+                            >
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="gm">Grams (gm)</SelectItem>
+                                <SelectItem value="ml">Milliliters (ml)</SelectItem>
+                                <SelectItem value="l">Liters (l)</SelectItem>
+                                <SelectItem value="pcs">Pieces (pcs)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Pack Size</Label>
+                            <Input
+                              type="number"
+                              min={1}
+                              value={option.packSize}
+                              onChange={(e) => {
+                                const newOptions = [...productForm.quantityOptions];
+                                newOptions[idx].packSize = Number(e.target.value) || 1;
+                                setProductForm((p) => ({ ...p, quantityOptions: newOptions }));
+                              }}
+                              placeholder="1"
+                            />
+                          </div>
+
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Display Label</Label>
+                            <Input
+                              value={option.displayLabel}
+                              onChange={(e) => {
+                                const newOptions = [...productForm.quantityOptions];
+                                newOptions[idx].displayLabel = e.target.value;
+                                setProductForm((p) => ({ ...p, quantityOptions: newOptions }));
+                              }}
+                              placeholder="300ml"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Price (₹)</Label>
+                            <Input
+                              type="number"
+                              min={0}
+                              step="0.01"
+                              value={option.price}
+                              onChange={(e) => {
+                                const newOptions = [...productForm.quantityOptions];
+                                newOptions[idx].price = Number(e.target.value) || 0;
+                                setProductForm((p) => ({ ...p, quantityOptions: newOptions }));
+                              }}
+                              placeholder="299"
+                            />
+                          </div>
+
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Original Price (₹)</Label>
+                            <Input
+                              type="number"
+                              min={0}
+                              step="0.01"
+                              value={option.originalPrice || ''}
+                              onChange={(e) => {
+                                const newOptions = [...productForm.quantityOptions];
+                                newOptions[idx].originalPrice = e.target.value ? Number(e.target.value) : undefined;
+                                setProductForm((p) => ({ ...p, quantityOptions: newOptions }));
+                              }}
+                              placeholder="399"
+                            />
+                          </div>
+
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Stock</Label>
+                            <Input
+                              type="number"
+                              min={0}
+                              value={option.stock}
+                              onChange={(e) => {
+                                const newOptions = [...productForm.quantityOptions];
+                                newOptions[idx].stock = Number(e.target.value) || 0;
+                                setProductForm((p) => ({ ...p, quantityOptions: newOptions }));
+                              }}
+                              placeholder="50"
+                            />
+                          </div>
+
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Sort Order</Label>
+                            <Input
+                              type="number"
+                              min={0}
+                              value={option.sortOrder}
+                              onChange={(e) => {
+                                const newOptions = [...productForm.quantityOptions];
+                                newOptions[idx].sortOrder = Number(e.target.value) || 0;
+                                setProductForm((p) => ({ ...p, quantityOptions: newOptions }));
+                              }}
+                              placeholder="0"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                          <Switch
+                            checked={option.isActive}
+                            onCheckedChange={(checked) => {
+                              const newOptions = [...productForm.quantityOptions];
+                              newOptions[idx].isActive = checked;
+                              setProductForm((p) => ({ ...p, quantityOptions: newOptions }));
+                            }}
+                          />
+                          <Label className="text-sm">Active</Label>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* <div>
                 <Label htmlFor="colors">Available Colors</Label>
                 <div className="flex gap-2 mt-2 mb-3">
                   <Input
@@ -4313,55 +4414,55 @@ const handleProductSubmit = async (e: React.FormEvent) => {
                 </Button>
               </div> */}
 
-              <div className="border-t border-border pt-4">
-                <h3 className="text-sm font-semibold mb-4">Discount</h3>
-                <div className="grid grid-cols-3 gap-3">
-                  <div>
-                    <Label htmlFor="discountType">Type</Label>
-                    <Select
-                      value={productForm.discount.type}
-                      onValueChange={(val) => setProductForm((p) => ({ ...p, discount: { ...p.discount, type: val as 'flat' | 'percentage' } }))}
-                    >
-                      <SelectTrigger id="discountType">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="flat">Flat (₹)</SelectItem>
-                        <SelectItem value="percentage">Percentage (%)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label htmlFor="discountValue">Value</Label>
-                    <Input
-                      id="discountValue"
-                      type="number"
-                      min="0"
-                      step={productForm.discount.type === 'percentage' ? '0.1' : '1'}
-                      value={productForm.discount.value}
-                      onChange={(e) => setProductForm((p) => ({ ...p, discount: { ...p.discount, value: Number(e.target.value) || 0 } }))}
-                      placeholder="0"
-                    />
-                  </div>
-                  <div className="flex items-end">
-                    <div className="text-sm p-2 bg-muted rounded">
-                      {productForm.discount.value > 0 && (
-                        <>
-                          <span className="text-xs text-muted-foreground">Final Price: </span>
-                          <span className="font-semibold">
-                            ₹{Math.max(0, productForm.discount.type === 'percentage'
-                              ? Math.round(productForm.price * (1 - productForm.discount.value / 100))
-                              : productForm.price - productForm.discount.value
-                            )}
-                          </span>
-                        </>
-                      )}
+                <div className="border-t border-border pt-4">
+                  <h3 className="text-sm font-semibold mb-4">Discount</h3>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div>
+                      <Label htmlFor="discountType">Type</Label>
+                      <Select
+                        value={productForm.discount.type}
+                        onValueChange={(val) => setProductForm((p) => ({ ...p, discount: { ...p.discount, type: val as 'flat' | 'percentage' } }))}
+                      >
+                        <SelectTrigger id="discountType">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="flat">Flat (₹)</SelectItem>
+                          <SelectItem value="percentage">Percentage (%)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="discountValue">Value</Label>
+                      <Input
+                        id="discountValue"
+                        type="number"
+                        min="0"
+                        step={productForm.discount.type === 'percentage' ? '0.1' : '1'}
+                        value={productForm.discount.value}
+                        onChange={(e) => setProductForm((p) => ({ ...p, discount: { ...p.discount, value: Number(e.target.value) || 0 } }))}
+                        placeholder="0"
+                      />
+                    </div>
+                    <div className="flex items-end">
+                      <div className="text-sm p-2 bg-muted rounded">
+                        {productForm.discount.value > 0 && (
+                          <>
+                            <span className="text-xs text-muted-foreground">Final Price: </span>
+                            <span className="font-semibold">
+                              ₹{Math.max(0, productForm.discount.type === 'percentage'
+                                ? Math.round(productForm.price * (1 - productForm.discount.value / 100))
+                                : productForm.price - productForm.discount.value
+                              )}
+                            </span>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {/* <div className="border-t border-border pt-4">
+                {/* <div className="border-t border-border pt-4">
                 <h3 className="text-sm font-semibold mb-4">Structured Size Chart (Alternative)</h3>
 
                 <div>
@@ -4540,33 +4641,85 @@ const handleProductSubmit = async (e: React.FormEvent) => {
                 </div>
               </div> */}
 
-              <div>
-                <Label htmlFor="longDescription">Long Description (Rich Text)</Label>
-                <Textarea
-                  id="longDescription"
-                  value={productForm.longDescription}
-                  onChange={(e) => setProductForm((p) => ({ ...p, longDescription: e.target.value }))}
-                  placeholder="Detailed product description, benefits, usage instructions..."
-                  rows={4}
-                />
-              </div>
+                <div>
+                  <Label htmlFor="longDescription">Long Description (Rich Text)</Label>
+                  <Textarea
+                    id="longDescription"
+                    value={productForm.longDescription}
+                    onChange={(e) => setProductForm((p) => ({ ...p, longDescription: e.target.value }))}
+                    placeholder="Detailed product description, benefits, usage instructions..."
+                    rows={4}
+                  />
+                </div>
 
-              <div>
-                <Label htmlFor="highlights">Highlights (Max 8 bullet points)</Label>
-                <div className="space-y-2 mt-2">
-                  {[...Array(Math.max(1, productForm.highlights.length + 1))].map((_, idx) => (
-                    idx < 8 && (
-                      <div key={idx} className="flex items-center gap-2">
-                        <Input
-                          value={productForm.highlights[idx] ?? ''}
-                          onChange={(e) => {
-                            const newHighlights = [...productForm.highlights];
-                            newHighlights[idx] = e.target.value;
-                            setProductForm((p) => ({ ...p, highlights: newHighlights }));
-                          }}
-                          placeholder={`Highlight ${idx + 1}`}
-                        />
-                        {productForm.highlights[idx] && (
+                <div>
+                  <Label htmlFor="highlights">Highlights (Max 8 bullet points)</Label>
+                  <div className="space-y-2 mt-2">
+                    {[...Array(Math.max(1, productForm.highlights.length + 1))].map((_, idx) => (
+                      idx < 8 && (
+                        <div key={idx} className="flex items-center gap-2">
+                          <Input
+                            value={productForm.highlights[idx] ?? ''}
+                            onChange={(e) => {
+                              const newHighlights = [...productForm.highlights];
+                              newHighlights[idx] = e.target.value;
+                              setProductForm((p) => ({ ...p, highlights: newHighlights }));
+                            }}
+                            placeholder={`Highlight ${idx + 1}`}
+                          />
+                          {productForm.highlights[idx] && (
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => {
+                                setProductForm((p) => ({
+                                  ...p,
+                                  highlights: p.highlights.filter((_, i) => i !== idx),
+                                }));
+                              }}
+                            >
+                              Remove
+                            </Button>
+                          )}
+                        </div>
+                      )
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <Label>Specifications</Label>
+                  <div className="space-y-3 mt-2">
+                    {[...Array(Math.max(1, productForm.specs.length + 1))].map((_, idx) => (
+                      <div key={idx} className="flex gap-2 items-end">
+                        <div className="flex-1">
+                          <Label className="text-xs text-muted-foreground">Key</Label>
+                          <Input
+                            value={productForm.specs[idx]?.key ?? ''}
+                            onChange={(e) => {
+                              const newSpecs = [...productForm.specs];
+                              if (!newSpecs[idx]) newSpecs[idx] = { key: '', value: '' };
+                              newSpecs[idx].key = e.target.value;
+                              setProductForm((p) => ({ ...p, specs: newSpecs }));
+                            }}
+                            placeholder="e.g., Material"
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <Label className="text-xs text-muted-foreground">Value</Label>
+                          <Input
+                            value={productForm.specs[idx]?.value ?? ''}
+                            onChange={(e) => {
+                              const newSpecs = [...productForm.specs];
+                              if (!newSpecs[idx]) newSpecs[idx] = { key: '', value: '' };
+                              newSpecs[idx].value = e.target.value;
+                              setProductForm((p) => ({ ...p, specs: newSpecs }));
+                            }}
+                            placeholder="e.g., 100% Cotton"
+                          />
+                        </div>
+                        {productForm.specs[idx]?.key && productForm.specs[idx]?.value && (
                           <Button
                             type="button"
                             size="sm"
@@ -4574,7 +4727,7 @@ const handleProductSubmit = async (e: React.FormEvent) => {
                             onClick={() => {
                               setProductForm((p) => ({
                                 ...p,
-                                highlights: p.highlights.filter((_, i) => i !== idx),
+                                specs: p.specs.filter((_, i) => i !== idx),
                               }));
                             }}
                           >
@@ -4582,295 +4735,243 @@ const handleProductSubmit = async (e: React.FormEvent) => {
                           </Button>
                         )}
                       </div>
-                    )
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <Label>Specifications</Label>
-                <div className="space-y-3 mt-2">
-                  {[...Array(Math.max(1, productForm.specs.length + 1))].map((_, idx) => (
-                    <div key={idx} className="flex gap-2 items-end">
-                      <div className="flex-1">
-                        <Label className="text-xs text-muted-foreground">Key</Label>
-                        <Input
-                          value={productForm.specs[idx]?.key ?? ''}
-                          onChange={(e) => {
-                            const newSpecs = [...productForm.specs];
-                            if (!newSpecs[idx]) newSpecs[idx] = { key: '', value: '' };
-                            newSpecs[idx].key = e.target.value;
-                            setProductForm((p) => ({ ...p, specs: newSpecs }));
-                          }}
-                          placeholder="e.g., Material"
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <Label className="text-xs text-muted-foreground">Value</Label>
-                        <Input
-                          value={productForm.specs[idx]?.value ?? ''}
-                          onChange={(e) => {
-                            const newSpecs = [...productForm.specs];
-                            if (!newSpecs[idx]) newSpecs[idx] = { key: '', value: '' };
-                            newSpecs[idx].value = e.target.value;
-                            setProductForm((p) => ({ ...p, specs: newSpecs }));
-                          }}
-                          placeholder="e.g., 100% Cotton"
-                        />
-                      </div>
-                      {productForm.specs[idx]?.key && productForm.specs[idx]?.value && (
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => {
-                            setProductForm((p) => ({
-                              ...p,
-                              specs: p.specs.filter((_, i) => i !== idx),
-                            }));
-                          }}
-                        >
-                          Remove
-                        </Button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <Label>FAQ (Frequently Asked Questions)</Label>
-                <div className="space-y-3 mt-2">
-                  {[...Array(Math.max(1, productForm.faq.length + 1))].map((_, idx) => (
-                    <div key={idx} className="border rounded-lg p-4 space-y-2">
-                      <div>
-                        <Label className="text-xs text-muted-foreground">Question</Label>
-                        <Input
-                          value={productForm.faq[idx]?.question ?? ''}
-                          onChange={(e) => {
-                            const newFaq = [...productForm.faq];
-                            if (!newFaq[idx]) newFaq[idx] = { question: '', answer: '' };
-                            newFaq[idx].question = e.target.value;
-                            setProductForm((p) => ({ ...p, faq: newFaq }));
-                          }}
-                          placeholder="e.g., What is the material of this product?"
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-xs text-muted-foreground">Answer</Label>
-                        <Textarea
-                          value={productForm.faq[idx]?.answer ?? ''}
-                          onChange={(e) => {
-                            const newFaq = [...productForm.faq];
-                            if (!newFaq[idx]) newFaq[idx] = { question: '', answer: '' };
-                            newFaq[idx].answer = e.target.value;
-                            setProductForm((p) => ({ ...p, faq: newFaq }));
-                          }}
-                          placeholder="e.g., This product is made from 100% premium cotton..."
-                          rows={3}
-                        />
-                      </div>
-                      {productForm.faq[idx]?.question && productForm.faq[idx]?.answer && (
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => {
-                            setProductForm((p) => ({
-                              ...p,
-                              faq: p.faq.filter((_, i) => i !== idx),
-                            }));
-                          }}
-                        >
-                          Remove FAQ
-                        </Button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="border-t pt-6">
-                <h3 className="text-lg font-semibold mb-4">SEO Settings</h3>
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="seoTitle">SEO Title</Label>
-                    <Input
-                      id="seoTitle"
-                      value={productForm.seo.title}
-                      onChange={(e) => setProductForm((p) => ({ ...p, seo: { ...p.seo, title: e.target.value } }))}
-                      placeholder="Short page title for Google (e.g., Blue Winter Hoodie for Men)"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="seoDescription">SEO Description</Label>
-                    <Textarea
-                      id="seoDescription"
-                      value={productForm.seo.description}
-                      onChange={(e) => setProductForm((p) => ({ ...p, seo: { ...p.seo, description: e.target.value } }))}
-                      placeholder="Short summary for search results (e.g., Premium blue winter hoodie for men. Warm, comfortable, and stylish.)"
-                      rows={2}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="seoKeywords">SEO Keywords</Label>
-                    <Input
-                      id="seoKeywords"
-                      value={productForm.seo.keywords}
-                      onChange={(e) => setProductForm((p) => ({ ...p, seo: { ...p.seo, keywords: e.target.value } }))}
-                      placeholder="Comma-separated keywords (e.g., hoodie, men hoodie, winter wear)"
-                    />
+                    ))}
                   </div>
                 </div>
-              </div>
 
-              <Button type="submit" className="w-full h-12 text-base font-semibold" disabled={saving}>
-                {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {editingProduct ? 'Update Product' : 'Add Product'}
-              </Button>
-            </form>
-          </DialogContent>
-        </Dialog>
-
-        <Dialog open={viewDrawerOpen} onOpenChange={setViewDrawerOpen}>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Product Details</DialogTitle>
-              <DialogDescription>
-                View product information
-              </DialogDescription>
-            </DialogHeader>
-            {viewingProduct && (
-              <div className="space-y-6 p-4 pb-20">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <h3 className="font-semibold text-lg mb-2">Product Image</h3>
-                    <img
-                      src={(function(){
-                        const url = (viewingProduct as any).image_url || (viewingProduct as any).images?.[0] || '/placeholder.svg';
-                        if (!url) return '/placeholder.svg';
-                        if (String(url).startsWith('http')) return url;
-                        return String(url).startsWith('/') ? url : `/uploads/${url}`;
-                      })()}
-                      alt={(viewingProduct as any).name || (viewingProduct as any).title || 'Product'}
-                      className="w-full h-auto object-cover rounded-lg border"
-                    />
-                  </div>
-                  <div className="space-y-4">
-                    <div>
-                      <h3 className="font-semibold text-lg">{(viewingProduct as any).name || (viewingProduct as any).title}</h3>
-                      <p className="text-muted-foreground text-sm mt-1">{viewingProduct.category || 'No category'}</p>
-                    </div>
-                    <div>
-                      <Label className="text-sm font-semibold">Price</Label>
-                      <p className="text-2xl font-bold text-primary">₹{Number(viewingProduct.price ?? 0).toLocaleString('en-IN')}</p>
-                    </div>
-                    <div>
-                      <Label className="text-sm font-semibold">Stock</Label>
-                      <p className="text-lg">{viewingProduct.stock ?? 0} units</p>
-                    </div>
-                    <div>
-                      <Label className="text-sm font-semibold">Status</Label>
-                      <Badge variant={viewingProduct.active ? 'default' : 'secondary'}>
-                        {viewingProduct.active ? 'Active' : 'Inactive'}
-                      </Badge>
-                    </div>
+                <div>
+                  <Label>FAQ (Frequently Asked Questions)</Label>
+                  <div className="space-y-3 mt-2">
+                    {[...Array(Math.max(1, productForm.faq.length + 1))].map((_, idx) => (
+                      <div key={idx} className="border rounded-lg p-4 space-y-2">
+                        <div>
+                          <Label className="text-xs text-muted-foreground">Question</Label>
+                          <Input
+                            value={productForm.faq[idx]?.question ?? ''}
+                            onChange={(e) => {
+                              const newFaq = [...productForm.faq];
+                              if (!newFaq[idx]) newFaq[idx] = { question: '', answer: '' };
+                              newFaq[idx].question = e.target.value;
+                              setProductForm((p) => ({ ...p, faq: newFaq }));
+                            }}
+                            placeholder="e.g., What is the material of this product?"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs text-muted-foreground">Answer</Label>
+                          <Textarea
+                            value={productForm.faq[idx]?.answer ?? ''}
+                            onChange={(e) => {
+                              const newFaq = [...productForm.faq];
+                              if (!newFaq[idx]) newFaq[idx] = { question: '', answer: '' };
+                              newFaq[idx].answer = e.target.value;
+                              setProductForm((p) => ({ ...p, faq: newFaq }));
+                            }}
+                            placeholder="e.g., This product is made from 100% premium cotton..."
+                            rows={3}
+                          />
+                        </div>
+                        {productForm.faq[idx]?.question && productForm.faq[idx]?.answer && (
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => {
+                              setProductForm((p) => ({
+                                ...p,
+                                faq: p.faq.filter((_, i) => i !== idx),
+                              }));
+                            }}
+                          >
+                            Remove FAQ
+                          </Button>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </div>
 
                 <div className="border-t pt-6">
-                  <Label className="text-sm font-semibold">Description</Label>
-                  <p className="text-sm text-muted-foreground mt-2">{viewingProduct.description || 'No description'}</p>
+                  <h3 className="text-lg font-semibold mb-4">SEO Settings</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="seoTitle">SEO Title</Label>
+                      <Input
+                        id="seoTitle"
+                        value={productForm.seo.title}
+                        onChange={(e) => setProductForm((p) => ({ ...p, seo: { ...p.seo, title: e.target.value } }))}
+                        placeholder="Short page title for Google (e.g., Blue Winter Hoodie for Men)"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="seoDescription">SEO Description</Label>
+                      <Textarea
+                        id="seoDescription"
+                        value={productForm.seo.description}
+                        onChange={(e) => setProductForm((p) => ({ ...p, seo: { ...p.seo, description: e.target.value } }))}
+                        placeholder="Short summary for search results (e.g., Premium blue winter hoodie for men. Warm, comfortable, and stylish.)"
+                        rows={2}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="seoKeywords">SEO Keywords</Label>
+                      <Input
+                        id="seoKeywords"
+                        value={productForm.seo.keywords}
+                        onChange={(e) => setProductForm((p) => ({ ...p, seo: { ...p.seo, keywords: e.target.value } }))}
+                        placeholder="Comma-separated keywords (e.g., hoodie, men hoodie, winter wear)"
+                      />
+                    </div>
+                  </div>
                 </div>
 
-                {viewingProduct.longDescription && (
-                  <div className="border-t pt-6">
-                    <Label className="text-sm font-semibold">Long Description</Label>
-                    <p className="text-sm text-muted-foreground mt-2">{viewingProduct.longDescription}</p>
-                  </div>
-                )}
+                <Button type="submit" className="w-full h-12 text-base font-semibold" disabled={saving}>
+                  {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {editingProduct ? 'Update Product' : 'Add Product'}
+                </Button>
+              </form>
+            </DialogContent>
+          </Dialog>
 
-                {Array.isArray((viewingProduct as any).sizes) && (viewingProduct as any).sizes.length > 0 && (
-                  <div className="border-t pt-6">
-                    <Label className="text-sm font-semibold">Available Sizes</Label>
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {(viewingProduct as any).sizes.map((size: string, idx: number) => (
-                        <Badge key={idx} variant="outline">{size}</Badge>
-                      ))}
+          <Dialog open={viewDrawerOpen} onOpenChange={setViewDrawerOpen}>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Product Details</DialogTitle>
+                <DialogDescription>
+                  View product information
+                </DialogDescription>
+              </DialogHeader>
+              {viewingProduct && (
+                <div className="space-y-6 p-4 pb-20">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <h3 className="font-semibold text-lg mb-2">Product Image</h3>
+                      <img
+                        src={(function () {
+                          const url = (viewingProduct as any).image_url || (viewingProduct as any).images?.[0] || '/placeholder.svg';
+                          if (!url) return '/placeholder.svg';
+                          if (String(url).startsWith('http')) return url;
+                          return String(url).startsWith('/') ? url : `/uploads/${url}`;
+                        })()}
+                        alt={(viewingProduct as any).name || (viewingProduct as any).title || 'Product'}
+                        className="w-full h-auto object-cover rounded-lg border"
+                      />
+                    </div>
+                    <div className="space-y-4">
+                      <div>
+                        <h3 className="font-semibold text-lg">{(viewingProduct as any).name || (viewingProduct as any).title}</h3>
+                        <p className="text-muted-foreground text-sm mt-1">{viewingProduct.category || 'No category'}</p>
+                      </div>
+                      <div>
+                        <Label className="text-sm font-semibold">Price</Label>
+                        <p className="text-2xl font-bold text-primary">₹{Number(viewingProduct.price ?? 0).toLocaleString('en-IN')}</p>
+                      </div>
+                      <div>
+                        <Label className="text-sm font-semibold">Stock</Label>
+                        <p className="text-lg">{viewingProduct.stock ?? 0} units</p>
+                      </div>
+                      <div>
+                        <Label className="text-sm font-semibold">Status</Label>
+                        <Badge variant={viewingProduct.active ? 'default' : 'secondary'}>
+                          {viewingProduct.active ? 'Active' : 'Inactive'}
+                        </Badge>
+                      </div>
                     </div>
                   </div>
-                )}
 
-                {Array.isArray((viewingProduct as any).colors) && (viewingProduct as any).colors.length > 0 && (
                   <div className="border-t pt-6">
-                    <Label className="text-sm font-semibold">Available Colors</Label>
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {(viewingProduct as any).colors.map((color: string, idx: number) => (
-                        <Badge key={idx} variant="outline">{color}</Badge>
-                      ))}
+                    <Label className="text-sm font-semibold">Description</Label>
+                    <p className="text-sm text-muted-foreground mt-2">{viewingProduct.description || 'No description'}</p>
+                  </div>
+
+                  {viewingProduct.longDescription && (
+                    <div className="border-t pt-6">
+                      <Label className="text-sm font-semibold">Long Description</Label>
+                      <p className="text-sm text-muted-foreground mt-2">{viewingProduct.longDescription}</p>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {Array.isArray((viewingProduct as any).highlights) && (viewingProduct as any).highlights.length > 0 && (
-                  <div className="border-t pt-6">
-                    <Label className="text-sm font-semibold">Highlights</Label>
-                    <ul className="list-disc list-inside text-sm text-muted-foreground mt-2 space-y-1">
-                      {(viewingProduct as any).highlights.map((h: string, idx: number) => (
-                        <li key={idx}>{h}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {Array.isArray((viewingProduct as any).specs) && (viewingProduct as any).specs.length > 0 && (
-                  <div className="border-t pt-6">
-                    <Label className="text-sm font-semibold">Specifications</Label>
-                    <div className="space-y-2 mt-2">
-                      {(viewingProduct as any).specs.map((spec: any, idx: number) => (
-                        <div key={idx} className="flex justify-between text-sm">
-                          <span className="font-medium">{spec.key}:</span>
-                          <span className="text-muted-foreground">{spec.value}</span>
-                        </div>
-                      ))}
+                  {Array.isArray((viewingProduct as any).sizes) && (viewingProduct as any).sizes.length > 0 && (
+                    <div className="border-t pt-6">
+                      <Label className="text-sm font-semibold">Available Sizes</Label>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {(viewingProduct as any).sizes.map((size: string, idx: number) => (
+                          <Badge key={idx} variant="outline">{size}</Badge>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {(viewingProduct as any).discount && (viewingProduct as any).discount.value > 0 && (
-                  <div className="border-t pt-6">
-                    <Label className="text-sm font-semibold">Discount</Label>
-                    <Badge className="mt-2">
-                      {(viewingProduct as any).discount.type === 'percentage'
-                        ? `${(viewingProduct as any).discount.value}% off`
-                        : `₹${(viewingProduct as any).discount.value} off`}
-                    </Badge>
-                  </div>
-                )}
-
-                {Array.isArray((viewingProduct as any).images) && (viewingProduct as any).images.length > 1 && (
-                  <div className="border-t pt-6">
-                    <Label className="text-sm font-semibold">All Images</Label>
-                    <div className="grid grid-cols-3 gap-2 mt-2">
-                      {(viewingProduct as any).images.map((img: string, idx: number) => (
-                        <img
-                          key={idx}
-                          src={(function(){
-                            const API_BASE = (import.meta as any).env?.VITE_API_BASE_URL || '';
-                            if (String(img).startsWith('http')) return img;
-                            return String(img).startsWith('/') ? img : `/uploads/${img}`;
-                          })()}
-                          alt={`Product ${idx + 1}`}
-                          className="w-full h-24 object-cover rounded border"
-                        />
-                      ))}
+                  {Array.isArray((viewingProduct as any).colors) && (viewingProduct as any).colors.length > 0 && (
+                    <div className="border-t pt-6">
+                      <Label className="text-sm font-semibold">Available Colors</Label>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {(viewingProduct as any).colors.map((color: string, idx: number) => (
+                          <Badge key={idx} variant="outline">{color}</Badge>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
+                  )}
+
+                  {Array.isArray((viewingProduct as any).highlights) && (viewingProduct as any).highlights.length > 0 && (
+                    <div className="border-t pt-6">
+                      <Label className="text-sm font-semibold">Highlights</Label>
+                      <ul className="list-disc list-inside text-sm text-muted-foreground mt-2 space-y-1">
+                        {(viewingProduct as any).highlights.map((h: string, idx: number) => (
+                          <li key={idx}>{h}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {Array.isArray((viewingProduct as any).specs) && (viewingProduct as any).specs.length > 0 && (
+                    <div className="border-t pt-6">
+                      <Label className="text-sm font-semibold">Specifications</Label>
+                      <div className="space-y-2 mt-2">
+                        {(viewingProduct as any).specs.map((spec: any, idx: number) => (
+                          <div key={idx} className="flex justify-between text-sm">
+                            <span className="font-medium">{spec.key}:</span>
+                            <span className="text-muted-foreground">{spec.value}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {(viewingProduct as any).discount && (viewingProduct as any).discount.value > 0 && (
+                    <div className="border-t pt-6">
+                      <Label className="text-sm font-semibold">Discount</Label>
+                      <Badge className="mt-2">
+                        {(viewingProduct as any).discount.type === 'percentage'
+                          ? `${(viewingProduct as any).discount.value}% off`
+                          : `₹${(viewingProduct as any).discount.value} off`}
+                      </Badge>
+                    </div>
+                  )}
+
+                  {Array.isArray((viewingProduct as any).images) && (viewingProduct as any).images.length > 1 && (
+                    <div className="border-t pt-6">
+                      <Label className="text-sm font-semibold">All Images</Label>
+                      <div className="grid grid-cols-3 gap-2 mt-2">
+                        {(viewingProduct as any).images.map((img: string, idx: number) => (
+                          <img
+                            key={idx}
+                            src={(function () {
+                              const API_BASE = (import.meta as any).env?.VITE_API_BASE_URL || '';
+                              if (String(img).startsWith('http')) return img;
+                              return String(img).startsWith('/') ? img : `/uploads/${img}`;
+                            })()}
+                            alt={`Product ${idx + 1}`}
+                            className="w-full h-24 object-cover rounded border"
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
@@ -4888,14 +4989,14 @@ const handleProductSubmit = async (e: React.FormEvent) => {
               <CardContent className="p-3 sm:p-4">
                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                   <div className="flex items-start gap-3 sm:gap-4">
-                    <input 
-                      type="checkbox" 
-                      checked={selectedProductIds.has(((product as any)._id || (product as any).id))} 
+                    <input
+                      type="checkbox"
+                      checked={selectedProductIds.has(((product as any)._id || (product as any).id))}
                       onChange={() => toggleProductSelection(((product as any)._id || (product as any).id))}
                       className="mt-1"
                     />
                     <img
-                      src={(function(){
+                      src={(function () {
                         const url = (product as any).image_url || (product as any).images?.[0] || '/placeholder.svg';
                         if (!url) return '/placeholder.svg';
                         if (String(url).startsWith('http')) return url;
@@ -4924,9 +5025,9 @@ const handleProductSubmit = async (e: React.FormEvent) => {
                     >
                       <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
                     </Button>
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
+                    <Button
+                      size="sm"
+                      variant="outline"
                       onClick={() => startEdit(product as any)}
                       className="h-8 w-8 sm:h-9 sm:w-9 p-0"
                     >
@@ -4969,11 +5070,11 @@ const handleProductSubmit = async (e: React.FormEvent) => {
           <form onSubmit={addCategory} className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="md:col-span-2">
               <Label htmlFor="catName">Name</Label>
-              <Input id="catName" value={catName} onChange={(e)=>setCatName(e.target.value)} required />
+              <Input id="catName" value={catName} onChange={(e) => setCatName(e.target.value)} required />
             </div>
             <div className="md:col-span-2">
               <Label htmlFor="catDesc">Description</Label>
-              <Textarea id="catDesc" value={catDesc} onChange={(e)=>setCatDesc(e.target.value)} />
+              <Textarea id="catDesc" value={catDesc} onChange={(e) => setCatDesc(e.target.value)} />
             </div>
             <div className="md:col-span-3">
               <Label>Category Image</Label>
@@ -4997,10 +5098,14 @@ const handleProductSubmit = async (e: React.FormEvent) => {
               />
             </div>
             <div className="md:col-span-3 flex items-end">
-              <Button type="submit" disabled={catSaving} className="w-full">
+              <button
+                type="submit"
+                disabled={catSaving}
+                className="w-full bg-black text-white border-black hover:bg-gray-800 hover:text-white focus-visible:bg-gray-800 focus-visible:text-white active:bg-gray-800 active:text-white px-4 py-2 rounded-md font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 {catSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Add Category
-              </Button>
+              </button>
             </div>
           </form>
         </CardContent>
@@ -5029,11 +5134,11 @@ const handleProductSubmit = async (e: React.FormEvent) => {
             </div>
             <div>
               <Label>Subcategory Name</Label>
-              <Input value={categoryForm.name} onChange={(e)=>setCategoryForm(p => ({ ...p, name: e.target.value }))} required />
+              <Input value={categoryForm.name} onChange={(e) => setCategoryForm(p => ({ ...p, name: e.target.value }))} required />
             </div>
             <div>
               <Label htmlFor="catDesc">Description</Label>
-              <Textarea id="catDesc" value={categoryForm.description} onChange={(e)=>setCategoryForm(p => ({ ...p, description: e.target.value }))} />
+              <Textarea id="catDesc" value={categoryForm.description} onChange={(e) => setCategoryForm(p => ({ ...p, description: e.target.value }))} />
             </div>
             <div className="md:col-span-3">
               <Label>Subcategory Image</Label>
@@ -5057,10 +5162,14 @@ const handleProductSubmit = async (e: React.FormEvent) => {
               />
             </div>
             <div className="md:col-span-3 flex items-end">
-              <Button type="submit" disabled={subcatSaving} className="w-full">
+              <button
+                type="submit"
+                disabled={subcatSaving}
+                className="w-full bg-black text-white border-black hover:bg-gray-800 hover:text-white focus-visible:bg-gray-800 focus-visible:text-white active:bg-gray-800 active:text-white px-4 py-2 rounded-md font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 {subcatSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Add Subcategory
-              </Button>
+              </button>
             </div>
           </form>
         </CardContent>
@@ -5105,29 +5214,33 @@ const handleProductSubmit = async (e: React.FormEvent) => {
               </Label>
               <div className="col-span-3">
                 <ImageUploader
-                images={categoryForm.imageUrl ? [categoryForm.imageUrl] : []}
-                onUpload={async (files) => {
-                  const uploadedUrls: string[] = [];
-                  for (const file of files) {
-                    try {
-                      const url = await getUploadUrl(file);
-                      uploadedUrls.push(url);
-                    } catch (err) {
-                      console.error('Failed to upload file:', err);
+                  images={categoryForm.imageUrl ? [categoryForm.imageUrl] : []}
+                  onUpload={async (files) => {
+                    const uploadedUrls: string[] = [];
+                    for (const file of files) {
+                      try {
+                        const url = await getUploadUrl(file);
+                        uploadedUrls.push(url);
+                      } catch (err) {
+                        console.error('Failed to upload file:', err);
+                      }
                     }
-                  }
-                  setCategoryForm(p => ({ ...p, imageUrl: uploadedUrls.length > 0 ? uploadedUrls[0] : '' }));
-                  return uploadedUrls;
-                }}
+                    setCategoryForm(p => ({ ...p, imageUrl: uploadedUrls.length > 0 ? uploadedUrls[0] : '' }));
+                    return uploadedUrls;
+                  }}
                   isLoading={uploadingImage}
                   maxImages={1}
                 />
               </div>
             </div>
-            <Button type="submit" disabled={catSaving}>
+            <button
+              type="submit"
+              disabled={catSaving}
+              className="bg-black text-white border-black hover:bg-gray-800 hover:text-white focus-visible:bg-gray-800 focus-visible:text-white active:bg-gray-800 active:text-white px-4 py-2 rounded-md font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               {catSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Save changes
-            </Button>
+            </button>
           </form>
         </DialogContent>
       </Dialog>
@@ -5211,19 +5324,19 @@ const handleProductSubmit = async (e: React.FormEvent) => {
           <form onSubmit={addRegion} className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="md:col-span-2">
               <Label htmlFor="regionName">Name</Label>
-              <Input 
-                id="regionName" 
-                value={regionForm.name} 
-                onChange={(e)=>setRegionForm(p => ({ ...p, name: e.target.value }))} 
-                required 
+              <Input
+                id="regionName"
+                value={regionForm.name}
+                onChange={(e) => setRegionForm(p => ({ ...p, name: e.target.value }))}
+                required
               />
             </div>
             <div className="md:col-span-2">
               <Label htmlFor="regionDesc">Description</Label>
-              <Textarea 
-                id="regionDesc" 
-                value={regionForm.description} 
-                onChange={(e)=>setRegionForm(p => ({ ...p, description: e.target.value }))} 
+              <Textarea
+                id="regionDesc"
+                value={regionForm.description}
+                onChange={(e) => setRegionForm(p => ({ ...p, description: e.target.value }))}
               />
             </div>
             <div className="md:col-span-3">
@@ -5248,10 +5361,14 @@ const handleProductSubmit = async (e: React.FormEvent) => {
               />
             </div>
             <div className="md:col-span-3 flex items-end">
-              <Button type="submit" disabled={regionSaving} className="w-full">
+              <button
+                type="submit"
+                disabled={regionSaving}
+                className="w-full bg-black text-white border-black hover:bg-gray-800 hover:text-white focus-visible:bg-gray-800 focus-visible:text-white active:bg-gray-800 active:text-white px-4 py-2 rounded-md font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 {regionSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Add Region
-              </Button>
+              </button>
             </div>
           </form>
         </CardContent>
@@ -5321,10 +5438,14 @@ const handleProductSubmit = async (e: React.FormEvent) => {
               <Button type="button" variant="outline" onClick={() => setEditingRegion(null)}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={regionSaving}>
+              <button
+                type="submit"
+                disabled={regionSaving}
+                className="bg-black text-white border-black hover:bg-gray-800 hover:text-white focus-visible:bg-gray-800 focus-visible:text-white active:bg-gray-800 active:text-white px-4 py-2 rounded-md font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 {regionSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Save Changes
-              </Button>
+              </button>
             </div>
           </form>
         </DialogContent>
@@ -5396,149 +5517,149 @@ const handleProductSubmit = async (e: React.FormEvent) => {
               <p className="text-sm text-muted-foreground">No orders found.</p>
             )}
             {paginatedOrders.map((order: any) => (
-            <Card key={order._id || order.id}>
-              <CardContent className="p-4 cursor-pointer" onClick={() => openOrderDetail(String(order._id || order.id))}>
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
-                  <div>
-                    <p className="font-semibold">
-                      Order #{String((order._id || order.id) ?? '').slice(0, 8)}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {(order.created_at || order.createdAt)
-                        ? new Date((order.created_at || order.createdAt) as any).toLocaleDateString()
-                        : ''}
-                    </p>
-                    <p className="font-bold mt-2">
-                      ₹{Number((order as any).total ?? (order as any).total_amount ?? 0).toLocaleString('en-IN')}
-                    </p>
-                  </div>
-                  {(() => {
-                    const itemsCount = (order.items || []).length;
-                    const singleItem = itemsCount === 1 ? order.items[0] : null;
-                    return (
-                      <div className="text-sm text-muted-foreground hidden sm:block flex-1 px-4">
-                        {singleItem ? (
-                          <div className="space-y-0.5">
-                            {(singleItem.size || singleItem.variant?.size) && (
-                              <div>Size: {singleItem.size || singleItem.variant?.size}</div>
-                            )}
-                            {(singleItem.color || singleItem.variant?.color) && (
-                              <div>Color: {singleItem.color || singleItem.variant?.color}</div>
-                            )}
-                            {!singleItem.size && !singleItem.color && !singleItem.variant?.size && !singleItem.variant?.color && (
-                              <div className="text-xs italic">N/A</div>
-                            )}
-                          </div>
-                        ) : itemsCount > 1 ? (
-                          <div className="text-xs">
-                            <div className="font-medium">{itemsCount} items</div>
-                            <div className="italic">see details for sizes/colors</div>
-                          </div>
-                        ) : (
-                          <div className="text-xs italic">N/A</div>
-                        )}
-                      </div>
-                    );
-                  })()}
-                  <div className="flex flex-wrap gap-2" onClick={(e) => e.stopPropagation()}>
+              <Card key={order._id || order.id}>
+                <CardContent className="p-4 cursor-pointer" onClick={() => openOrderDetail(String(order._id || order.id))}>
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+                    <div>
+                      <p className="font-semibold">
+                        Order #{String((order._id || order.id) ?? '').slice(0, 8)}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {(order.created_at || order.createdAt)
+                          ? new Date((order.created_at || order.createdAt) as any).toLocaleDateString()
+                          : ''}
+                      </p>
+                      <p className="font-bold mt-2">
+                        ₹{Number((order as any).total ?? (order as any).total_amount ?? 0).toLocaleString('en-IN')}
+                      </p>
+                    </div>
                     {(() => {
-                      const orderId = String((order._id || order.id) as any);
-                      const hasInvoice = orderInvoices[orderId];
-                      const isGenerating = generatingInvoice[orderId];
+                      const itemsCount = (order.items || []).length;
+                      const singleItem = itemsCount === 1 ? order.items[0] : null;
                       return (
-                        <>
-                          <Button
-                            size="sm"
-                            variant={order.status === 'pending' ? 'default' : 'outline'}
-                            onClick={() => updateOrderStatus(orderId, 'pending')}
-                          >
-                            Pending
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant={order.status === 'paid' ? 'default' : 'outline'}
-                            onClick={() => updateOrderStatus(orderId, 'paid')}
-                          >
-                            Paid
-                          </Button>
-                          {shippingEditId === orderId ? (
-                            <div className="flex gap-2 items-center">
-                              <Input
-                                placeholder="Tracking ID"
-                                value={shippingTrackingId}
-                                onChange={(e) => setShippingTrackingId(e.target.value)}
-                                className="w-40 h-9 text-sm"
-                                disabled={shippingSaving}
-                              />
+                        <div className="text-sm text-muted-foreground hidden sm:block flex-1 px-4">
+                          {singleItem ? (
+                            <div className="space-y-0.5">
+                              {(singleItem.size || singleItem.variant?.size) && (
+                                <div>Size: {singleItem.size || singleItem.variant?.size}</div>
+                              )}
+                              {(singleItem.color || singleItem.variant?.color) && (
+                                <div>Color: {singleItem.color || singleItem.variant?.color}</div>
+                              )}
+                              {!singleItem.size && !singleItem.color && !singleItem.variant?.size && !singleItem.variant?.color && (
+                                <div className="text-xs italic">N/A</div>
+                              )}
+                            </div>
+                          ) : itemsCount > 1 ? (
+                            <div className="text-xs">
+                              <div className="font-medium">{itemsCount} items</div>
+                              <div className="italic">see details for sizes/colors</div>
+                            </div>
+                          ) : (
+                            <div className="text-xs italic">N/A</div>
+                          )}
+                        </div>
+                      );
+                    })()}
+                    <div className="flex flex-wrap gap-2" onClick={(e) => e.stopPropagation()}>
+                      {(() => {
+                        const orderId = String((order._id || order.id) as any);
+                        const hasInvoice = orderInvoices[orderId];
+                        const isGenerating = generatingInvoice[orderId];
+                        return (
+                          <>
+                            <Button
+                              size="sm"
+                              variant={order.status === 'pending' ? 'default' : 'outline'}
+                              onClick={() => updateOrderStatus(orderId, 'pending')}
+                            >
+                              Pending
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant={order.status === 'paid' ? 'default' : 'outline'}
+                              onClick={() => updateOrderStatus(orderId, 'paid')}
+                            >
+                              Paid
+                            </Button>
+                            {shippingEditId === orderId ? (
+                              <div className="flex gap-2 items-center">
+                                <Input
+                                  placeholder="Tracking ID"
+                                  value={shippingTrackingId}
+                                  onChange={(e) => setShippingTrackingId(e.target.value)}
+                                  className="w-40 h-9 text-sm"
+                                  disabled={shippingSaving}
+                                />
+                                <Button
+                                  size="sm"
+                                  onClick={() => saveOrderShipping(orderId)}
+                                  disabled={shippingSaving || !shippingTrackingId.trim()}
+                                >
+                                  {shippingSaving ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Save'}
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    setShippingEditId(null);
+                                    setShippingTrackingId('');
+                                  }}
+                                  disabled={shippingSaving}
+                                >
+                                  Cancel
+                                </Button>
+                              </div>
+                            ) : (
                               <Button
                                 size="sm"
-                                onClick={() => saveOrderShipping(orderId)}
-                                disabled={shippingSaving || !shippingTrackingId.trim()}
+                                variant={order.status === 'shipped' ? 'default' : 'outline'}
+                                onClick={() => updateOrderStatus(orderId, 'shipped')}
                               >
-                                {shippingSaving ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Save'}
+                                Shipped
                               </Button>
+                            )}
+                            <Button
+                              size="sm"
+                              variant={order.status === 'delivered' ? 'default' : 'outline'}
+                              onClick={() => updateOrderStatus(orderId, 'delivered')}
+                            >
+                              Delivered
+                            </Button>
+                            {order.status === 'paid' && !hasInvoice && (
+                              <Button
+                                size="sm"
+                                variant="secondary"
+                                disabled={isGenerating}
+                                onClick={() => generateInvoice(orderId)}
+                              >
+                                {isGenerating ? (
+                                  <>
+                                    <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                    Generating...
+                                  </>
+                                ) : (
+                                  'Approve & Generate Invoice'
+                                )}
+                              </Button>
+                            )}
+                            {hasInvoice && (
                               <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => {
-                                  setShippingEditId(null);
-                                  setShippingTrackingId('');
-                                }}
-                                disabled={shippingSaving}
+                                onClick={() => viewInvoice(orderId)}
                               >
-                                Cancel
+                                View Invoice
                               </Button>
-                            </div>
-                          ) : (
-                            <Button
-                              size="sm"
-                              variant={order.status === 'shipped' ? 'default' : 'outline'}
-                              onClick={() => updateOrderStatus(orderId, 'shipped')}
-                            >
-                              Shipped
-                            </Button>
-                          )}
-                          <Button
-                            size="sm"
-                            variant={order.status === 'delivered' ? 'default' : 'outline'}
-                            onClick={() => updateOrderStatus(orderId, 'delivered')}
-                          >
-                            Delivered
-                          </Button>
-                          {order.status === 'paid' && !hasInvoice && (
-                            <Button
-                              size="sm"
-                              variant="secondary"
-                              disabled={isGenerating}
-                              onClick={() => generateInvoice(orderId)}
-                            >
-                              {isGenerating ? (
-                                <>
-                                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                                  Generating...
-                                </>
-                              ) : (
-                                'Approve & Generate Invoice'
-                              )}
-                            </Button>
-                          )}
-                          {hasInvoice && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => viewInvoice(orderId)}
-                            >
-                              View Invoice
-                            </Button>
-                          )}
-                        </>
-                      );
-                    })()}
+                            )}
+                          </>
+                        );
+                      })()}
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            ))}
           </div>
           {orders.length > 0 && (
             <Pagination
@@ -5820,11 +5941,11 @@ const handleProductSubmit = async (e: React.FormEvent) => {
         </CardContent>
       </Card>
 
-     
+
     </div>
 
 
-    
+
   );
 
   const renderShiprocketSettings = () => (
@@ -5832,7 +5953,7 @@ const handleProductSubmit = async (e: React.FormEvent) => {
       <div>
         <h2 className="text-2xl font-bold">Shiprocket Settings</h2>
         <p className="text-sm text-muted-foreground">
-          Connect your Shiprocket account to automate fulfilment. These defaults use Shiprocket sandbox credentials so you can test immediately.
+          Connect your Shiprocket account to automate fulfilment. Enter your Shiprocket account email and password to enable automatic order creation and tracking.
         </p>
       </div>
 
@@ -5885,36 +6006,25 @@ const handleProductSubmit = async (e: React.FormEvent) => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
-                <Label htmlFor="shiprocketApiKey">API Key</Label>
+                <Label htmlFor="shiprocketChannelId">Channel ID</Label>
                 <Input
-                  id="shiprocketApiKey"
-                  value={shiprocketForm.apiKey}
-                  onChange={(e) => setShiprocketForm((prev) => ({ ...prev, apiKey: e.target.value }))}
+                  id="shiprocketChannelId"
+                  value={shiprocketForm.channelId}
+                  onChange={(e) => setShiprocketForm((prev) => ({ ...prev, channelId: e.target.value }))}
                   disabled={settingsLoading || savingShiprocket}
                   required
                 />
               </div>
               <div>
-                <Label htmlFor="shiprocketSecret">Secret</Label>
+                <Label htmlFor="shiprocketPickupPincode">Pickup Pincode</Label>
                 <Input
-                  id="shiprocketSecret"
-                  value={shiprocketForm.secret}
-                  onChange={(e) => setShiprocketForm((prev) => ({ ...prev, secret: e.target.value }))}
+                  id="shiprocketPickupPincode"
+                  value={shiprocketForm.pickupPincode}
+                  onChange={(e) => setShiprocketForm((prev) => ({ ...prev, pickupPincode: e.target.value }))}
                   disabled={settingsLoading || savingShiprocket}
                   required
                 />
               </div>
-            </div>
-
-            <div>
-              <Label htmlFor="shiprocketChannelId">Channel ID</Label>
-              <Input
-                id="shiprocketChannelId"
-                value={shiprocketForm.channelId}
-                onChange={(e) => setShiprocketForm((prev) => ({ ...prev, channelId: e.target.value }))}
-                disabled={settingsLoading || savingShiprocket}
-                required
-              />
             </div>
 
             <Button type="submit" disabled={savingShiprocket || settingsLoading} className="w-full md:w-auto">
@@ -5946,13 +6056,13 @@ const handleProductSubmit = async (e: React.FormEvent) => {
               <div className="space-y-2 mt-2">
                 {contactForm.phones.map((p, idx) => (
                   <div key={idx} className="flex items-center gap-2">
-                    <Input value={p} onChange={(e)=>setContactForm((prev)=>({ ...prev, phones: prev.phones.map((x,i)=> i===idx? e.target.value : x) }))} />
-                    <Button variant="outline" onClick={() => setContactForm((prev)=>({ ...prev, phones: prev.phones.filter((_,i)=>i!==idx) }))}>
+                    <Input value={p} onChange={(e) => setContactForm((prev) => ({ ...prev, phones: prev.phones.map((x, i) => i === idx ? e.target.value : x) }))} />
+                    <Button variant="outline" onClick={() => setContactForm((prev) => ({ ...prev, phones: prev.phones.filter((_, i) => i !== idx) }))}>
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 ))}
-                <Button onClick={() => setContactForm((prev)=>({ ...prev, phones: [...prev.phones, ''] }))} variant="outline">
+                <Button onClick={() => setContactForm((prev) => ({ ...prev, phones: [...prev.phones, ''] }))} variant="outline">
                   <Plus className="h-4 w-4 mr-2" /> Add Phone
                 </Button>
               </div>
@@ -5963,13 +6073,13 @@ const handleProductSubmit = async (e: React.FormEvent) => {
               <div className="space-y-2 mt-2">
                 {contactForm.emails.map((eAddr, idx) => (
                   <div key={idx} className="flex items-center gap-2">
-                    <Input value={eAddr} onChange={(e)=>setContactForm((prev)=>({ ...prev, emails: prev.emails.map((x,i)=> i===idx? e.target.value : x) }))} />
-                    <Button variant="outline" onClick={() => setContactForm((prev)=>({ ...prev, emails: prev.emails.filter((_,i)=>i!==idx) }))}>
+                    <Input value={eAddr} onChange={(e) => setContactForm((prev) => ({ ...prev, emails: prev.emails.map((x, i) => i === idx ? e.target.value : x) }))} />
+                    <Button variant="outline" onClick={() => setContactForm((prev) => ({ ...prev, emails: prev.emails.filter((_, i) => i !== idx) }))}>
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 ))}
-                <Button onClick={() => setContactForm((prev)=>({ ...prev, emails: [...prev.emails, ''] }))} variant="outline">
+                <Button onClick={() => setContactForm((prev) => ({ ...prev, emails: [...prev.emails, ''] }))} variant="outline">
                   <Plus className="h-4 w-4 mr-2" /> Add Email
                 </Button>
               </div>
@@ -5980,27 +6090,27 @@ const handleProductSubmit = async (e: React.FormEvent) => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
                 <div>
                   <Label>Line 1</Label>
-                  <Input value={contactForm.address.line1 || ''} onChange={(e)=>setContactForm((prev)=>({ ...prev, address: { ...prev.address, line1: e.target.value } }))} />
+                  <Input value={contactForm.address.line1 || ''} onChange={(e) => setContactForm((prev) => ({ ...prev, address: { ...prev.address, line1: e.target.value } }))} />
                 </div>
                 <div>
                   <Label>Line 2</Label>
-                  <Input value={contactForm.address.line2 || ''} onChange={(e)=>setContactForm((prev)=>({ ...prev, address: { ...prev.address, line2: e.target.value } }))} />
+                  <Input value={contactForm.address.line2 || ''} onChange={(e) => setContactForm((prev) => ({ ...prev, address: { ...prev.address, line2: e.target.value } }))} />
                 </div>
                 <div>
                   <Label>City</Label>
-                  <Input value={contactForm.address.city || ''} onChange={(e)=>setContactForm((prev)=>({ ...prev, address: { ...prev.address, city: e.target.value } }))} />
+                  <Input value={contactForm.address.city || ''} onChange={(e) => setContactForm((prev) => ({ ...prev, address: { ...prev.address, city: e.target.value } }))} />
                 </div>
                 <div>
                   <Label>State</Label>
-                  <Input value={contactForm.address.state || ''} onChange={(e)=>setContactForm((prev)=>({ ...prev, address: { ...prev.address, state: e.target.value } }))} />
+                  <Input value={contactForm.address.state || ''} onChange={(e) => setContactForm((prev) => ({ ...prev, address: { ...prev.address, state: e.target.value } }))} />
                 </div>
                 <div className="md:col-span-2">
                   <Label>Pincode</Label>
-                  <Input value={contactForm.address.pincode || ''} onChange={(e)=>setContactForm((prev)=>({ ...prev, address: { ...prev.address, pincode: e.target.value } }))} />
+                  <Input value={contactForm.address.pincode || ''} onChange={(e) => setContactForm((prev) => ({ ...prev, address: { ...prev.address, pincode: e.target.value } }))} />
                 </div>
                 <div className="md:col-span-2">
                   <Label>Maps URL (optional)</Label>
-                  <Input value={contactForm.mapsUrl || ''} onChange={(e)=>setContactForm((prev)=>({ ...prev, mapsUrl: e.target.value }))} />
+                  <Input value={contactForm.mapsUrl || ''} onChange={(e) => setContactForm((prev) => ({ ...prev, mapsUrl: e.target.value }))} />
                 </div>
               </div>
             </div>
@@ -6181,13 +6291,13 @@ const handleProductSubmit = async (e: React.FormEvent) => {
         <CardContent className="space-y-6">
           <div>
             <Label>New Arrivals Limit</Label>
-            <Input type="number" min={1} max={100} value={homeLimit} onChange={(e)=>setHomeLimit(Math.max(1, Math.min(100, Number(e.target.value||0))))} />
+            <Input type="number" min={1} max={100} value={homeLimit} onChange={(e) => setHomeLimit(Math.max(1, Math.min(100, Number(e.target.value || 0))))} />
           </div>
 
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <Label>Ticker Lines</Label>
-              <Button size="sm" variant="outline" onClick={()=>setHomeTicker((arr)=>[...arr, { id: `tmp_${Date.now()}`, text: '', url: '', startAt: '', endAt: '', priority: 0 }])}>Add Line</Button>
+              <Button size="sm" variant="outline" onClick={() => setHomeTicker((arr) => [...arr, { id: `tmp_${Date.now()}`, text: '', url: '', startAt: '', endAt: '', priority: 0 }])}>Add Line</Button>
             </div>
             <div className="space-y-3">
               {homeTicker.length === 0 && <p className="text-sm text-muted-foreground">No lines yet.</p>}
@@ -6195,9 +6305,9 @@ const handleProductSubmit = async (e: React.FormEvent) => {
                 <div key={it.id || idx} className="flex items-end gap-2 border rounded-md p-2">
                   <div className="flex-1">
                     <Label>Text</Label>
-                    <Input value={it.text} onChange={(e)=>setHomeTicker((arr)=>{ const copy=[...arr]; copy[idx]={...copy[idx], text: e.target.value}; return copy; })} />
+                    <Input value={it.text} onChange={(e) => setHomeTicker((arr) => { const copy = [...arr]; copy[idx] = { ...copy[idx], text: e.target.value }; return copy; })} />
                   </div>
-                  <Button variant="destructive" size="sm" onClick={()=>setHomeTicker((arr)=>arr.filter((_,i)=>i!==idx))}>Delete</Button>
+                  <Button variant="destructive" size="sm" onClick={() => setHomeTicker((arr) => arr.filter((_, i) => i !== idx))}>Delete</Button>
                 </div>
               ))}
             </div>
@@ -6206,7 +6316,7 @@ const handleProductSubmit = async (e: React.FormEvent) => {
           <div className="border-t border-border pt-6 space-y-3">
             <div className="flex items-center justify-between">
               <Label className="text-base font-semibold">Feature Rows (T-SHIRTS, DENIMS, HOODIES)</Label>
-              <Button size="sm" variant="outline" onClick={()=>setHomeFeatureRows((arr)=>[...arr, { key: '', title: '', link: '', imageAlt: '' }])}>Add Row</Button>
+              <Button size="sm" variant="outline" onClick={() => setHomeFeatureRows((arr) => [...arr, { key: '', title: '', link: '', imageAlt: '' }])}>Add Row</Button>
             </div>
             <p className="text-sm text-muted-foreground">Manage the large category sections on the home page.</p>
             <div className="space-y-3">
@@ -6216,23 +6326,23 @@ const handleProductSubmit = async (e: React.FormEvent) => {
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <Label className="text-xs">Key (e.g., tshirts)</Label>
-                      <Input value={row.key} onChange={(e)=>setHomeFeatureRows((arr)=>{ const copy=[...arr]; copy[idx]={...copy[idx], key: e.target.value}; return copy; })} placeholder="tshirts" />
+                      <Input value={row.key} onChange={(e) => setHomeFeatureRows((arr) => { const copy = [...arr]; copy[idx] = { ...copy[idx], key: e.target.value }; return copy; })} placeholder="tshirts" />
                     </div>
                     <div>
                       <Label className="text-xs">Title (e.g., T-SHIRTS)</Label>
-                      <Input value={row.title} onChange={(e)=>setHomeFeatureRows((arr)=>{ const copy=[...arr]; copy[idx]={...copy[idx], title: e.target.value}; return copy; })} placeholder="T-SHIRTS" />
+                      <Input value={row.title} onChange={(e) => setHomeFeatureRows((arr) => { const copy = [...arr]; copy[idx] = { ...copy[idx], title: e.target.value }; return copy; })} placeholder="T-SHIRTS" />
                     </div>
                   </div>
                   <div>
                     <Label className="text-xs">Link (e.g., /collection/t-shirts)</Label>
-                    <Input value={row.link} onChange={(e)=>setHomeFeatureRows((arr)=>{ const copy=[...arr]; copy[idx]={...copy[idx], link: e.target.value}; return copy; })} placeholder="/collection/t-shirts" />
+                    <Input value={row.link} onChange={(e) => setHomeFeatureRows((arr) => { const copy = [...arr]; copy[idx] = { ...copy[idx], link: e.target.value }; return copy; })} placeholder="/collection/t-shirts" />
                   </div>
                   <div>
                     <Label className="text-xs">Image Alt Text (optional)</Label>
-                    <Input value={row.imageAlt || ''} onChange={(e)=>setHomeFeatureRows((arr)=>{ const copy=[...arr]; copy[idx]={...copy[idx], imageAlt: e.target.value}; return copy; })} placeholder="T-Shirts Collection" />
+                    <Input value={row.imageAlt || ''} onChange={(e) => setHomeFeatureRows((arr) => { const copy = [...arr]; copy[idx] = { ...copy[idx], imageAlt: e.target.value }; return copy; })} placeholder="T-Shirts Collection" />
                   </div>
                   <div className="flex justify-end">
-                    <Button variant="destructive" size="sm" onClick={()=>setHomeFeatureRows((arr)=>arr.filter((_,i)=>i!==idx))}>Delete Row</Button>
+                    <Button variant="destructive" size="sm" onClick={() => setHomeFeatureRows((arr) => arr.filter((_, i) => i !== idx))}>Delete Row</Button>
                   </div>
                 </div>
               ))}
@@ -6257,7 +6367,7 @@ const handleProductSubmit = async (e: React.FormEvent) => {
       const data = await apiFetch<AdminReview[]>(`/api/reviews/admin/reviews?limit=200&v=${Date.now()}`);
       const arr = Array.isArray(data) ? data : (Array.isArray((data as any)?.data) ? (data as any).data : []);
       setReviews(arr);
-    } catch (e:any) {
+    } catch (e: any) {
       console.warn('Failed to load reviews', e?.message || e);
     } finally {
       setReviewsLoading(false);
@@ -6275,94 +6385,94 @@ const handleProductSubmit = async (e: React.FormEvent) => {
 
 
 
-   <div className="space-y-6">
-  <div>
-    <h2 className="text-2xl font-bold">User Reviews</h2>
-  </div>
-
-  <Card className="shadow-sm rounded-xl bg-white dark:bg-slate-900">
-    <CardContent className="p-4">
-      <div className="overflow-x-auto text-slate-800 dark:text-slate-200">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="text-slate-700 dark:text-slate-300">User Name</TableHead>
-              <TableHead className="text-slate-700 dark:text-slate-300">Email</TableHead>
-              <TableHead className="text-slate-700 dark:text-slate-300">Review</TableHead>
-              <TableHead className="text-slate-700 dark:text-slate-300">Rating</TableHead>
-              <TableHead className="text-slate-700 dark:text-slate-300">Date</TableHead>
-              <TableHead className="text-slate-700 dark:text-slate-300">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-
-          <TableBody>
-            {reviews.map((r) => (
-              <TableRow key={r._id} className="hover:bg-muted/50">
-                <TableCell className="font-medium">{r.username || "-"}</TableCell>
-
-                {/* stronger color than 'muted' so it stays readable */}
-                <TableCell className="text-slate-600 dark:text-slate-300">
-                  {r.email || "-"}
-                </TableCell>
-
-                <TableCell className="max-w-[420px]">
-                  <div className="text-sm leading-relaxed break-words whitespace-pre-wrap">
-                    {r.text}
-                  </div>
-
-                  {Array.isArray((r as any).replies) && (r as any).replies.length > 0 && (
-                    <div className="mt-2 space-y-1">
-                      {(r as any).replies.map((rep: any, i: number) => (
-                        <div
-                          key={i}
-                          className="text-xs text-slate-600 dark:text-slate-300 border-l border-slate-200 dark:border-slate-700 pl-2"
-                        >
-                          <span className="font-semibold text-slate-700 dark:text-slate-200">
-                            {rep.authorId?.name || "Admin"}:
-                          </span>{" "}
-                          {rep.text}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </TableCell>
-
-                <TableCell>{r.rating ?? "-"}</TableCell>
-
-                <TableCell>
-                  {r?.createdAt ? new Date(r.createdAt).toLocaleDateString("en-IN") : "-"}
-                </TableCell>
-
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <Button size="sm" variant="outline" onClick={() => openEditReview(r)}>
-                      Edit
-                    </Button>
-                    <Button size="sm" variant="destructive" onClick={() => handleReviewDelete(r._id)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-
-            {(!reviews || reviews.length === 0) && (
-              <TableRow>
-                <TableCell
-                  colSpan={6}
-                  className="text-center text-sm text-slate-600 dark:text-slate-300 py-6"
-                >
-                  {reviewsLoading ? "Loading..." : "No reviews found."}
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold">User Reviews</h2>
       </div>
-    </CardContent>
-  </Card>
 
-</div>
+      <Card className="shadow-sm rounded-xl bg-white dark:bg-slate-900">
+        <CardContent className="p-4">
+          <div className="overflow-x-auto text-slate-800 dark:text-slate-200">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-slate-700 dark:text-slate-300">User Name</TableHead>
+                  <TableHead className="text-slate-700 dark:text-slate-300">Email</TableHead>
+                  <TableHead className="text-slate-700 dark:text-slate-300">Review</TableHead>
+                  <TableHead className="text-slate-700 dark:text-slate-300">Rating</TableHead>
+                  <TableHead className="text-slate-700 dark:text-slate-300">Date</TableHead>
+                  <TableHead className="text-slate-700 dark:text-slate-300">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+
+              <TableBody>
+                {reviews.map((r) => (
+                  <TableRow key={r._id} className="hover:bg-muted/50">
+                    <TableCell className="font-medium">{r.username || "-"}</TableCell>
+
+                    {/* stronger color than 'muted' so it stays readable */}
+                    <TableCell className="text-slate-600 dark:text-slate-300">
+                      {r.email || "-"}
+                    </TableCell>
+
+                    <TableCell className="max-w-[420px]">
+                      <div className="text-sm leading-relaxed break-words whitespace-pre-wrap">
+                        {r.text}
+                      </div>
+
+                      {Array.isArray((r as any).replies) && (r as any).replies.length > 0 && (
+                        <div className="mt-2 space-y-1">
+                          {(r as any).replies.map((rep: any, i: number) => (
+                            <div
+                              key={i}
+                              className="text-xs text-slate-600 dark:text-slate-300 border-l border-slate-200 dark:border-slate-700 pl-2"
+                            >
+                              <span className="font-semibold text-slate-700 dark:text-slate-200">
+                                {rep.authorId?.name || "Admin"}:
+                              </span>{" "}
+                              {rep.text}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </TableCell>
+
+                    <TableCell>{r.rating ?? "-"}</TableCell>
+
+                    <TableCell>
+                      {r?.createdAt ? new Date(r.createdAt).toLocaleDateString("en-IN") : "-"}
+                    </TableCell>
+
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Button size="sm" variant="outline" onClick={() => openEditReview(r)}>
+                          Edit
+                        </Button>
+                        <Button size="sm" variant="destructive" onClick={() => handleReviewDelete(r._id)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+
+                {(!reviews || reviews.length === 0) && (
+                  <TableRow>
+                    <TableCell
+                      colSpan={6}
+                      className="text-center text-sm text-slate-600 dark:text-slate-300 py-6"
+                    >
+                      {reviewsLoading ? "Loading..." : "No reviews found."}
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+
+    </div>
 
   );
 
@@ -6505,9 +6615,9 @@ const handleProductSubmit = async (e: React.FormEvent) => {
       case 'return-policy':
         return <AdminReturnPolicyEditor />;
       case 'privacy-policy':
-        return <AdminPrivacyPolicyEditor />; 
+        return <AdminPrivacyPolicyEditor />;
       case 'terms-of-service':
-        return <AdminTermsOfServiceEditor />; 
+        return <AdminTermsOfServiceEditor />;
       case 'billing':
         return renderBillingSettings();
       case 'payment':
@@ -6533,8 +6643,15 @@ const handleProductSubmit = async (e: React.FormEvent) => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
-      <main className="container mx-auto px-3 sm:px-4 pt-32 md:pt-36 lg:pt-40 pb-12">
+      <main className="container mx-auto px-3 sm:px-4 pt-6 md:pt-8 pb-12">
+        {/* Admin Header with Logo */}
+        <div className="flex items-center justify-between mb-6">
+          <img src="/logo1.png" alt="Logo" className="h-10 w-auto" />
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-muted-foreground">Admin Panel</span>
+          </div>
+        </div>
+
         {/* Mobile sidebar toggle button */}
         <button
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -6568,7 +6685,7 @@ const handleProductSubmit = async (e: React.FormEvent) => {
                     <button
                       key={item.id}
                       onClick={() => {
-                        setActiveSection(item.id);
+                        handleSectionChange(item.id as Section);
                         setIsSidebarOpen(false);
                       }}
                       className={cn(
@@ -6588,6 +6705,45 @@ const handleProductSubmit = async (e: React.FormEvent) => {
                     </button>
                   );
                 })}
+                <div className="pt-4 mt-4 border-t border-border">
+                  <Dialog open={showLogoutConfirm} onOpenChange={setShowLogoutConfirm}>
+                    <DialogTrigger asChild>
+                      <button
+                        className="w-full flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors text-red-600 hover:bg-red-50 hover:text-red-700"
+                      >
+                        <LogOut className="h-4 w-4 flex-shrink-0" />
+                        <span className="truncate">Logout</span>
+                      </button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-md">
+                      <DialogHeader>
+                        <DialogTitle>Confirm Logout</DialogTitle>
+                        <DialogDescription>
+                          Are you sure you want to log out?
+                        </DialogDescription>
+                      </DialogHeader>
+                      <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2">
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          onClick={() => setShowLogoutConfirm(false)}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          onClick={async () => {
+                            await handleLogout();
+                            setShowLogoutConfirm(false);
+                          }}
+                        >
+                          Logout
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                </div>
               </div>
             </div>
           </aside>
@@ -6663,8 +6819,8 @@ const handleProductSubmit = async (e: React.FormEvent) => {
                             {(it.color || it.variant?.color) && <div>Color: {it.color || it.variant?.color}</div>}
                           </div>
                         </div>
-                        <div className="text-sm tabular-nums">{it.qty} × ���₹{Number(it.price || 0).toLocaleString('en-IN')}</div>
-                        <div className="w-20 text-right font-semibold">₹{(Number(it.qty || 0) * Number(it.price || 0)).toLocaleString('en-IN')}</div>
+                        <div className="text-sm tabular-nums">{it.qty} × &#8377;{Number(it.price || 0).toLocaleString('en-IN')}</div>
+                        <div className="w-20 text-right font-semibold">&#8377;{(Number(it.qty || 0) * Number(it.price || 0)).toLocaleString('en-IN')}</div>
                       </div>
                     ))}
                   </div>
@@ -6685,22 +6841,22 @@ const handleProductSubmit = async (e: React.FormEvent) => {
           <div className="px-4 pb-6 space-y-4">
             <div>
               <Label>Name</Label>
-              <Input value={userForm.name} onChange={(e) => setUserForm((p:any)=>({ ...p, name: e.target.value }))} />
+              <Input value={userForm.name} onChange={(e) => setUserForm((p: any) => ({ ...p, name: e.target.value }))} />
               {userErrors.name && <p className="text-xs text-destructive mt-1">{userErrors.name}</p>}
             </div>
             <div>
               <Label>Email</Label>
-              <Input value={userForm.email} onChange={(e) => setUserForm((p:any)=>({ ...p, email: e.target.value }))} />
+              <Input value={userForm.email} onChange={(e) => setUserForm((p: any) => ({ ...p, email: e.target.value }))} />
               {userErrors.email && <p className="text-xs text-destructive mt-1">{userErrors.email}</p>}
             </div>
             <div>
               <Label>Phone</Label>
-              <Input value={userForm.phone} onChange={(e) => setUserForm((p:any)=>({ ...p, phone: e.target.value }))} />
+              <Input value={userForm.phone} onChange={(e) => setUserForm((p: any) => ({ ...p, phone: e.target.value }))} />
               {userErrors.phone && <p className="text-xs text-destructive mt-1">{userErrors.phone}</p>}
             </div>
             <div>
               <Label>Role</Label>
-              <Select value={userForm.role} onValueChange={(v:any)=>setUserForm((p:any)=>({ ...p, role: v }))}>
+              <Select value={userForm.role} onValueChange={(v: any) => setUserForm((p: any) => ({ ...p, role: v }))}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -6712,7 +6868,7 @@ const handleProductSubmit = async (e: React.FormEvent) => {
             </div>
             <div>
               <Label>Status</Label>
-              <Select value={userForm.status} onValueChange={(v:any)=>setUserForm((p:any)=>({ ...p, status: v }))}>
+              <Select value={userForm.status} onValueChange={(v: any) => setUserForm((p: any) => ({ ...p, status: v }))}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -6724,12 +6880,12 @@ const handleProductSubmit = async (e: React.FormEvent) => {
             </div>
             <div>
               <Label>Address</Label>
-              <Textarea value={userForm.address1} onChange={(e)=>setUserForm((p:any)=>({ ...p, address1: e.target.value }))} />
+              <Textarea value={userForm.address1} onChange={(e) => setUserForm((p: any) => ({ ...p, address1: e.target.value }))} />
             </div>
 
             <div className="flex gap-2">
               <Button onClick={saveUser} disabled={userSaving}>
-                {userSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>} Save
+                {userSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Save
               </Button>
               <Button variant="outline" onClick={closeUserDrawer}>Cancel</Button>
             </div>
@@ -6743,8 +6899,6 @@ const handleProductSubmit = async (e: React.FormEvent) => {
         onClose={() => setEditReviewOpen(false)}
         onSave={handleReviewSave}
       />
-
-      <Footer />
     </div>
   );
 };

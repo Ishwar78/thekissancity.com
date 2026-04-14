@@ -89,13 +89,6 @@ const PORT = process.env.PORT || 5000;
 /* --------------------------- LOG EACH REQUEST --------------------------- */
 app.use((req, res, next) => {
   console.log(`🔍 [REQUEST] ${req.method} ${req.url}`);
-  console.log('🔍 [REQUEST] Headers:', JSON.stringify(req.headers, null, 2));
-  console.log('🔍 [REQUEST] Body:', JSON.stringify(req.body, null, 2));
-  next();
-});
-
-app.use((req, _res, next) => {
-  console.log(`${req.method} ${req.path}`);
   next();
 });
 
@@ -173,22 +166,6 @@ app.use('/api/faqs', faqsRoutes);
 app.use('/api/regions', regionsRoutes);
 app.use('/api/product-slider', productSliderRoutes);
 
-// Debug env endpoint (masking enabled)
-app.get('/api/_debug/env', (_req, res) => {
-  const mask = (v) =>
-    !v || v.length < 6 ? (v ? '***' : '(empty)') : v.slice(0, 4) + '***' + v.slice(-2);
-
-  res.json({
-    ok: true,
-    data: {
-      RZP_KEY_ID: mask(process.env.RAZORPAY_KEY_ID || ''),
-      RZP_KEY_SECRET: mask(process.env.RAZORPAY_KEY_SECRET || ''),
-      RZP_CURRENCY: process.env.RAZORPAY_CURRENCY || '(empty)',
-      MONGODB_URI_EXISTS: !!process.env.MONGODB_URI,
-      JWT_SECRET: mask(process.env.JWT_SECRET || ''),
-    },
-  });
-});
 
 /* ------------------- SERVER-SIDE SEO META TAG INJECTION ------------------- */
 // This middleware handles frontend routes and injects product-specific meta tags

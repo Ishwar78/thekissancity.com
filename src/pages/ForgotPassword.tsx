@@ -43,19 +43,9 @@ const ForgotPassword = () => {
       });
 
       if (res.ok) {
-        // Extract token from response if available (for demo purposes)
-        const token = res.json?.token;
-        if (token) {
-          setResetToken(token);
-          setStep('reset');
-          toast.success('Please check your email for reset link or use the one below');
-        } else {
-          toast.success('If an account exists with this email, you will receive a reset link');
-          // For demo, after a few seconds, offer to reset with token
-          setTimeout(() => {
-            toast.info('Demo mode: Please click the reset button or check your email');
-          }, 2000);
-        }
+        toast.success('If an account exists with this email, you will receive a reset link via email.');
+        // Optionally clear the email field
+        setEmail('');
       } else {
         toast.error(res.json?.message || 'Failed to request password reset');
       }
@@ -101,10 +91,12 @@ const ForgotPassword = () => {
       });
 
       if (res.ok) {
-        toast.success('Password reset successfully!');
-        setTimeout(() => {
-          navigate('/auth');
-        }, 2000);
+        toast.success('Password reset successfully! You can now sign in with your new password.');
+        // Clear the state or switch to a success message, without force redirecting
+        setStep('email');
+        setResetToken('');
+        setNewPassword('');
+        setConfirmPassword('');
       } else {
         toast.error(res.json?.message || 'Failed to reset password');
       }
@@ -142,9 +134,13 @@ const ForgotPassword = () => {
                     required
                   />
                 </div>
-                <Button type="submit" className="w-full" disabled={loading}>
+                <button 
+                  type="submit" 
+                  className="w-full bg-[#6B4E3B] text-white px-4 py-2 rounded-md font-medium hover:bg-[#5A4131] transition-colors disabled:opacity-50 disabled:cursor-not-allowed" 
+                  disabled={loading}
+                >
                   {loading ? 'Sending...' : 'Send Reset Link'}
-                </Button>
+                </button>
               </form>
             ) : (
               <form onSubmit={handleResetPassword} className="space-y-4">
@@ -170,20 +166,23 @@ const ForgotPassword = () => {
                     required
                   />
                 </div>
-                <Button type="submit" className="w-full" disabled={loading}>
+                <button 
+                  type="submit" 
+                  className="w-full bg-[#6B4E3B] text-white px-4 py-2 rounded-md font-medium hover:bg-[#5A4131] transition-colors disabled:opacity-50 disabled:cursor-not-allowed" 
+                  disabled={loading}
+                >
                   {loading ? 'Resetting...' : 'Reset Password'}
-                </Button>
+                </button>
               </form>
             )}
             <div className="mt-4 text-center">
-              <Button
+              <button
                 type="button"
-                variant="ghost"
-                className="text-sm text-primary hover:underline"
+                className="text-sm text-[#6B4E3B] hover:underline hover:text-[#5A4131] font-medium transition-colors"
                 onClick={() => navigate('/auth')}
               >
                 Back to sign in
-              </Button>
+              </button>
             </div>
           </CardContent>
         </Card>

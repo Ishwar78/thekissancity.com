@@ -91,7 +91,7 @@ export function InvoiceDisplay({ order, invoice, businessInfo, isLoading, error 
         <div className="mb-8 pb-8 border-b border-border">
           <div className="flex justify-between items-start mb-6">
             <div>
-              <img src="/Untitled design.png" alt="Company Header" className="h-16 mb-2 object-contain" />
+              <img src="/logo1.png" alt="Company Header" className="h-16 mb-2 object-contain" />
             </div>
             <div className="text-right">
               <p className="text-sm text-muted-foreground">Contact:</p>
@@ -168,14 +168,22 @@ export function InvoiceDisplay({ order, invoice, businessInfo, isLoading, error 
             <thead>
               <tr className="border-b-2 border-border">
                 <th className="text-left py-2 font-semibold">Item</th>
-                <th className="text-left py-2 font-semibold">Color</th>
                 <th className="text-right py-2 font-semibold">Qty</th>
                 <th className="text-right py-2 font-semibold">Price</th>
                 <th className="text-right py-2 font-semibold">Total</th>
               </tr>
             </thead>
             <tbody>
-              {order.items.map((item, idx) => (
+              {order.items.map((item, idx) => {
+                console.log('=== INVOICE ITEM DEBUG ===');
+                console.log('Item:', item);
+                console.log('Item meta:', item.meta);
+                console.log('Item meta.gram:', item.meta?.gram);
+                console.log('Item gram:', item.gram);
+                console.log('Item variant:', item.variant);
+                console.log('Item variant.gram:', item.variant?.gram);
+                console.log('=== END INVOICE ITEM DEBUG ===');
+                return (
                 <tr key={idx} className="border-b border-border">
                   <td className="py-3">
                     <div className="flex gap-2">
@@ -195,19 +203,18 @@ export function InvoiceDisplay({ order, invoice, businessInfo, isLoading, error 
                         {item.size && !item.variant?.size && (
                           <p className="text-xs text-muted-foreground">Size: {item.size}</p>
                         )}
+                        <p className="text-sm font-bold text-red-600 mt-1">
+                          Weight: {item.meta?.gram || item.gram || item.variant?.gram || 'N/A'}
+                        </p>
                       </div>
                     </div>
-                  </td>
-                  <td className="py-3">
-                    <p className="text-sm">
-                      {item.color || item.variant?.color || '-'}
-                    </p>
                   </td>
                   <td className="text-right py-3">{item.qty}</td>
                   <td className="text-right py-3">₹{item.price.toLocaleString('en-IN')}</td>
                   <td className="text-right py-3 font-semibold">₹{(item.price * item.qty).toLocaleString('en-IN')}</td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>

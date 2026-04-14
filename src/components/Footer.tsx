@@ -35,7 +35,7 @@ export const Footer = () => {
 
   return (
     <footer className=" text-white relative overflow-hidden mb-0"
-    style={{ backgroundColor: '#2d2117' }}>
+      style={{ backgroundColor: '#2d2117' }}>
       <div
         className="absolute bottom-0 left-0 w-full h-full bg-no-repeat bg-left-bottom opacity-10 sm:opacity-20"
         style={{ backgroundImage: 'url(/src/assets/table-outline.png)', backgroundSize: '40% auto' }}
@@ -55,15 +55,15 @@ export const Footer = () => {
               aria-label="KisaanCity Home"
             >
               <img
-                src="/logo.jpeg" 
+                src="/FinalLogo-removebg-preview.png"
                 alt="KisaanCity Logo"
                 className="h-8 md:h-10 w-auto object-contain"
               />
-              <span className="sr-only">Kissan City</span>
+              <span className="sr-only">The Kissan City</span>
             </Link>
 
             <p className="text-xs md:text-sm text-gray-300 leading-relaxed mb-4 md:mb-6 max-w-xs">
-             The Kissan City is a brand name owned by Nut and Nector Pvt Ltd and is bridging the gap between the rural heartland and urban doorstep.
+              The Kissan City is a brand name owned by Nut and Nector Pvt Ltd and is bridging the gap between the rural heartland and urban doorstep.
             </p>
             <div className="space-y-2 md:space-y-3">
               <div className="flex items-center gap-2 md:gap-3 text-xs md:text-sm text-gray-300 hover:text-yellow-400 transition-colors">
@@ -72,11 +72,16 @@ export const Footer = () => {
                   connnect@thekissancity.com
                 </a>
               </div>
-              
-              <div className="flex items-start gap-2 md:gap-3 text-xs md:text-sm text-gray-300">
+
+              <a
+                href="https://maps.app.goo.gl/NKGXAh846kNFqE2H8?g_st=aw"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-start gap-2 md:gap-3 text-xs md:text-sm text-gray-300 hover:text-yellow-400 transition-colors"
+              >
                 <MapPin className="h-3 w-3 md:h-4 md:w-4 text-white mt-0.5 flex-shrink-0" />
                 <span>India</span>
-              </div>
+              </a>
 
               {/* GSTIN (added) */}
               {/* <div className="text-xs md:text-sm text-gray-300">
@@ -92,7 +97,7 @@ export const Footer = () => {
             <div>
               <h4 className="font-semibold text-white mb-3 md:mb-5 text-sm md:text-base">Shop</h4>
               <ul className="space-y-2 md:space-y-3">
-                
+
                 <li>
                   <Link
                     to="/about"
@@ -208,20 +213,20 @@ export const Footer = () => {
                 <Instagram className="h-4 w-4 md:h-5 md:w-5" />
               </a>
               <a
-               href="https://twitter.com/thekissancity"
-  target="_blank"
-  rel="noopener noreferrer"
-  className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white hover:text-black transition-all duration-200"
->
-  <svg
-    className="h-4 w-4 md:h-5 md:w-5"
-    viewBox="0 0 24 24"
-    fill="currentColor"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.259 5.629 5.905-5.629Zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-  </svg>
-</a>
+                href="https://twitter.com/thekissancity"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white hover:text-black transition-all duration-200"
+              >
+                <svg
+                  className="h-4 w-4 md:h-5 md:w-5"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.259 5.629 5.905-5.629Zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                </svg>
+              </a>
               <a
                 href="/"
                 target="_blank"

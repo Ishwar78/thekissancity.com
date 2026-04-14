@@ -121,6 +121,20 @@ type P = {
     primaryImageIndex?: number;
   }>;
   colorInventory?: Array<{ color: string; qty: number }>;
+  quantityOptions?: Array<{
+    id?: string;
+    code?: string;
+    label?: string;
+    displayLabel?: string;
+    price?: number;
+    originalPrice?: number;
+    stock?: number;
+    qty?: number;
+    quantity?: number;
+    unit?: string;
+    packSize?: number;
+    gram?: string;
+  }>;
   discount?: { type: 'percentage' | 'flat'; value: number };
   sku?: string;
   slug?: string;
@@ -206,8 +220,7 @@ const ProductDetail = () => {
       try {
         setLoading(true);
         if (!slug) throw new Error("Missing product identifier");
-        const cacheBuster = Date.now();
-        const { ok, json } = await api(`/api/products/${slug}?_t=${cacheBuster}`);
+        const { ok, json } = await api(`/api/products/${slug}`);
         if (!ok) throw new Error(json?.message || json?.error || "Failed to load product");
         if (!ignore) {
           const productData = json?.data as P;
@@ -402,11 +415,47 @@ const ProductDetail = () => {
         const item: any = { id: String(product._id || product.id), title, price: itemPrice, image: img, meta: {} as any };
         if (selectedSize) item.meta.size = selectedSize;
         item.meta.color = color;
+        // Add gram if available in quantity options
+        if (hasQuantityOptions && selectedSize) {
+          const selectedOption = product.quantityOptions?.find((opt: any) => opt.id === selectedSize || opt.code === selectedSize);
+          console.log('=== GRAM DEBUG ===');
+          console.log('hasQuantityOptions:', hasQuantityOptions);
+          console.log('selectedSize:', selectedSize);
+          console.log('selectedOption:', selectedOption);
+          console.log('selectedOption.gram:', selectedOption?.gram);
+          // Construct gram from quantity and unit
+          if (selectedOption?.quantity && selectedOption?.unit) {
+            item.meta.gram = `${selectedOption.quantity}${selectedOption.unit}`;
+            console.log('Constructed gram from quantity and unit:', item.meta.gram);
+          } else if (selectedOption?.gram) {
+            item.meta.gram = selectedOption.gram;
+            console.log('Added gram to item.meta:', item.meta.gram);
+          }
+          console.log('=== END GRAM DEBUG ===');
+        }
         itemsToAdd.push(item);
       });
     } else {
       const item: any = { id: String(product._id || product.id), title, price: itemPrice, image: img, meta: {} as any };
       if (selectedSize) item.meta.size = selectedSize;
+      // Add gram if available in quantity options
+      if (hasQuantityOptions && selectedSize) {
+        const selectedOption = product.quantityOptions?.find((opt: any) => opt.id === selectedSize || opt.code === selectedSize);
+        console.log('=== GRAM DEBUG ===');
+        console.log('hasQuantityOptions:', hasQuantityOptions);
+        console.log('selectedSize:', selectedSize);
+        console.log('selectedOption:', selectedOption);
+        console.log('selectedOption.gram:', selectedOption?.gram);
+        // Construct gram from quantity and unit
+        if (selectedOption?.quantity && selectedOption?.unit) {
+          item.meta.gram = `${selectedOption.quantity}${selectedOption.unit}`;
+          console.log('Constructed gram from quantity and unit:', item.meta.gram);
+        } else if (selectedOption?.gram) {
+          item.meta.gram = selectedOption.gram;
+          console.log('Added gram to item.meta:', item.meta.gram);
+        }
+        console.log('=== END GRAM DEBUG ===');
+      }
       itemsToAdd.push(item);
     }
     if (!user) {
@@ -421,6 +470,7 @@ const ProductDetail = () => {
 
   const handleBuyNow = () => {
     if (!product) return;
+    const hasQuantityOptions = Array.isArray(product?.quantityOptions) && product.quantityOptions.length > 0;
     const usingSizeInventory = product?.trackInventoryBySize && Array.isArray(product?.sizeInventory);
     if (usingSizeInventory && !selectedSize) {
       toast({ title: "Select a size", description: "Please choose a size before proceeding to checkout.", variant: "destructive" });
@@ -471,11 +521,43 @@ const ProductDetail = () => {
         const item: any = { id: String(product._id || product.id), title, price: itemPrice, image: img, meta: {} as any };
         if (selectedSize) item.meta.size = selectedSize;
         item.meta.color = color;
+        // Add gram if available in quantity options
+        if (hasQuantityOptions && selectedSize) {
+          const selectedOption = product.quantityOptions?.find((opt: any) => opt.id === selectedSize || opt.code === selectedSize);
+          console.log('=== GRAM DEBUG ===');
+          console.log('hasQuantityOptions:', hasQuantityOptions);
+          console.log('selectedSize:', selectedSize);
+          console.log('selectedOption:', selectedOption);
+          console.log('selectedOption.gram:', selectedOption?.gram);
+          // Construct gram from quantity and unit
+          if (selectedOption?.quantity && selectedOption?.unit) {
+            item.meta.gram = `${selectedOption.quantity}${selectedOption.unit}`;
+            console.log('Constructed gram from quantity and unit:', item.meta.gram);
+          } else if (selectedOption?.gram) {
+            item.meta.gram = selectedOption.gram;
+            console.log('Added gram to item.meta:', item.meta.gram);
+          }
+          console.log('=== END GRAM DEBUG ===');
+        }
         itemsToAdd.push(item);
       });
     } else {
       const item: any = { id: String(product._id || product.id), title, price: itemPrice, image: img, meta: {} as any };
       if (selectedSize) item.meta.size = selectedSize;
+      // Add gram if available in quantity options
+      if (hasQuantityOptions && selectedSize) {
+        const selectedOption = product.quantityOptions?.find((opt: any) => opt.id === selectedSize || opt.code === selectedSize);
+        console.log('=== GRAM DEBUG (BUY NOW ELSE) ===');
+        console.log('hasQuantityOptions:', hasQuantityOptions);
+        console.log('selectedSize:', selectedSize);
+        console.log('selectedOption:', selectedOption);
+        console.log('selectedOption.gram:', selectedOption?.gram);
+        if (selectedOption?.gram) {
+          item.meta.gram = selectedOption.gram;
+          console.log('Added gram to item.meta:', item.meta.gram);
+        }
+        console.log('=== END GRAM DEBUG (BUY NOW ELSE) ===');
+      }
       itemsToAdd.push(item);
     }
     if (!user) {
@@ -633,12 +715,7 @@ const ProductDetail = () => {
                       <span className="text-emerald-500 text-xs">★</span>
                     </div>
                     <span className="text-[10px] text-gray-400 mt-1">
-                      {(() => {
-                        const randomRating = Math.floor(Math.random() * (300000 - 200000 + 1)) + 200000;
-                        return randomRating >= 1000
-                          ? `${(randomRating / 1000).toFixed(0)} ratings`
-                          : `${randomRating} ratings`;
-                      })()}
+                      {product?.reviewCount || 0} reviews
                     </span>
                   </div>
                 </div>

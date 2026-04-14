@@ -3,6 +3,12 @@ const router = express.Router();
 const Category = require('../models/Category');
 const { requireAuth, requireAdmin } = require('../middleware/auth');
 
+// Helper to validate image URLs (reject base64)
+function isValidImageUrl(url) {
+  if (!url || typeof url !== 'string') return false;
+  return url.startsWith('http://') || url.startsWith('https://');
+}
+
 // Helper to normalize updates from body
 function buildCategoryPayload(body = {}) {
   const payload = {};
@@ -10,7 +16,10 @@ function buildCategoryPayload(body = {}) {
   if (typeof body.description !== 'undefined') payload.description = String(body.description || '').trim();
   if (typeof body.active !== 'undefined') payload.active = !!body.active;
   if (typeof body.slug !== 'undefined') payload.slug = String(body.slug || '').trim();
-  if (typeof body.imageUrl !== 'undefined') payload.imageUrl = String(body.imageUrl || '').trim();
+  if (typeof body.imageUrl !== 'undefined') {
+    const imageUrl = String(body.imageUrl || '').trim();
+    payload.imageUrl = isValidImageUrl(imageUrl) ? imageUrl : undefined;
+  }
   const parentId = body.parentId || body.parent || null;
   if (typeof parentId !== 'undefined') payload.parent = parentId ? String(parentId) : null;
   return payload;

@@ -1,10 +1,20 @@
 const express = require('express');
 const router = express.Router();
+const rateLimit = require('express-rate-limit');
 const ProductSlider = require('../models/ProductSlider');
 const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const { authOptional, requireAuth, requireAdmin } = require('../middleware/auth');
+
+// Rate limiter for product slider uploads (admin-only)
+const sliderUploadLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20, // Limit each IP to 20 slider uploads per 15 minutes
+  message: { ok: false, message: 'Too many slider upload requests, please try again later' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 // Configure Cloudinary for slider images
 cloudinary.config({
@@ -235,7 +245,7 @@ router.get('/:id', requireAuth, requireAdmin, async (req, res) => {
 });
 
 // POST /api/product-slider - Create new slider (admin only)
-router.post('/', requireAuth, requireAdmin, uploadMiddleware, async (req, res) => {
+router.post('/', sliderUploadLimiter, requireAuth, requireAdmin, uploadMiddleware, async (req, res) => {
   try {
     const { title, subtitle, description, buttonText, buttonLink, order, isActive, stats } = req.body;
 
@@ -321,7 +331,7 @@ router.post('/', requireAuth, requireAdmin, uploadMiddleware, async (req, res) =
 });
 
 // PUT /api/product-slider/:id - Update slider (admin only)
-router.put('/:id', requireAuth, requireAdmin, uploadMiddleware, async (req, res) => {
+router.put('/:id', sliderUploadLimiter, requireAuth, requireAdmin, uploadMiddleware, async (req, res) => {
   try {
     const slider = await ProductSlider.findById(req.params.id);
     

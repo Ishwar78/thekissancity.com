@@ -276,7 +276,7 @@ export default function BestSellerSection() {
       setLoading(true);
       setError(null);
       try {
-        const res = await api('/api/products?isBestSeller=true&limit=12&active=true');
+        const res = await api('/api/products?isBestSeller=true&limit=8&active=true');
         if (!res.ok) throw new Error(res.json?.message || 'Failed to fetch best sellers');
         setProducts(res.json.data || []);
       } catch (err: any) {

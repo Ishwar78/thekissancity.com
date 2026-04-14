@@ -8,8 +8,29 @@ import { api } from '@/lib/api';
 import { Phone, Mail, MapPin, Copy, Clock, MessageCircle } from 'lucide-react';
 
 export default function Contact() {
-  const emails: string[] = ['support@kissancity.in'];
-  const address = { line1: 'Dwarka, Delhi', line2: '', city: 'Delhi', state: 'Delhi', pincode: '110001' };
+  const [emails, setEmails] = React.useState<string[]>(['support@kissancity.in']);
+  const [phones, setPhones] = React.useState<string[]>([]);
+  const [address, setAddress] = React.useState({ line1: 'Dwarka, Delhi', line2: '', city: 'Delhi', state: 'Delhi', pincode: '110001' });
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const fetchContactSettings = async () => {
+      try {
+        const res = await api('/api/settings/contact');
+        if (res.ok && res.json?.data) {
+          const data = res.json.data;
+          if (Array.isArray(data.emails) && data.emails.length) setEmails(data.emails);
+          if (Array.isArray(data.phones)) setPhones(data.phones);
+          if (data.address) setAddress(data.address);
+        }
+      } catch (err) {
+        console.error('Failed to load contact settings:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchContactSettings();
+  }, []);
 
   const copyToClipboard = async (email: string) => {
     try {
@@ -44,7 +65,43 @@ export default function Contact() {
           </div>
 
           {/* Contact Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+            {/* Phone Card */}
+            {phones.length > 0 && (
+              <Card className="group relative overflow-hidden border-2 hover:border-primary/50 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <CardHeader className="relative">
+                  <div className="flex items-center gap-4 mb-2">
+                    <div className="bg-black rounded-xl p-3 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                      <Phone className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-xl">Phone</CardTitle>
+                      <CardDescription className="mt-1 text-xs">Call us</CardDescription>
+                    </div>
+                  </div>
+                  <p className="text-sm text-muted-foreground">Reach us directly</p>
+                </CardHeader>
+                <CardContent className="relative">
+                  <ul className="space-y-3">
+                    {phones.map((p, idx) => (
+                      <li key={idx}>
+                        <a 
+                          href={`tel:${p}`}
+                          className="group/link flex items-center justify-between p-3 rounded-lg bg-gradient-to-r from-gray-50 to-transparent hover:from-purple-50 hover:to-purple-50/30 transition-all duration-200 border border-transparent hover:border-purple-200"
+                        >
+                          <span className="font-semibold text-foreground group-hover/link:text-primary transition-colors">
+                            {p}
+                          </span>
+                          <Copy className="h-4 w-4 text-muted-foreground group-hover/link:text-primary group-hover/link:scale-110 transition-all flex-shrink-0 ml-2" />
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Email Card */}
             <Card className="group relative overflow-hidden border-2 hover:border-primary/50 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
               <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>

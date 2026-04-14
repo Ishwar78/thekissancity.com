@@ -604,7 +604,7 @@ const CheckoutPayment = () => {
               description: 'Your order has been confirmed',
             });
             clearCart();
-            navigate('/orders/success');
+            navigate('/dashboard');
           } catch (error: any) {
             toast({
               title: 'Payment Verification Failed',

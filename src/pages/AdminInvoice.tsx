@@ -116,7 +116,7 @@ export default function AdminInvoice() {
           <Card className="p-6">
             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
               <div className="flex items-center gap-3">
-                {biz?.logo && <img src={biz.logo} alt="Logo" className="w-12 h-12 rounded" />}
+                <img src={biz?.logo || '/logo1.png'} alt="Logo" className="w-12 h-12 rounded" />
                 <div>
                   <p className="font-bold text-lg">{biz?.name || 'Seller'}</p>
                   <p className="text-xs text-muted-foreground whitespace-pre-line">{biz?.address || ''}</p>
@@ -149,6 +149,20 @@ export default function AdminInvoice() {
                   {order.phone && <p className="text-gray-700 pt-1">📞 {order.phone}</p>}
                 </div>
               </div>
+              {(order as any).returnPhoto && (
+                <div>
+                  <h3 className="font-semibold mb-3 text-base">Return Evidence</h3>
+                  <div className="rounded border p-4 bg-white">
+                    <img 
+                      src={(order as any).returnPhoto} 
+                      alt="Return Evidence" 
+                      className="max-w-full h-auto rounded border shadow-sm cursor-zoom-in"
+                      onClick={() => window.open((order as any).returnPhoto, '_blank')}
+                    />
+                    <p className="text-xs text-muted-foreground mt-2">Photo provided by customer for return request.</p>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="mt-6">

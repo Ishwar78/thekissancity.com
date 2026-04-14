@@ -9,6 +9,8 @@ const OrderItemSchema = new mongoose.Schema({
   variant: Object,
   size: String,
   color: String,
+  gram: String,
+  meta: Object,
   productId: String,
   discount: {
     type: { type: String, enum: ['flat', 'percentage'] },
@@ -57,9 +59,15 @@ const OrderSchema = new mongoose.Schema(
     refundAmount: { type: Number, default: 0 },
     returnPhoto: { type: String, default: '' },
     returnReason: { type: String, default: '' },
-    returnStatus: { type: String, enum: ['None', 'Pending', 'Processing', 'Completed', 'Rejected'], default: 'None' },
+    returnStatus: { type: String, enum: ['None', 'Pending', 'Processing', 'Completed', 'Approved', 'Rejected'], default: 'None' },
   },
   { timestamps: true },
 );
+
+// Performance indexes
+OrderSchema.index({ userId: 1, createdAt: -1 });
+OrderSchema.index({ createdAt: -1 });
+OrderSchema.index({ status: 1, createdAt: -1 });
+OrderSchema.index({ returnStatus: 1, createdAt: -1 });
 
 module.exports = mongoose.model('Order', OrderSchema);

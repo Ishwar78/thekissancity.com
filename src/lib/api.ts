@@ -1,6 +1,8 @@
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 
   (import.meta.env.PROD ? "https://thekissancity.com" : "http://localhost:5000");
 
+const IS_DEV = import.meta.env.DEV;
+
 function isLocalhost(url: string) {
   try {
     return url.includes("localhost") || url.includes("127.0.0.1");
@@ -17,91 +19,93 @@ function joinUrl(base: string, p: string) {
   return `${base}${p}`;
 }
 
- 
+// Cache TTLs in milliseconds
+const CACHE_TTL: Record<string, number> = {
+  '/api/categories':        5 * 60 * 1000,  // 5 min
+  '/api/regions':           5 * 60 * 1000,  // 5 min
+  '/api/settings/home':     5 * 60 * 1000,  // 5 min
+  '/api/influencer':        5 * 60 * 1000,  // 5 min
+  '/api/about-us':         10 * 60 * 1000,  // 10 min
+  '/api/product-slider':    2 * 60 * 1000,  // 2 min
+  '/api/products':          1 * 60 * 1000,  // 1 min
+  '/api/reviews':           2 * 60 * 1000,  // 2 min
+};
+
+// Simple in-memory cache
+const memCache = new Map<string, { data: any; exp: number }>();
+
+function getCacheTTL(path: string): number {
+  for (const [key, ttl] of Object.entries(CACHE_TTL)) {
+    if (path.includes(key)) return ttl;
+  }
+  return 0; // no cache by default
+}
 
 export async function api(path: string, options: RequestInit = {}) {
-  // Add cache-busting timestamp for GET requests only
-  const url = path.startsWith("http") ? path : joinUrl(API_BASE, path);
+  const isWrite = options.method && options.method !== 'GET';
   
-  // Only add timestamp for GET requests to avoid caching issues
-  const finalUrl = path.startsWith("http") ? url : (
-    (options.method === 'GET' || !options.method) 
-      ? (url.includes('?') ? `${url}&_t=${Date.now()}` : `${url}?_t=${Date.now()}`)
-      : url
-  );
-
-  console.log('🌐 [API] Request:', {
-    path,
-    method: options.method || 'GET',
-    finalUrl,
-    API_BASE,
-    isProduction: import.meta.env.PROD
-  });
-  
-  // Log the full request details for debugging
-  console.log('🌐 [API] Full request details:', {
-    url: finalUrl,
-    options: {
-      method: options.method || 'GET',
-      headers: options.headers,
-      body: options.body
-    }
-  });
-
-  // Always use absolute URLs in production to avoid domain conflicts
-  if (import.meta.env.PROD || !isLocalhost(API_BASE)) {
-    console.log('🌐 [API] Using absolute URL path');
-    
-    try {
-      const token = (typeof window !== 'undefined') ? localStorage.getItem('token') : null;
-      const headers = options.body instanceof FormData
-        ? { ...(options.headers || {}) } as Record<string,string>
-        : { "Content-Type": "application/json", ...(options.headers || {}) } as Record<string,string>;
-      if (token) headers['Authorization'] = `Bearer ${token}`;
-
-      console.log('🌐 [API] Headers being sent:', headers);
-
-      const { headers: _, ...optionsWithoutHeaders } = options;
-      const res = await fetch(finalUrl, {
-        credentials: "include",
-        headers,
-        cache: "no-store",
-        ...optionsWithoutHeaders,
-      });
-
-      const json = await res.json().catch(() => ({}));
-      return { ok: res.ok, status: res.status, json };
-    } catch (error: any) {
-      console.error('🌐 [API] Absolute request error:', error);
-      // Re-throwing error to propagate it.
-      throw error;
+  // Only cache GET requests
+  if (!isWrite) {
+    const cached = memCache.get(path);
+    if (cached && Date.now() < cached.exp) {
+      if (IS_DEV) console.log(`📦 [API] Cache hit: ${path}`);
+      return cached.data;
     }
   }
 
-  // Fallback for localhost development
-  const relUrl = path.startsWith("http")
-    ? path
-    : (path.startsWith("/api") ? path : `/api${path.startsWith("/") ? path : `/${path}`}`);
+  const url = path.startsWith("http") ? path : joinUrl(API_BASE, path);
+
+  if (IS_DEV) {
+    console.log(`🌐 [API] ${options.method || 'GET'} ${path}`);
+  }
+
+  const token = (typeof window !== 'undefined') ? localStorage.getItem('token') : null;
+  
+  const headers = options.body instanceof FormData
+    ? { ...(options.headers || {}) } as Record<string, string>
+    : { "Content-Type": "application/json", ...(options.headers || {}) } as Record<string, string>;
+  
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  const { headers: _, ...optionsWithoutHeaders } = options;
 
   try {
-    const token = (typeof window !== 'undefined') ? localStorage.getItem('token') : null;
-    const relHeaders = options.body instanceof FormData
-      ? { ...(options.headers || {}) } as Record<string,string>
-      : { "Content-Type": "application/json", ...(options.headers || {}) } as Record<string,string>;
-    if (token) relHeaders['Authorization'] = `Bearer ${token}`;
-
-    const { headers: _, ...optionsWithoutHeaders } = options;
-    const res = await fetch(relUrl, {
+    const fetchStart = Date.now();
+    const res = await fetch(url, {
       credentials: "include",
-      headers: relHeaders,
-      cache: "no-store",
+      headers,
+      // ✅ Allow browser caching for GET requests
+      cache: isWrite ? "no-store" : "default",
       ...optionsWithoutHeaders,
     });
+    const fetchDuration = Date.now() - fetchStart;
+
+    // Log timing to diagnose slow calls
+    console.log(`⏱️ ${fetchDuration}ms — ${path}`);
 
     const json = await res.json().catch(() => ({}));
-    return { ok: res.ok, status: res.status, json };
-  } catch (relErr) {
-    // Re-throwing the error to propagate it.
-    throw relErr;
+    const result = { ok: res.ok, status: res.status, json };
+
+    // Store in memory cache for GET requests
+    if (!isWrite && res.ok) {
+      const ttl = getCacheTTL(path);
+      if (ttl > 0) {
+        memCache.set(path, { data: result, exp: Date.now() + ttl });
+      }
+    }
+
+    return result;
+  } catch (error: any) {
+    if (IS_DEV) console.error('🌐 [API] Error:', error);
+    throw error;
+  }
+}
+
+// Call this after any mutation to invalidate related cache
+export function invalidateCache(pathPrefix: string) {
+  for (const key of memCache.keys()) {
+    if (key.includes(pathPrefix)) {
+      memCache.delete(key);
+    }
   }
 }

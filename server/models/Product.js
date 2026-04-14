@@ -184,5 +184,14 @@ ProductSchema.pre('save', function (next) {
 // Helpful indexes for search/filter
 ProductSchema.index({ title: 'text' });
 ProductSchema.index({ category: 1, active: 1 });
+ProductSchema.index({ active: 1, featured: 1 });
+ProductSchema.index({ featured: 1, active: 1 }); // Compound index for featured products
+ProductSchema.index({ active: 1, isBestSeller: 1 });
+ProductSchema.index({ isBestSeller: 1, active: 1 }); // Compound index for best sellers
+ProductSchema.index({ region: 1, active: 1 });
+ProductSchema.index({ price: 1, active: 1 });
+ProductSchema.index({ slug: 1 });
+ProductSchema.index({ createdAt: -1, active: 1 }); // For new arrivals sorting
+ProductSchema.index({ createdAt: -1, _id: -1 }); // Secondary sort by _id as fallback
 
 module.exports = mongoose.model('Product', ProductSchema);

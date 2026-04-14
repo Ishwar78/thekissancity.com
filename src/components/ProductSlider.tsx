@@ -387,7 +387,7 @@ export const ProductSlider = ({ className }: { className?: string }) => {
                   <img
                     className="kc-img"
                     src={item.image}
-                    alt={item.title || item.name || "Kissan City"}
+                    alt={item.title || item.name || "The Kissan City"}
                     loading={i === 0 ? "eager" : "lazy"}
                     onError={(e) => {
                       (e.target as HTMLImageElement).style.display = "none";

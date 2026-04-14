@@ -1,10 +1,39 @@
 const express = require('express');
 const router = express.Router();
+const rateLimit = require('express-rate-limit');
 
 router.use((req, res, next) => {
   console.log(`[UPLOADS ROUTER] ${req.method} ${req.path}`);
   next();
 });
+
+// Rate limiter for general uploads (admin-only)
+const adminUploadLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 30, // Limit each IP to 30 uploads per 15 minutes
+  message: { ok: false, message: 'Too many upload requests, please try again later' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Rate limiter for authenticated user uploads (images)
+const userUploadLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20, // Limit each IP to 20 uploads per 15 minutes
+  message: { ok: false, message: 'Too many upload requests, please try again later' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Rate limiter for video uploads (stricter due to larger file size)
+const videoUploadLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 10, // Limit each IP to 10 video uploads per hour
+  message: { ok: false, message: 'Too many video upload requests, please try again later' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
@@ -48,7 +77,7 @@ const upload = multer({
 });
 
 // General uploads (admin-only)
-router.post('/', requireAuth, requireAdmin, upload.single('file'), (req, res) => {
+router.post('/', adminUploadLimiter, requireAuth, requireAdmin, upload.single('file'), (req, res) => {
   if (!req.file) return res.status(400).json({ ok: false, message: 'No file uploaded' });
   console.log('[Cloudinary Upload Success]', req.file.path);
   // Cloudinary will provide the file path (URL)
@@ -56,9 +85,9 @@ router.post('/', requireAuth, requireAdmin, upload.single('file'), (req, res) =>
 });
 
 // Single image upload (for AboutUsManager and similar components)
-router.post('/single', upload.single('image'), (req, res) => {
+router.post('/single', adminUploadLimiter, upload.single('image'), (req, res) => {
   console.log('[UPLOADS /single] Request received.');
-  
+
   if (!req.file) {
     console.log('[UPLOADS /single] No file uploaded after multer processing.');
     return res.status(400).json({ ok: false, message: 'No file uploaded' });
@@ -70,7 +99,7 @@ router.post('/single', upload.single('image'), (req, res) => {
 });
 
 // Review image uploads (authenticated users)
-router.post('/images', requireAuth, (req, res) => {
+router.post('/images', userUploadLimiter, requireAuth, (req, res) => {
   console.log('[UPLOADS /images] Request received.');
   upload.single('file')(req, res, async function (err) {
     if (err instanceof multer.MulterError) {
@@ -97,7 +126,7 @@ router.post('/images', requireAuth, (req, res) => {
 // Admin video uploads
 const uploadMiddleware = upload.single('file');
 
-router.post('/admin/video', requireAuth, requireAdmin, (req, res, next) => {
+router.post('/admin/video', videoUploadLimiter, requireAuth, requireAdmin, (req, res, next) => {
   uploadMiddleware(req, res, function (err) {
     if (err instanceof multer.MulterError) {
       // A Multer error occurred when uploading.

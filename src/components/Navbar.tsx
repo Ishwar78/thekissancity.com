@@ -41,7 +41,7 @@ export const Navbar = ({ cartItemCount = 0 }: NavbarProps) => {
         const categoriesResult = categoriesResponse.json;
         const categoriesList = categoriesResult.ok && Array.isArray(categoriesResult.data) ? categoriesResult.data : [];
 
-        const productsResponse = await api('/api/products?limit=200');
+        const productsResponse = await api('/api/products?limit=10&skipReviews=true&active=true');
         const productsResult = productsResponse.json;
         const productsList = productsResult.ok && Array.isArray(productsResult.data) ? productsResult.data : [];
 
@@ -84,20 +84,20 @@ export const Navbar = ({ cartItemCount = 0 }: NavbarProps) => {
   return (
     <>
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white text-gray-900 border-b border-gray-200 shadow-sm">
-        <div className="container mx-auto px-8">
+        <div className="container mx-auto pl-1 md:px-8 pr-2 md:pr-8">
           <div className="flex items-center justify-between h-16">
 
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-6" aria-label="Kissan City Home">
+           <Link to="/" className="flex items-center gap-1 md:gap-6 -mt-1 -ml-3" aria-label="The Kissan City Home">
               {logoFailed ? (
-                <div className="h-14 md:h-16 lg:h-[60px] w-auto select-none max-w-[260px] flex items-center justify-center bg-gray-100 rounded-lg">
-                  <span className="text-gray-600 font-bold text-lg">Kissan City</span>
+                <div className="h-8 md:h-16 lg:h-[60px] w-auto select-none max-w-[150px] md:max-w-[200px] flex items-center justify-center bg-gray-100 rounded-lg">
+                  <span className="text-gray-600 font-bold text-lg">The Kissan City</span>
                 </div>
               ) : (
                 <img
-                  src="/logo.png?v=20240331"
+                  src="/logo1.png"
                   alt="The Kissan City"
-                  className="h-14 md:h-16 lg:h-[60px] w-auto select-none max-w-[260px]"
+                  className="h-8 md:h-16 lg:h-[60px] w-auto select-none max-w-[150px] md:max-w-[200px]"
                   loading="eager"
                   decoding="async"
                   onError={(e) => {
@@ -111,9 +111,8 @@ export const Navbar = ({ cartItemCount = 0 }: NavbarProps) => {
             </Link>
 
             {/* Mobile expanded search overlay */}
-            <div className={`md:hidden transition-all duration-300 ease-in-out ${
-              isSearchExpanded ? 'absolute inset-0 z-50 bg-[#2d2117] px-4' : 'hidden'
-            }`}>
+            <div className={`md:hidden transition-all duration-300 ease-in-out ${isSearchExpanded ? 'absolute inset-0 z-50 bg-[#2d2117] px-4' : 'hidden'
+              }`}>
               {isSearchExpanded && (
                 <div className="flex items-center h-full">
                   <Button
@@ -251,7 +250,7 @@ export const Navbar = ({ cartItemCount = 0 }: NavbarProps) => {
                   <input
                     ref={desktopSearchRef}
                     type="text"
-                    
+
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onKeyDown={handleKeyDown}
@@ -309,14 +308,14 @@ export const Navbar = ({ cartItemCount = 0 }: NavbarProps) => {
             </div>
 
             {/* Actions */}
-            <div className="flex items-center gap-1">
+            <div className="flex items-center -ml-2">
               {/* Mobile Search Icon */}
               <Button
                 type="button"
                 variant="link"
                 size="icon"
                 onClick={() => setIsSearchExpanded(true)}
-                className="md:hidden no-underline"
+                className="md:hidden no-underline -mr-1"
                 aria-label="Search"
               >
                 <Search className="h-5 w-5" style={{ color: '#6b4423' }} />
@@ -324,20 +323,20 @@ export const Navbar = ({ cartItemCount = 0 }: NavbarProps) => {
 
               {user ? (
                 <Link to="/dashboard">
-                  <Button variant="link" size="icon" className="no-underline transition-colors">
+                  <Button variant="link" size="icon" className="no-underline transition-colors -mr-1">
                     <User className="h-5 w-5" style={{ color: '#6b4423' }} />
                   </Button>
                 </Link>
               ) : (
                 <Link to="/auth">
-                  <Button variant="link" size="icon" className="no-underline transition-colors">
+                  <Button variant="link" size="icon" className="no-underline transition-colors -mr-1">
                     <User className="h-5 w-5" style={{ color: '#6b4423' }} />
                   </Button>
                 </Link>
               )}
 
               <Link to="/cart">
-                <Button variant="link" size="icon" className="relative no-underline transition-colors" style={{ color: '#6b4423' }}>
+                <Button variant="link" size="icon" className="relative no-underline transition-colors -mr-1" style={{ color: '#6b4423' }}>
                   <ShoppingCart className="h-5 w-5" />
                   {liveCount > 0 && (
                     <span

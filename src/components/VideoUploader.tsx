@@ -97,15 +97,26 @@ export const VideoUploader: React.FC<VideoUploaderProps> = ({
       </div>
 
       {preview && (
-        <div>
-          <label className="text-sm font-medium mb-2 block">Video Preview</label>
-          <Card className="relative group rounded-lg overflow-hidden border-2 border-border hover:border-primary/50">
-            <video src={preview} controls className="w-full aspect-video object-cover"></video>
-            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+        <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <label className="text-sm font-semibold mb-2 block text-muted-foreground flex items-center gap-2">
+            <div className="w-1 h-1 rounded-full bg-primary" />
+            Video Preview
+          </label>
+          <Card className="relative group rounded-xl overflow-hidden border-2 border-border hover:border-primary/50 transition-all duration-300 shadow-md">
+            {/* 9:16 Aspect Ratio Container */}
+            <div className="aspect-[9/16] bg-black flex items-center justify-center">
+              <video 
+                src={preview} 
+                controls 
+                className="w-full h-full object-contain"
+              ></video>
+            </div>
+            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
               <Button
                 type="button"
-                size="sm"
+                size="icon"
                 variant="destructive"
+                className="h-8 w-8 rounded-full shadow-lg"
                 onClick={removeVideo}
               >
                 <X className="h-4 w-4" />
@@ -116,9 +127,15 @@ export const VideoUploader: React.FC<VideoUploaderProps> = ({
       )}
 
       {!preview && !isLoading && (
-        <div className="border-2 border-dashed rounded-lg p-8 text-center text-muted-foreground">
-          <Upload className="h-8 w-8 mx-auto mb-2 opacity-50" />
-          <p className="text-sm">No video selected. Click "Select Video" to add one.</p>
+        <div 
+          onClick={() => fileInputRef.current?.click()}
+          className="border-2 border-dashed rounded-xl p-10 text-center cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-all duration-300 group"
+        >
+          <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+            <Upload className="h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors" />
+          </div>
+          <p className="font-medium text-sm text-foreground">Click to upload video</p>
+          <p className="text-xs text-muted-foreground mt-1">MP4, WebM or Ogg (Max 100MB)</p>
         </div>
       )}
     </div>

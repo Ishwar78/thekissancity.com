@@ -1,10 +1,20 @@
 const express = require('express');
+const rateLimit = require('express-rate-limit');
 const InfluencerImage = require('../models/InfluencerImage');
 const Product = require('../models/Product');
 const { requireAuth, requireAdmin } = require('../middleware/auth');
 const upload = require('../routes/uploads').upload; // Import the upload middleware
 
 const router = express.Router();
+
+// Rate limiter for influencer image uploads (admin-only)
+const influencerUploadLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20, // Limit each IP to 20 influencer image uploads per 15 minutes
+  message: { ok: false, message: 'Too many influencer image upload requests, please try again later' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 // GET all influencer images (public)
 router.get('/influencer-images/public', async (req, res) => {
@@ -61,7 +71,7 @@ router.get('/admin/influencer-images/:id', requireAuth, requireAdmin, async (req
 });
 
 // POST create new influencer image
-router.post('/admin/influencer-images', requireAuth, requireAdmin, upload.single('image'), async (req, res) => {
+router.post('/admin/influencer-images', influencerUploadLimiter, requireAuth, requireAdmin, upload.single('image'), async (req, res) => {
   try {
     const { influencerName, productId } = req.body;
     let imageUrl = null;
@@ -89,7 +99,7 @@ router.post('/admin/influencer-images', requireAuth, requireAdmin, upload.single
 });
 
 // PUT update influencer image
-router.put('/admin/influencer-images/:id', requireAuth, requireAdmin, upload.single('image'), async (req, res) => {
+router.put('/admin/influencer-images/:id', influencerUploadLimiter, requireAuth, requireAdmin, upload.single('image'), async (req, res) => {
   try {
     // For FormData, extract fields from req.body
     const influencerName = req.body.influencerName;

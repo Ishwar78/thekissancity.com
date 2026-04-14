@@ -196,10 +196,20 @@ export const AdminAddInfluencerImage: React.FC<AdminAddInfluencerImageProps> = (
             {imageFile && <p className="text-sm text-gray-500">Selected: {imageFile.name}</p>}
           </div>
 
-          <Button type="submit" className="w-full rounded-full" disabled={loading}>
-            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            <PlusCircle className="mr-2 h-4 w-4" /> {editingItem ? 'Update Influencer Image' : 'Add Influencer Image'}
-          </Button>
+          <button 
+            type="submit" 
+            className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-[#6B4E3B] hover:bg-[#5D4037] text-white font-bold rounded-xl transition-all shadow-md hover:shadow-lg active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed group"
+            disabled={loading}
+          >
+            {loading ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              <div className="bg-white/20 p-1 rounded-lg group-hover:bg-white/30 transition-colors">
+                <PlusCircle className="h-4 w-4 text-white" />
+              </div>
+            )}
+            <span>{editingItem ? 'Update Influencer Image' : 'Add Influencer Image'}</span>
+          </button>
         </form>
       </CardContent>
     </Card>

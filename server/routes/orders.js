@@ -4,8 +4,99 @@ const Order = require('../models/Order');
 const User = require('../models/User');
 const { authOptional, requireAuth, requireAdmin } = require('../middleware/auth');
 const { sendOrderConfirmationEmail, sendStatusUpdateEmail, sendReturnApprovalEmail, sendCustomEmail } = require('../utils/emailService');
+const { createOrder: createShiprocketOrder } = require('../utils/shiprocketService');
+const SiteSetting = require('../models/SiteSetting');
 
 const ALLOWED_STATUSES = ['pending', 'paid', 'shipped', 'delivered', 'returned', 'cancelled'];
+
+// Helper to create order in ShipRocket
+async function createShiprocketShipment(order) {
+  try {
+    const settings = await SiteSetting.findOne();
+    const shiprocketSettings = settings?.shipping?.shiprocket;
+
+    if (!shiprocketSettings || !shiprocketSettings.enabled) {
+      console.log('ShipRocket integration is disabled, skipping shipment creation');
+      return null;
+    }
+
+    // Set environment variables for ShipRocket auth
+    process.env.SHIPROCKET_API_EMAIL = shiprocketSettings.email;
+    process.env.SHIPROCKET_API_PASSWORD = shiprocketSettings.password;
+    process.env.SHIPROCKET_PICKUP_PINCODE = shiprocketSettings.pickupPincode || '110001';
+
+    // Construct order data for ShipRocket
+    const orderItems = order.items.map(item => ({
+      name: item.title,
+      sku: item.id || item.productId,
+      units: item.qty,
+      selling_price: Number(item.price),
+      discount: Number(item.discountAmount || 0),
+      tax: 0,
+      hsn: '',
+    }));
+
+    const shiprocketOrderData = {
+      order_id: String(order._id),
+      order_date: new Date().toISOString().split('T')[0],
+      pickup_location: 'Primary',
+      channel_id: shiprocketSettings.channelId || '',
+      comment: '',
+      billing_customer_name: order.name,
+      billing_last_name: '',
+      billing_address: order.address,
+      billing_address_2: order.streetAddress || '',
+      billing_city: order.city,
+      billing_pincode: order.pincode,
+      billing_state: order.state,
+      billing_country: 'India',
+      billing_email: '',
+      billing_phone: order.phone,
+      shipping_is_billing: true,
+      shipping_customer_name: order.name,
+      shipping_last_name: '',
+      shipping_address: order.address,
+      shipping_address_2: order.streetAddress || '',
+      shipping_city: order.city,
+      shipping_pincode: order.pincode,
+      shipping_state: order.state,
+      shipping_country: 'India',
+      shipping_email: '',
+      shipping_phone: order.phone,
+      order_type: 'ESSENTIALS',
+      payment_method: order.paymentMethod === 'COD' ? 'cod' : 'prepaid',
+      sub_total: Number(order.total),
+      length: 10,
+      breadth: 10,
+      height: 10,
+      weight: 0.5,
+      order_items: orderItems,
+    };
+
+    const response = await createShiprocketOrder(shiprocketOrderData);
+
+    if (response && response.order_id) {
+      console.log(`ShipRocket order created successfully. Order ID: ${response.order_id}`);
+      
+      // Update order with tracking number if available
+      if (response.shipment_id) {
+        await Order.findByIdAndUpdate(order._id, {
+          trackingNumber: response.shipment_id,
+          trackingId: response.shipment_id,
+        });
+        console.log(`Updated order ${order._id} with tracking number: ${response.shipment_id}`);
+      }
+
+      return response;
+    }
+
+    return null;
+  } catch (error) {
+    console.error('Error creating ShipRocket shipment:', error.message);
+    // Don't throw error - we don't want to fail the order if ShipRocket fails
+    return null;
+  }
+}
 
 // ========== POST ROUTES (must come before GET /:id) ==========
 
@@ -49,13 +140,19 @@ router.post('/', authOptional, async (req, res) => {
     const Product = require('../models/Product');
     const enrichedItems = [];
 
-    for (const item of items) {
-      let product = null;
-      let enrichedItem = { ...item };
+    // Fetch all products in one query (optimization)
+    const productIds = items.map(item => item.id || item.productId).filter(Boolean);
+    const products = await Product.find({ _id: { $in: productIds } });
 
-      if (item.id || item.productId) {
-        const productId = item.id || item.productId;
-        product = await Product.findById(productId);
+    const productMap = new Map();
+    products.forEach(p => productMap.set(p._id.toString(), p));
+
+    for (const item of items) {
+      let enrichedItem = { ...item };
+      const productId = item.id || item.productId;
+
+      if (productId) {
+        const product = productMap.get(productId.toString());
 
         if (product) {
           // Add product discount to order item
@@ -120,13 +217,14 @@ router.post('/', authOptional, async (req, res) => {
             }
             product.stock -= requestedQty;
           }
-
-          await product.save();
         }
       }
 
       enrichedItems.push(enrichedItem);
     }
+
+    // Save all products in bulk (optimization)
+    await Product.bulkSave(products);
 
     const doc = new Order({
       userId: req.user ? req.user._id : undefined,
@@ -146,6 +244,52 @@ router.post('/', authOptional, async (req, res) => {
     });
 
     await doc.save();
+
+    // Send order confirmation email for COD orders (async, don't block)
+    if (paymentMethod === 'COD') {
+      (async () => {
+        try {
+          let recipientEmail = null;
+          let customerName = name || 'Customer';
+
+          if (body.email) {
+            recipientEmail = body.email;
+          } else if (req.user && req.user._id) {
+            const userObj = await User.findById(req.user._id);
+            if (userObj) {
+              if (userObj.email) recipientEmail = userObj.email;
+              if (userObj.name || userObj.fullName) customerName = userObj.name || userObj.fullName;
+            }
+          }
+
+          if (recipientEmail) {
+            await sendOrderConfirmationEmail(doc, { email: recipientEmail, name: customerName });
+            console.log(`COD order confirmation email sent to ${recipientEmail}`);
+          }
+        } catch (emailErr) {
+          console.error('Failed to send COD order confirmation email:', emailErr);
+        }
+      })();
+    }
+
+    // Create shipment in ShipRocket for COD orders (async, don't block response)
+    if (paymentMethod === 'COD') {
+      (async () => {
+        try {
+          console.log('=== SHIPROCKET SHIPMENT CREATION START (COD) ===');
+          const shiprocketResponse = await createShiprocketShipment(doc);
+          if (shiprocketResponse) {
+            console.log('✅ ShipRocket shipment created successfully for COD order');
+          } else {
+            console.log('ℹ️ ShipRocket shipment creation skipped or failed for COD order');
+          }
+          console.log('=== SHIPROCKET SHIPMENT CREATION END (COD) ===');
+        } catch (shiprocketErr) {
+          console.error('❌ Failed to create ShipRocket shipment for COD order:', shiprocketErr);
+        }
+      })();
+    }
+
     return res.json({ ok: true, data: doc });
   } catch (e) {
     console.error(e);
@@ -226,20 +370,64 @@ router.post('/request-return', requireAuth, async (req, res) => {
 
 // ========== GET ROUTES WITH SPECIFIC PATHS (must come before GET /:id) ==========
 
+// Public tracking route - no auth required, returns limited info
+router.get('/:id/track', async (req, res) => {
+  try {
+    const doc = await Order.findById(req.params.id).lean();
+    if (!doc) {
+      return res.status(404).json({ ok: false, message: 'Order not found' });
+    }
+
+    // Return limited public info (privacy protection)
+    const publicOrderInfo = {
+      _id: doc._id,
+      status: doc.status,
+      trackingId: doc.trackingId,
+      createdAt: doc.createdAt,
+      updatedAt: doc.updatedAt,
+      phone: doc.phone ? doc.phone.substring(doc.phone.length - 4) : '****', // Last 4 digits only
+      city: doc.city,
+      state: doc.state,
+      items: doc.items?.map(item => ({
+        title: item.title,
+        qty: item.qty,
+        image: item.image,
+        // No price, specific address details, or full phone number shown for privacy
+      }))
+    };
+
+    return res.json({ ok: true, data: publicOrderInfo });
+  } catch (e) {
+    console.error('Public track order error:', e);
+    return res.status(500).json({ ok: false, message: 'Failed to find tracking information' });
+  }
+});
+
 // List orders for current user (mine=1) or admin all
 router.get('/', authOptional, async (req, res) => {
   try {
-    const { mine } = req.query;
+    const { mine, page = 1, limit = 50 } = req.query;
+    const pageNum = Math.max(1, Number(page));
+    const limitNum = Math.min(200, Number(limit));
+
     if (mine && String(mine) === '1') {
       if (!req.user) return res.status(401).json({ ok: false, message: 'Unauthorized' });
-      const docs = await Order.find({ userId: req.user._id }).sort({ createdAt: -1 }).lean();
+      const docs = await Order.find({ userId: req.user._id })
+        .sort({ createdAt: -1 })
+        .skip((pageNum - 1) * limitNum)
+        .limit(limitNum)
+        .lean();
       return res.json({ ok: true, data: docs });
     }
 
     // admin list
     if (!req.user) return res.status(401).json({ ok: false, message: 'Unauthorized' });
     if (req.user.role !== 'admin') return res.status(403).json({ ok: false, message: 'Forbidden' });
-    const docs = await Order.find().sort({ createdAt: -1 }).lean();
+    const docs = await Order.find()
+      .sort({ createdAt: -1 })
+      .skip((pageNum - 1) * limitNum)
+      .limit(limitNum)
+      .lean();
     return res.json({ ok: true, data: docs });
   } catch (e) {
     console.error(e);
@@ -250,7 +438,15 @@ router.get('/', authOptional, async (req, res) => {
 // Get user's orders
 router.get('/mine', requireAuth, async (req, res) => {
   try {
-    const docs = await Order.find({ userId: req.user._id }).sort({ createdAt: -1 }).lean();
+    const { page = 1, limit = 50 } = req.query;
+    const pageNum = Math.max(1, Number(page));
+    const limitNum = Math.min(200, Number(limit));
+
+    const docs = await Order.find({ userId: req.user._id })
+      .sort({ createdAt: -1 })
+      .skip((pageNum - 1) * limitNum)
+      .limit(limitNum)
+      .lean();
     return res.json({ ok: true, data: docs });
   } catch (e) {
     console.error(e);
@@ -265,6 +461,10 @@ router.get('/returns', requireAuth, requireAdmin, async (req, res) => {
       .populate('userId')
       .sort({ createdAt: -1 })
       .lean();
+    console.log('📡 [OrderList] Returning return requests count:', docs.length);
+    if (docs.length > 0) {
+      console.log('📡 [OrderList] First row ID:', docs[0]._id, 'Status:', docs[0].returnStatus);
+    }
     return res.json({ ok: true, data: docs });
   } catch (e) {
     console.error('List returns error:', e);
@@ -289,7 +489,7 @@ router.get('/mine-returns', requireAuth, async (req, res) => {
 router.get('/bestsellers', async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 12;
-    
+
     // Get recent orders (any status except cancelled) sorted by creation date
     // This includes pending, paid, shipped, and delivered orders
     const recentOrders = await Order.find({
@@ -301,7 +501,7 @@ router.get('/bestsellers', async (req, res) => {
 
     // Extract unique products from order items
     const productMap = new Map();
-    
+
     recentOrders.forEach(order => {
       if (order.items && Array.isArray(order.items)) {
         order.items.forEach(item => {
@@ -337,22 +537,22 @@ router.get('/bestsellers', async (req, res) => {
     const Product = require('../models/Product');
     const Review = require('../models/Review');
     const productIds = bestSellers.map(p => p.productId).filter(id => id);
-    
+
     if (productIds.length === 0) {
       return res.json({ ok: true, data: [] });
     }
-    
+
     const products = await Product.find({ _id: { $in: productIds } }).lean();
 
     // Fetch average ratings for all products
     const mongoose = require('mongoose');
     const ObjectId = mongoose.Types.ObjectId;
-    
+
     // Convert productIds to ObjectIds, filtering out invalid ones
     const validProductIds = productIds
       .filter(id => id && mongoose.Types.ObjectId.isValid(id))
       .map(id => new ObjectId(id));
-    
+
     let ratingAggregation = [];
     if (validProductIds.length > 0) {
       ratingAggregation = await Review.aggregate([
@@ -386,7 +586,7 @@ router.get('/bestsellers', async (req, res) => {
     const enrichedProducts = bestSellers.map(bs => {
       const product = products.find(p => String(p._id) === String(bs.productId));
       const ratingInfo = ratingMap.get(String(bs.productId));
-      
+
       if (product) {
         return {
           ...product,
@@ -641,15 +841,19 @@ router.put('/:id/admin-update', requireAuth, requireAdmin, async (req, res) => {
       order.trackingNumber = trackingNumber.trim();
     }
 
+    console.log('📝 [OrderUpdate] Updating order:', id, 'New returnStatus:', returnStatus);
     // Update return status if provided
-    if (returnStatus && ['None', 'Pending', 'Processing', 'Completed', 'Rejected'].includes(returnStatus)) {
+    if (returnStatus && ['None', 'Pending', 'Processing', 'Completed', 'Approved', 'Rejected'].includes(returnStatus)) {
+      console.log('📝 [OrderUpdate] Setting returnStatus to:', returnStatus);
       order.returnStatus = returnStatus;
-      if (returnStatus === 'Completed') {
+      if (returnStatus === 'Completed' || returnStatus === 'Approved') {
+        console.log('📝 [OrderUpdate] Setting order status to returned');
         order.status = 'returned';
       }
     }
 
     await order.save();
+    console.log('📝 [OrderUpdate] Order saved successfully');
 
     // Send email on status change
     if (status && status !== previousStatus && order.userId && order.userId.email) {

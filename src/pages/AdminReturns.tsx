@@ -35,6 +35,7 @@ interface ReturnOrder {
     ifscCode: string;
   };
   returnRequestedAt?: string;
+  returnPhoto?: string;
 }
 
 const NAV_ITEMS = [
@@ -79,36 +80,76 @@ export default function AdminReturns() {
 
   useEffect(() => { void fetchReturns(); }, []);
 
+  console.log('🔄 [AdminReturns] Component Render - Rows count:', rows.length);
+
   const fetchReturns = async () => {
     try {
       setFetching(true);
-      const res = await api('/api/orders/returns?v=' + Date.now(), { cache: 'no-store' as any });
-      if (res.ok && res.json?.ok) setRows(Array.isArray(res.json.data) ? res.json.data : []);
+      const url = '/api/orders/returns?v=' + Date.now();
+      console.log('📡 [AdminReturns] Fetching returns:', url);
+      const res = await api(url);
+      console.log('📡 [AdminReturns] Fetch Response:', { ok: res.ok, jsonOk: res.json?.ok });
+      
+      if (res.ok && res.json?.ok) {
+        const data = Array.isArray(res.json.data) ? res.json.data : [];
+        console.log('📡 [AdminReturns] Fetched data length:', data.length);
+        console.log('📡 [AdminReturns] Sample data (first row status):', data[0]?.returnStatus);
+        setRows(data);
+      }
+    } catch (err) {
+      console.error('❌ [AdminReturns] Fetch error:', err);
     } finally {
       setFetching(false);
     }
   };
 
   const updateStatus = async (orderId: string, value: 'Pending' | 'Approved' | 'Rejected') => {
+    console.log('🚀 [AdminReturns] updateStatus start:', { orderId, value });
+    
+    // Optimistic Update: Update local UI immediately
+    const previousRows = [...rows];
+    setRows(current => current.map(row => 
+      row._id === orderId ? { ...row, returnStatus: value } : row
+    ));
+
     try {
-      const { ok } = await api(`/api/orders/${orderId}/admin-update`, {
+      const res = await api(`/api/orders/${orderId}/admin-update`, {
         method: 'PUT',
         body: JSON.stringify({ returnStatus: value }),
       });
-      if (ok) {
-        setRows(prev => prev.map(r => r._id === orderId ? { ...r, returnStatus: value, status: value === 'Approved' ? 'returned' : r.status } : r));
+      
+      console.log('🚀 [AdminReturns] API response status ok:', res.ok);
+      
+      if (res.ok) {
+        toast({ title: 'Status updated' });
+        console.log('🚀 [AdminReturns] Success toast shown, calling fetchReturns...');
+        // Refresh data from server to ensure UI is perfectly in sync and pick up other side-effects
+        await fetchReturns();
+        console.log('🚀 [AdminReturns] fetchReturns completed');
+        
+        // Send email update if not Approved
         if (value !== 'Approved') {
-          const row = rows.find(r => r._id === orderId);
+          // Note: we use current rows from the CLOSURE which is the old state, 
+          // but we just need the user email which shouldn't have changed.
+          const row = previousRows.find(r => r._id === orderId);
+          console.log('🚀 [AdminReturns] Mailing logic - current row found:', !!row);
           const userEmail = (row?.userId && typeof row.userId === 'object') ? (row.userId.email || '') : '';
           if (userEmail) {
+            console.log('🚀 [AdminReturns] Sending mail to:', userEmail);
             const subj = value === 'Rejected' ? 'Return Rejected' : 'Return Update';
             const html = `<p>Hello ${(row?.userId as any)?.name || ''},</p><p>Your return request for order #${orderId.slice(0, 8).toUpperCase()} is <b>${value}</b>.</p>`;
-            await api('/api/orders/send-mail', { method: 'POST', body: JSON.stringify({ to: userEmail, subject: subj, html }) });
+            const mailRes = await api('/api/orders/send-mail', { method: 'POST', body: JSON.stringify({ to: userEmail, subject: subj, html }) });
+            console.log('🚀 [AdminReturns] Mail response ok:', mailRes.ok);
           }
         }
-        toast({ title: 'Status updated' });
+      } else {
+        console.warn('🚀 [AdminReturns] API update returned not ok, rolling back...');
+        setRows(previousRows);
+        toast({ title: res.json?.message || 'Failed to update', variant: 'destructive' });
       }
     } catch (e: any) {
+      console.error('❌ [AdminReturns] Error updating status:', e);
+      setRows(previousRows);
       toast({ title: e?.message || 'Failed to update', variant: 'destructive' });
     }
   };
@@ -180,7 +221,7 @@ export default function AdminReturns() {
                           navigate('/admin/support');
                           setIsSidebarOpen(false);
                         } else {
-                          navigate('/admin');
+                          navigate(`/admin?tab=${item.id}`);
                           setIsSidebarOpen(false);
                         }
                       }}
@@ -278,6 +319,24 @@ export default function AdminReturns() {
                             {/* Return Reason */}
                             <td className="py-3 pr-3">
                               <div className="text-xs break-words leading-snug">{row.returnReason || '-'}</div>
+                              {row.returnPhoto && (
+                                <div className="mt-2">
+                                  <a 
+                                    href={row.returnPhoto} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="text-[10px] text-primary hover:underline flex items-center gap-1"
+                                  >
+                                    <Eye className="h-3 w-3" /> View Photo
+                                  </a>
+                                  <img 
+                                    src={row.returnPhoto} 
+                                    alt="Return evidence" 
+                                    className="w-16 h-16 object-cover rounded mt-1 border cursor-zoom-in hover:opacity-90 transition-opacity"
+                                    onClick={() => window.open(row.returnPhoto, '_blank')}
+                                  />
+                                </div>
+                              )}
                             </td>
 
                             {/* Refund Details */}
@@ -309,16 +368,15 @@ export default function AdminReturns() {
 
                             {/* Status */}
                             <td className="py-3 pr-3">
-                              <Select value={row.returnStatus || 'Pending'} onValueChange={(v: any) => updateStatus(row._id, v)}>
-                                <SelectTrigger className="w-[130px] h-8 text-xs">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="Pending">Pending</SelectItem>
-                                  <SelectItem value="Approved">Approved</SelectItem>
-                                  <SelectItem value="Rejected">Rejected</SelectItem>
-                                </SelectContent>
-                              </Select>
+                              <select
+                                value={row.returnStatus || 'Pending'}
+                                onChange={(e) => updateStatus(row._id, e.target.value as 'Pending' | 'Approved' | 'Rejected')}
+                                className="w-[130px] h-8 text-xs px-2 rounded border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-gray-400"
+                              >
+                                <option value="Pending">Pending</option>
+                                <option value="Approved">Approved</option>
+                                <option value="Rejected">Rejected</option>
+                              </select>
                             </td>
 
                             {/* Actions */}
@@ -380,10 +438,21 @@ export default function AdminReturns() {
               />
             </div>
             <div className="flex gap-2">
-              <Button onClick={sendEmail} disabled={emailSending}>
+              <button 
+                type="button"
+                onClick={sendEmail} 
+                disabled={emailSending}
+                className="bg-black text-white border-black hover:bg-gray-800 hover:text-white focus-visible:bg-gray-800 focus-visible:text-white active:bg-gray-800 active:text-white px-4 py-2 rounded-md font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 {emailSending ? 'Sending…' : 'Send'}
-              </Button>
-              <Button variant="outline" onClick={() => setEmailOpen(false)}>Cancel</Button>
+              </button>
+              <button 
+                type="button"
+                onClick={() => setEmailOpen(false)}
+                className="bg-white text-black border-gray-300 hover:border-gray-400 hover:bg-gray-50 focus-visible:border-gray-400 focus-visible:bg-gray-50 active:border-gray-400 active:bg-gray-50 px-4 py-2 rounded-md font-medium transition-colors border disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </DialogContent>

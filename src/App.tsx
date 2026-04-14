@@ -45,6 +45,7 @@ import OrderSuccess from "./pages/OrderSuccess";
 import AdminTracking from "./pages/AdminTracking";
 import ProductRedirect from "./pages/ProductRedirect";
 import ProductSliderManagement from "./pages/admin/ProductSliderManagement";
+import TrackOrder from "./pages/TrackOrder";
 import { ShippingPolicyPage } from "./pages/ShippingPolicyPage";
 import { PrivacyPolicyPage } from "./pages/PrivacyPolicyPage";
 import { TermsOfServicePage } from "./pages/TermsOfServicePage";
@@ -55,9 +56,9 @@ import RegionProducts from "./pages/RegionProducts";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 0, // Data is stale immediately
-      gcTime: 0, // Don't cache data (replacing deprecated cacheTime)
-      refetchOnWindowFocus: true, // Refetch when window gains focus
+      staleTime: 5 * 60 * 1000, // Data stays fresh for 5 minutes
+      gcTime: 10 * 60 * 1000, // Cache data for 10 minutes (replacing deprecated cacheTime)
+      refetchOnWindowFocus: false, // Don't refetch when window gains focus
       refetchOnReconnect: true, // Refetch when reconnecting
       retry: 1, // Only retry once
     },
@@ -175,6 +176,7 @@ const AppContent = () => {
         <Route path="/terms-of-service" element={<TermsOfServicePage />} />
         <Route path="/best-sellers" element={<BestSellerProducts />} />
         <Route path="/collection/region/:slug" element={<RegionProducts />} />
+        <Route path="/track-order/:orderId" element={<TrackOrder />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="/contact" element={<Contact />} />
         <Route path="/shipping" element={<HelpCenter />} />

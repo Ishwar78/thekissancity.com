@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { sendPasswordResetEmail } = require('../utils/emailService');
 const User = require('../models/User');
 const OTP = require('../models/OTP');
 const { requireAuth, requireAdmin } = require('../middleware/auth');
@@ -27,11 +28,11 @@ router.get('/test', (req, res) => {
   console.log('🔍 [TEST] Headers:', JSON.stringify(req.headers, null, 2));
   console.log('🔍 [TEST] Origin:', req.headers.origin);
   console.log('🔍 [TEST] Timestamp:', new Date().toISOString());
-  res.json({ 
-    ok: true, 
-    message: 'Server is reachable!', 
+  res.json({
+    ok: true,
+    message: 'Server is reachable!',
     timestamp: new Date().toISOString(),
-    origin: req.headers.origin 
+    origin: req.headers.origin
   });
 });
 
@@ -42,11 +43,11 @@ router.post('/send-otp', async (req, res) => {
   console.log('📱 [SEND OTP] Request headers:', JSON.stringify(req.headers, null, 2));
   console.log('📱 [SEND OTP] Request origin:', req.headers.origin);
   console.log('📱 [SEND OTP] Request body:', JSON.stringify(req.body, null, 2));
-  
+
   try {
     const { phone } = req.body || {};
     console.log('📱 [SEND OTP] Phone received:', phone);
-    
+
     if (!phone || !/^\d{10}$/.test(phone)) {
       console.log('❌ [SEND OTP] Invalid phone format:', phone);
       return res.status(400).json({ ok: false, message: 'Valid 10-digit phone number is required' });
@@ -71,7 +72,7 @@ router.post('/send-otp', async (req, res) => {
     // Send OTP via 2Factor
     console.log('📤 [SEND OTP] Attempting to send SMS via 2Factor...');
     const smsResult = await sendOTP(phone); // No longer passing local OTP
-    
+
     if (!smsResult.ok) {
       console.log('❌ [SEND OTP] 2Factor sending failed:', smsResult.message);
       return res.status(500).json({ ok: false, message: smsResult.message || 'Failed to send OTP' });
@@ -90,9 +91,9 @@ router.post('/send-otp', async (req, res) => {
 
     console.log('✅ [SEND OTP] OTP sent successfully via 2Factor!');
     console.log('========================================\n');
-    
-    return res.json({ 
-      ok: true, 
+
+    return res.json({
+      ok: true,
       message: 'OTP sent successfully via SMS',
       sessionId: smsResult.sessionId
     });
@@ -110,15 +111,15 @@ router.post('/verify-otp', async (req, res) => {
   console.log('📱 [VERIFY OTP] Request received at:', new Date().toISOString());
   console.log('📱 [VERIFY OTP] Request headers:', JSON.stringify(req.headers, null, 2));
   console.log('📱 [VERIFY OTP] Request body:', JSON.stringify(req.body, null, 2));
-  
+
   try {
     const { phone, otp } = req.body || {};
-    
+
     // Validate inputs
     if (!phone || !otp) {
       console.log('❌ [VERIFY OTP] Missing phone or OTP');
-      return res.status(400).json({ 
-        ok: false, 
+      return res.status(400).json({
+        ok: false,
         message: 'Phone and OTP are required',
         details: {
           phone: phone ? 'provided' : 'missing',
@@ -130,18 +131,18 @@ router.post('/verify-otp', async (req, res) => {
     // Validate phone format
     if (!/^\d{10}$/.test(phone)) {
       console.log('❌ [VERIFY OTP] Invalid phone format:', phone);
-      return res.status(400).json({ 
-        ok: false, 
-        message: 'Valid 10-digit phone number is required' 
+      return res.status(400).json({
+        ok: false,
+        message: 'Valid 10-digit phone number is required'
       });
     }
 
     // Validate OTP format
     if (!/^\d{6}$/.test(otp)) {
       console.log('❌ [VERIFY OTP] Invalid OTP format:', otp);
-      return res.status(400).json({ 
-        ok: false, 
-        message: 'Valid 6-digit OTP is required' 
+      return res.status(400).json({
+        ok: false,
+        message: 'Valid 6-digit OTP is required'
       });
     }
 
@@ -157,32 +158,32 @@ router.post('/verify-otp', async (req, res) => {
 
     if (!otpRecord) {
       console.log('❌ [VERIFY OTP] No valid OTP record found for phone:', phone);
-      return res.status(400).json({ 
-        ok: false, 
-        message: 'Invalid or expired OTP. Please request a new OTP.' 
+      return res.status(400).json({
+        ok: false,
+        message: 'Invalid or expired OTP. Please request a new OTP.'
       });
     }
 
     // Must have a session ID for 2Factor verification
     if (!otpRecord.sessionId) {
       console.log('❌ [VERIFY OTP] No session ID found - cannot verify via 2Factor');
-      return res.status(400).json({ 
-        ok: false, 
-        message: 'Invalid verification session. Please request a new OTP.' 
+      return res.status(400).json({
+        ok: false,
+        message: 'Invalid verification session. Please request a new OTP.'
       });
     }
 
     console.log('📱 [VERIFY OTP] Using 2Factor API verification with session ID:', otpRecord.sessionId);
     const verifyResult = await verifyOTP(phone, otp, otpRecord.sessionId);
-    
+
     if (!verifyResult.ok) {
       console.log('❌ [VERIFY OTP] 2Factor verification failed:', verifyResult.message);
-      return res.status(400).json({ 
-        ok: false, 
-        message: verifyResult.message || 'Invalid OTP' 
+      return res.status(400).json({
+        ok: false,
+        message: verifyResult.message || 'Invalid OTP'
       });
     }
-    
+
     console.log('✅ [VERIFY OTP] 2Factor verification successful');
 
     // Mark OTP as verified
@@ -191,18 +192,18 @@ router.post('/verify-otp', async (req, res) => {
 
     console.log('✅ [VERIFY OTP] OTP marked as verified in database');
     console.log('========================================\n');
-    
-    return res.json({ 
-      ok: true, 
-      message: 'OTP verified successfully' 
+
+    return res.json({
+      ok: true,
+      message: 'OTP verified successfully'
     });
   } catch (e) {
     console.error('❌ [VERIFY OTP] Error occurred:', e);
     console.error('❌ [VERIFY OTP] Error stack:', e.stack);
     console.log('========================================\n');
-    return res.status(500).json({ 
-      ok: false, 
-      message: 'Server error during OTP verification' 
+    return res.status(500).json({
+      ok: false,
+      message: 'Server error during OTP verification'
     });
   }
 });
@@ -237,12 +238,12 @@ router.post('/signup', async (req, res) => {
     if (otpRecord.sessionId) {
       console.log('📱 [SIGNUP] Verifying OTP with 2Factor for signup');
       const verifyResult = await verifyOTP(phone, otp, otpRecord.sessionId);
-      
+
       if (!verifyResult.ok) {
         console.log('❌ [SIGNUP] 2Factor OTP verification failed:', verifyResult.message);
         return res.status(400).json({ ok: false, message: verifyResult.message || 'Invalid OTP. Please request a new OTP.' });
       }
-      
+
       console.log('✅ [SIGNUP] 2Factor OTP verification successful for signup');
     } else {
       // Fallback to local OTP verification (for backward compatibility)
@@ -448,11 +449,15 @@ router.post('/forgot-password', async (req, res) => {
     user.resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hour
     await user.save();
 
-    // In production, you would send an email here with the reset link
-    // For now, we'll just return success and log the token
-    console.log(`Password reset token for ${email}:`, resetToken);
+    const baseUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+    const resetLink = `${baseUrl}/forgot-password?token=${resetToken}`;
+    
+    // Send email with reset link
+    await sendPasswordResetEmail(user, resetLink);
+    
+    console.log(`Password reset email sent to ${email}`);
 
-    return res.json({ ok: true, message: 'If email exists, a reset link has been sent', token: resetToken });
+    return res.json({ ok: true, message: 'If email exists, a reset link has been sent' });
   } catch (e) {
     console.error(e);
     return res.status(500).json({ ok: false, message: 'Server error' });

@@ -39,10 +39,10 @@ export const products: Product[] = [
   
   {
     id: "4",
-    name: "Kissan City Special",
+    name: "The Kissan City Special",
     price: 2499,
     category: "Hoodies",
-    description: "Exclusive Kissan City design featuring traditional Indian agricultural motifs with modern streetwear aesthetics.",
+    description: "Exclusive The Kissan City design featuring traditional Indian agricultural motifs with modern streetwear aesthetics.",
     image: KisanImg,
     images: [KisanImg],
     sizes: ["S", "M", "L", "XL"],

@@ -288,9 +288,8 @@ router.put('/', requireAuth, requireAdmin, async (req, res) => {
         if (typeof shiprocket.enabled === 'boolean') set['shipping.shiprocket.enabled'] = shiprocket.enabled;
         if (typeof shiprocket.email === 'string') set['shipping.shiprocket.email'] = shiprocket.email.trim();
         if (typeof shiprocket.password === 'string') set['shipping.shiprocket.password'] = shiprocket.password; // keep exact value
-        if (typeof shiprocket.apiKey === 'string') set['shipping.shiprocket.apiKey'] = shiprocket.apiKey.trim();
-        if (typeof shiprocket.secret === 'string') set['shipping.shiprocket.secret'] = shiprocket.secret.trim();
         if (typeof shiprocket.channelId === 'string') set['shipping.shiprocket.channelId'] = shiprocket.channelId.trim();
+        if (typeof shiprocket.pickupPincode === 'string') set['shipping.shiprocket.pickupPincode'] = shiprocket.pickupPincode.trim();
       }
     }
 
@@ -307,7 +306,7 @@ router.put('/', requireAuth, requireAdmin, async (req, res) => {
       return res.status(400).json({ ok: false, message: 'No valid fields supplied' });
     }
 
-    const doc = await SiteSetting.findOneAndUpdate({}, { $set: set }, {
+    const doc = await SiteSetting.findOneAndUpdate({}, { $set: set, $unset: { 'shipping.shiprocket.apiKey': '', 'shipping.shiprocket.secret': '' } }, {
       new: true,
       upsert: true,
       setDefaultsOnInsert: true,
