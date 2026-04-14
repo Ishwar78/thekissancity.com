@@ -7,6 +7,7 @@ interface Product {
   _id: string;
   title: string;
   images: string[];
+  slug?: string;
 }
 
 interface InfluencerDataItem {
@@ -348,6 +349,15 @@ export default function InfluencerSection() {
             {/* Video title */}
             <div className="is-vid-info">
               <div className="is-vid-title">{selectedVideo?.productId?.title || 'Featured Product'}</div>
+              {selectedVideo?.productId?.slug && (
+                <Link 
+                  to={`/products/${selectedVideo.productId.slug}`}
+                  className="mt-2.5 inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-white bg-[#2d6a4f]/90 hover:bg-[#2d6a4f] px-3.5 py-2 rounded-lg transition-all shadow-lg"
+                >
+                  View Product
+                  <ArrowRight size={10} />
+                </Link>
+              )}
             </div>
 
             {/* Nav */}
@@ -398,6 +408,15 @@ export default function InfluencerSection() {
               </button>
               <div className="is-vid-info">
                 <div className="is-vid-title">{selectedVideo?.productId?.title || 'Featured Product'}</div>
+                {selectedVideo?.productId?.slug && (
+                  <Link 
+                    to={`/products/${selectedVideo.productId.slug}`}
+                    className="mt-3 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-white bg-[#2d6a4f]/90 hover:bg-[#2d6a4f] px-4 py-2.5 rounded-xl transition-all shadow-xl hover:scale-105 active:scale-95"
+                  >
+                    View Product
+                    <ArrowRight size={12} />
+                  </Link>
+                )}
               </div>
             </div>
           </div>
@@ -432,7 +451,13 @@ export default function InfluencerSection() {
                       <Play size={14} fill="#2d6a4f" color="#2d6a4f" />
                     </div>
                     <div className="is-thumb-label">
-                      <span>{item.productId?.title || 'Product Review'}</span>
+                      {item.productId?.slug ? (
+                        <Link to={`/products/${item.productId.slug}`} onClick={(e) => e.stopPropagation()} className="hover:underline">
+                          <span>{item.productId?.title || 'Product Review'}</span>
+                        </Link>
+                      ) : (
+                        <span>{item.productId?.title || 'Product Review'}</span>
+                      )}
                     </div>
                   </div>
                 );

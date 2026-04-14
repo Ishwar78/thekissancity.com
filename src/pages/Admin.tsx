@@ -6813,10 +6813,20 @@ const Admin = () => {
                           className="w-12 h-12 object-cover rounded"
                         />
                         <div className="flex-1">
-                          <div className="font-medium">{it.title}</div>
-                          <div className="text-xs text-muted-foreground space-y-0.5">
-                            {(it.size || it.variant?.size) && <div>Size: {it.size || it.variant?.size}</div>}
-                            {(it.color || it.variant?.color) && <div>Color: {it.color || it.variant?.color}</div>}
+                          <div className="font-semibold text-sm">{it.title}</div>
+                          <div className="text-[11px] text-muted-foreground mt-0.5 space-y-0.5">
+                            {(it.size || it.variant?.size) && (
+                              <div className="flex items-center gap-1">
+                                <span className="font-medium">Variant:</span> 
+                                <span className="bg-secondary/50 px-1.5 py-0.5 rounded text-[10px]">{it.size || it.variant?.size}</span>
+                              </div>
+                            )}
+                            {(it.color || it.variant?.color) && (
+                              <div className="flex items-center gap-1">
+                                <span className="font-medium">Color:</span>
+                                <span className="bg-secondary/50 px-1.5 py-0.5 rounded text-[10px]">{it.color || it.variant?.color}</span>
+                              </div>
+                            )}
                           </div>
                         </div>
                         <div className="text-sm tabular-nums">{it.qty} × &#8377;{Number(it.price || 0).toLocaleString('en-IN')}</div>

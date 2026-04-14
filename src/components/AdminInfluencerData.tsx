@@ -218,7 +218,11 @@ export const AdminInfluencerData = () => {
                     variant="secondary"
                     size="icon"
                     className="h-10 w-10 rounded-full shadow-lg hover:scale-110 transition-transform"
-                    onClick={() => openEditModal(item)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      openEditModal(item);
+                    }}
                   >
                     <Edit className="h-4 w-4" />
                   </Button>
@@ -226,7 +230,11 @@ export const AdminInfluencerData = () => {
                     variant="destructive"
                     size="icon"
                     className="h-10 w-10 rounded-full shadow-lg hover:scale-110 transition-transform"
-                    onClick={() => openDeleteConfirm(item._id)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      openDeleteConfirm(item._id);
+                    }}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>

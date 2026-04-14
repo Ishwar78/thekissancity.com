@@ -92,7 +92,7 @@ export const ProductSlider = ({ className }: { className?: string }) => {
         .kc-slide {
           min-width: 100%;
           position: relative;
-          height: clamp(220px, 38vw, 440px);
+          height: clamp(280px, 35vw, 540px);
           overflow: hidden;
           background: #0d0a04;
         }
@@ -103,8 +103,8 @@ export const ProductSlider = ({ className }: { className?: string }) => {
           inset: 0;
           width: 100%;
           height: 100%;
-          object-fit: cover;
-          object-position: center 20%;
+          object-fit: contain;
+          object-position: center;
           display: block;
           transform: scale(1.02);
           transition: transform 6s ease-out;

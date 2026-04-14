@@ -413,7 +413,11 @@ const ProductDetail = () => {
     if (selectedColors.length > 0) {
       selectedColors.forEach(color => {
         const item: any = { id: String(product._id || product.id), title, price: itemPrice, image: img, meta: {} as any };
-        if (selectedSize) item.meta.size = selectedSize;
+        
+        // Use human-readable label for size/weight if available
+        const option = quantityOptions.find(o => o.id === selectedSize);
+        if (selectedSize) item.meta.size = option ? option.displayLabel : selectedSize;
+        
         item.meta.color = color;
         // Add gram if available in quantity options
         if (hasQuantityOptions && selectedSize) {
@@ -437,7 +441,10 @@ const ProductDetail = () => {
       });
     } else {
       const item: any = { id: String(product._id || product.id), title, price: itemPrice, image: img, meta: {} as any };
-      if (selectedSize) item.meta.size = selectedSize;
+      
+      // Use human-readable label for size/weight if available
+      const option = quantityOptions.find(o => o.id === selectedSize);
+      if (selectedSize) item.meta.size = option ? option.displayLabel : selectedSize;
       // Add gram if available in quantity options
       if (hasQuantityOptions && selectedSize) {
         const selectedOption = product.quantityOptions?.find((opt: any) => opt.id === selectedSize || opt.code === selectedSize);
@@ -519,7 +526,11 @@ const ProductDetail = () => {
     if (selectedColors.length > 0) {
       selectedColors.forEach(color => {
         const item: any = { id: String(product._id || product.id), title, price: itemPrice, image: img, meta: {} as any };
-        if (selectedSize) item.meta.size = selectedSize;
+        
+        // Use human-readable label for size/weight if available
+        const option = quantityOptions.find(o => o.id === selectedSize);
+        if (selectedSize) item.meta.size = option ? option.displayLabel : selectedSize;
+        
         item.meta.color = color;
         // Add gram if available in quantity options
         if (hasQuantityOptions && selectedSize) {
@@ -543,7 +554,10 @@ const ProductDetail = () => {
       });
     } else {
       const item: any = { id: String(product._id || product.id), title, price: itemPrice, image: img, meta: {} as any };
-      if (selectedSize) item.meta.size = selectedSize;
+      
+      // Use human-readable label for size/weight if available
+      const option = quantityOptions.find(o => o.id === selectedSize);
+      if (selectedSize) item.meta.size = option ? option.displayLabel : selectedSize;
       // Add gram if available in quantity options
       if (hasQuantityOptions && selectedSize) {
         const selectedOption = product.quantityOptions?.find((opt: any) => opt.id === selectedSize || opt.code === selectedSize);

@@ -8,7 +8,7 @@ const router = express.Router();
 // Public route to get all influencer data (no auth required)
 router.get('/influencer-data/public', async (req, res) => {
   try {
-    const influencerData = await InfluencerData.find().populate('productId', 'title images');
+    const influencerData = await InfluencerData.find().populate('productId', 'title images slug');
     res.status(200).json({ ok: true, data: influencerData });
   } catch (error) {
     res.status(500).json({ ok: false, message: error.message });
@@ -19,7 +19,7 @@ router.get('/influencer-data/public', async (req, res) => {
 router.get('/admin/influencer-data', requireAuth, requireAdmin, async (req, res) => {
   try {
     console.log('Attempting to fetch influencer data...');
-    const influencerData = await InfluencerData.find().populate('productId', 'title images');
+    const influencerData = await InfluencerData.find().populate('productId', 'title images slug');
     console.log('Fetched Influencer Data:', influencerData.map(item => ({ videoUrl: item.videoUrl, productName: item.productId?.title, productId: item.productId?._id })));
     res.status(200).json({ ok: true, data: influencerData });
   } catch (error) {
@@ -31,7 +31,7 @@ router.get('/admin/influencer-data', requireAuth, requireAdmin, async (req, res)
 // GET a single influencer data entry by ID
 router.get('/admin/influencer-data/:id', requireAuth, requireAdmin, async (req, res) => {
   try {
-    const influencerDataItem = await InfluencerData.findById(req.params.id).populate('productId', 'name images');
+    const influencerDataItem = await InfluencerData.findById(req.params.id).populate('productId', 'name images slug');
     if (!influencerDataItem) {
       return res.status(404).json({ ok: false, message: 'Influencer data not found' });
     }
@@ -77,7 +77,7 @@ router.put('/admin/influencer-data/:id', requireAuth, requireAdmin, async (req, 
       req.params.id,
       { videoUrl, productId },
       { new: true, runValidators: true }
-    ).populate('productId', 'name images');
+    ).populate('productId', 'name images slug');
     
     if (!updatedInfluencerData) {
       return res.status(404).json({ ok: false, message: 'Influencer data not found' });

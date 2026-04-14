@@ -170,9 +170,21 @@ export default function AllVideosPage() {
                   </div>
                 </div>
                 <div className="absolute bottom-0 left-0 right-0 p-4 z-10">
-                  <h3 className="font-bold text-white text-sm mb-1 line-clamp-2 drop-shadow-lg">
-                    {video.productId?.title || 'Product Review'}
-                  </h3>
+                  {video.productId?.slug ? (
+                    <Link 
+                      to={`/products/${video.productId.slug}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="hover:underline block"
+                    >
+                      <h3 className="font-bold text-white text-sm mb-1 line-clamp-2 drop-shadow-lg">
+                        {video.productId?.title || 'Product Review'}
+                      </h3>
+                    </Link>
+                  ) : (
+                    <h3 className="font-bold text-white text-sm mb-1 line-clamp-2 drop-shadow-lg">
+                      {video.productId?.title || 'Product Review'}
+                    </h3>
+                  )}
                 </div>
               </div>
             </div>
