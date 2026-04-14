@@ -77,7 +77,7 @@ export const ProductSlider = ({ className }: { className?: string }) => {
           position: relative;
           width: 100%;
           overflow: hidden;
-          background: #0d0a04;
+           background: transparent;
           font-family: 'Lato', sans-serif;
         }
 
@@ -92,7 +92,7 @@ export const ProductSlider = ({ className }: { className?: string }) => {
         .kc-slide {
           min-width: 100%;
           position: relative;
-          height: clamp(280px, 35vw, 540px);
+          height: clamp(300px, 40vw, 640px);
           overflow: hidden;
           background: #0d0a04;
         }
@@ -103,7 +103,7 @@ export const ProductSlider = ({ className }: { className?: string }) => {
           inset: 0;
           width: 100%;
           height: 100%;
-          object-fit: contain;
+          object-fit:cover;
           object-position: center;
           display: block;
           transform: scale(1.02);
@@ -431,7 +431,7 @@ export const ProductSlider = ({ className }: { className?: string }) => {
             </div>
 
             {/* Nav arrows */}
-            <button
+            {/* <button
               className="kc-nav kc-nav-prev"
               onClick={() => goTo(currentSlide - 1)}
               aria-label="Previous slide"
@@ -444,7 +444,7 @@ export const ProductSlider = ({ className }: { className?: string }) => {
               aria-label="Next slide"
             >
               <ChevronRight size={17} />
-            </button>
+            </button> */}
 
             {/* Dots */}
             <div className="kc-dots">
