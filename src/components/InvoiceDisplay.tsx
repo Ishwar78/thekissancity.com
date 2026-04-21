@@ -84,14 +84,14 @@ export function InvoiceDisplay({ order, invoice, businessInfo, isLoading, error 
           Print / Download
         </Button>
       </div>
-
+ 
       {/* Invoice Content */}
       <div className="print:p-0 p-4 sm:p-8 max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-8 pb-8 border-b border-border">
           <div className="flex justify-between items-start mb-6">
             <div>
-              <img src="/logo1.png" alt="Company Header" className="h-16 mb-2 object-contain" />
+              <img src="/kissancitylogo1.jpg" alt="Company Header" className="h-16 mb-2 object-contain" />
             </div>
             <div className="text-right">
               <p className="text-sm text-muted-foreground">Contact:</p>

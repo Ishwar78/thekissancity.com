@@ -1,55 +1,24 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { MapPin, Award } from 'lucide-react';
 
-// Use the actual uploaded image filenames
-const farmers = [
-  {
-    name: "Ramesh Patel",
-    location: "Madhya Pradesh",
-    specialty: "Organic Mushroom Farming",
-    quote: "\"I believe in growing food the way nature intended — no chemicals, no shortcuts. Every mushroom we harvest carries the richness of our soil.\"",
-    experience: "15+ years",
-    image: "/src/assets/f1.jpg",
-  },
-  {
-    name: "Lakshmi Devi",
-    location: "Uttarakhand",
-    specialty: "Wild Mushroom & Herb Collection",
-    quote: "\"My grandmother taught me which mushrooms grow best in the hills. Today, I share that knowledge with KissanCity to bring purity to every jar.\"",
-    experience: "20+ years",
-    image: "/src/assets/f2.jpg",
-  },
-  {
-    name: "Sukhdev Singh",
-    location: "Punjab",
-    specialty: "Amla & Garlic Cultivation",
-    quote: "\"ਸਾਡੇ ਆਂਵਲੇ ਦੇ ਰੁੱਖ 40 ਸਾਲ ਪੁਰਾਣੇ ਨੇ। ਇਨ੍ਹਾਂ ਦਾ ਸੁਆਦ ਤੇ Vitamin C ਕਿਸੇ ਹੋਰ ਵਿੱਚ ਨਹੀਂ ਮਿਲਦਾ।\"",
-    experience: "25+ years",
-    image: "/src/assets/f3.jpg",
-  },
-  {
-    name: "Mahender Yadav",
-    location: "Haryana",
-    specialty: "Sarson & Organic Spice Farming",
-    quote: "\"ਸਾਡੀ ਜ਼ਮੀਨ ਤੇ ਜੋ ਉਗੇ ਉਹ ਅਸਲੀ ਹੈ। ਨਾ ਕੋਈ ਕੈਮਿਕਲ, ਨਾ ਕੋਈ ਮਿਲਾਵਟ। KissanCity ਨੇ ਮਿਹਨਤ ਦੀ ਸਹੀ ਕੀਮਤ ਦਿੱਤੀ।\"",
-    experience: "18+ years",
-    image: "/src/assets/f44.jpg",
-  },
-];
-
 const FarmersSection = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(true);
+  const [farmers, setFarmers] = useState<any[]>([]);
 
   useEffect(() => {
-    const node = sectionRef.current;
-    if (!node) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) { setVisible(true); observer.disconnect(); } },
-      { threshold: 0.08 }
-    );
-    observer.observe(node);
-    return () => observer.disconnect();
+    const fetchFarmers = async () => {
+      try {
+        const res = await fetch('/api/team?type=farmer');
+        if (res.ok) {
+          const { data } = await res.json();
+          setFarmers(data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch farmers:', err);
+      }
+    };
+    fetchFarmers();
   }, []);
 
   return (
@@ -360,7 +329,7 @@ const FarmersSection = () => {
           >
             {/* Photo */}
             <div className="fs-photo-wrap">
-              <img src={farmer.image} alt={farmer.name} />
+              <img src={farmer.image?.startsWith('http') ? farmer.image : `/uploads/${farmer.image}`} alt={farmer.name} />
               <div className="fs-name-overlay">
                 <div className="fs-farmer-name">{farmer.name}</div>
                 <div className="fs-location">

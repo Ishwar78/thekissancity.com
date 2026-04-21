@@ -6,6 +6,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { ProductCard } from '@/components/ProductCard';
 import { Navbar } from '@/components/Navbar';
 import FarmersSection from '@/components/farmerSection';
+import ExpertSection from '@/components/ExpertSection';
 import InfoSection from '@/components/infoSection';
 import { Footer } from '@/components/Footer';
 import FarmerStatsSection from '@/components/farmerstatSection';
@@ -195,6 +196,7 @@ const About = () => {
        
 
         <FarmersSection/>
+        <ExpertSection/>
 
          <div className="coll-section container mx-auto px-4 sm:px-6">
 

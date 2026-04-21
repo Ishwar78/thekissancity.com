@@ -13,6 +13,8 @@ import { AdminReturnPolicyEditor } from "../components/AdminReturnPolicyEditor";
 import { AdminTermsOfServiceEditor } from "../components/AdminTermsOfServiceEditor";
 import { AboutUsManager } from "../components/admin/AboutUsManager";
 import { ProductSliderManager } from "../components/admin/ProductSliderManager";
+import { AboutSectionManager } from "../components/admin/AboutSectionManager";
+import { BlogManager } from "../components/admin/BlogManager";
 import { AdminEditReviewModal, AdminReview } from '@/components/AdminEditReviewModal';
 import { Pagination } from '@/components/Pagination';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
@@ -175,6 +177,8 @@ const NAV_ITEMS = [
   { id: 'influencer-data', label: 'Influencer Data', icon: Video },
   { id: 'influencer-images', label: 'Influencer Images', icon: Image },
   { id: 'about-us', label: 'About Us Section', icon: FileText },
+  { id: 'aboutsection', label: 'About Section', icon: Users2 },
+  { id: 'blog', label: 'Blog', icon: FileText },
   { id: 'faqs', label: 'FAQ Management', icon: FileText },
 ] as const;
 
@@ -6668,6 +6672,10 @@ const Admin = () => {
         return <InfluencerImageSection />;
       case 'about-us':
         return <AboutUsManager />;
+      case 'aboutsection':
+        return <AboutSectionManager />;
+      case 'blog':
+        return <BlogManager />;
       case 'slider':
         return <ProductSliderManager />;
       case 'faqs':
@@ -6676,13 +6684,13 @@ const Admin = () => {
         return null;
     }
   };
-
+ 
   return (
     <div className="min-h-screen bg-background">
       <main className="container mx-auto px-3 sm:px-4 pt-6 md:pt-8 pb-12">
         {/* Admin Header with Logo */}
         <div className="flex items-center justify-between mb-6">
-          <img src="/logo1.png" alt="Logo" className="h-10 w-auto" />
+          <img src="/kissancitylogo1.jpg" alt="Logo" className="h-10 w-auto" />
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-muted-foreground">Admin Panel</span>
           </div>
