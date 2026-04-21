@@ -54,7 +54,7 @@ const BestSellerCard = ({ product, index }: { product: Product; index: number })
   const slug = product.slug || id;
   const linkTo = `/products/${slug}`;
 
-  const displayPrice = (() => {
+  const rawPrice = (() => {
     if (product.quantityOptions && product.quantityOptions.length > 0) {
       const active = product.quantityOptions.filter(o => o.isActive && o.stock > 0 && o.price > 0);
       const pool = active.length > 0 ? active : product.quantityOptions.filter(o => o.price > 0);
@@ -64,6 +64,21 @@ const BestSellerCard = ({ product, index }: { product: Product; index: number })
   })();
 
   const discountPercentage = product.discount?.value || 0;
+  const discountType = product.discount?.type || 'flat';
+
+  const displayPrice = (() => {
+    if (discountPercentage > 0) {
+      if (discountType === 'percentage') {
+        return Math.round(rawPrice * (1 - discountPercentage / 100));
+      } else {
+        // flat discount
+        return Math.max(0, rawPrice - discountPercentage);
+      }
+    }
+    return rawPrice;
+  })();
+
+  const originalPriceToShow = discountPercentage > 0 ? rawPrice : (product.originalPrice && product.originalPrice > displayPrice ? product.originalPrice : undefined);
 
   const bullets = product.highlights?.slice(0, 3) || [];
 
@@ -184,12 +199,12 @@ const BestSellerCard = ({ product, index }: { product: Product; index: number })
             >
               {displayPrice > 0 ? `₹${displayPrice.toLocaleString('en-IN')}` : '—'}
             </span>
-            {product.originalPrice && product.originalPrice > displayPrice && (
+            {originalPriceToShow && originalPriceToShow > displayPrice && (
               <span
                 className="text-xs line-through"
                 style={{ color: '#b0957a' }}
               >
-                ₹{product.originalPrice.toLocaleString('en-IN')}
+                ₹{originalPriceToShow.toLocaleString('en-IN')}
               </span>
             )}
           </div>

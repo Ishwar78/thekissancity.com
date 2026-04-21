@@ -12,6 +12,7 @@ import { AdminPrivacyPolicyEditor } from "../components/AdminPrivacyPolicyEditor
 import { AdminReturnPolicyEditor } from "../components/AdminReturnPolicyEditor";
 import { AdminTermsOfServiceEditor } from "../components/AdminTermsOfServiceEditor";
 import { AboutUsManager } from "../components/admin/AboutUsManager";
+import { ProductSliderManager } from "../components/admin/ProductSliderManager";
 import { AdminEditReviewModal, AdminReview } from '@/components/AdminEditReviewModal';
 import { Pagination } from '@/components/Pagination';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
@@ -73,6 +74,20 @@ import { ImageUploader } from '@/components/ImageUploader';
 import BulkCouponForm from '@/components/BulkCouponForm';
 import BulkCouponList from '@/components/BulkCouponList';
 import slugify from 'slugify';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
+
+// ReactQuill toolbar modules (bold, italic, underline, link, lists, headings, clear)
+const QUILL_MODULES = {
+  toolbar: [
+    [{ header: [1, 2, 3, false] }],
+    ['bold', 'italic', 'underline', 'link'],
+    [{ list: 'ordered' }, { list: 'bullet' }],
+    ['clean'],
+  ],
+};
+
+const QUILL_FORMATS = ['header', 'bold', 'italic', 'underline', 'link', 'list', 'bullet'];
 
 
 
@@ -135,6 +150,7 @@ const NAV_ITEMS = [
   { id: 'products', label: 'Products', icon: Package },
   { id: 'categories', label: 'Categories', icon: Tags },
   { id: 'regions', label: 'Regions', icon: MapPin },
+  { id: 'slider', label: 'Product Slider', icon: Image },
   { id: 'coupons', label: 'Coupon Management', icon: Percent },
   { id: 'bulk-coupons', label: 'Bulk Coupons', icon: Mail },
   { id: 'pages', label: 'Pages', icon: LayoutDashboard },
@@ -3490,12 +3506,16 @@ const Admin = () => {
                 </div>
                 <div>
                   <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    value={productForm.description}
-                    onChange={(e) => setProductForm((p) => ({ ...p, description: e.target.value }))}
-                    required
-                  />
+                  <div className="mt-1" style={{ minHeight: 120 }}>
+                    <ReactQuill
+                      theme="snow"
+                      value={productForm.description}
+                      onChange={(val) => setProductForm((p) => ({ ...p, description: val }))}
+                      modules={QUILL_MODULES}
+                      formats={QUILL_FORMATS}
+                      style={{ background: '#fff', borderRadius: 8 }}
+                    />
+                  </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
@@ -3523,20 +3543,30 @@ const Admin = () => {
                   </div>
                 </div>
                 <div>
-                  <Label htmlFor="paragraph1">Paragraph 1</Label>
-                  <Textarea
-                    id="paragraph1"
-                    value={productForm.paragraph1}
-                    onChange={(e) => setProductForm((p) => ({ ...p, paragraph1: e.target.value }))}
-                  />
+                  <Label>Paragraph 1</Label>
+                  <div className="mt-1" style={{ minHeight: 120 }}>
+                    <ReactQuill
+                      theme="snow"
+                      value={productForm.paragraph1}
+                      onChange={(val) => setProductForm((p) => ({ ...p, paragraph1: val }))}
+                      modules={QUILL_MODULES}
+                      formats={QUILL_FORMATS}
+                      style={{ background: '#fff', borderRadius: 8 }}
+                    />
+                  </div>
                 </div>
                 <div>
-                  <Label htmlFor="paragraph2">Paragraph 2</Label>
-                  <Textarea
-                    id="paragraph2"
-                    value={productForm.paragraph2}
-                    onChange={(e) => setProductForm((p) => ({ ...p, paragraph2: e.target.value }))}
-                  />
+                  <Label>Paragraph 2</Label>
+                  <div className="mt-1" style={{ minHeight: 120 }}>
+                    <ReactQuill
+                      theme="snow"
+                      value={productForm.paragraph2}
+                      onChange={(val) => setProductForm((p) => ({ ...p, paragraph2: val }))}
+                      modules={QUILL_MODULES}
+                      formats={QUILL_FORMATS}
+                      style={{ background: '#fff', borderRadius: 8 }}
+                    />
+                  </div>
                 </div>
 
                 {/* <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
@@ -4642,14 +4672,18 @@ const Admin = () => {
               </div> */}
 
                 <div>
-                  <Label htmlFor="longDescription">Long Description (Rich Text)</Label>
-                  <Textarea
-                    id="longDescription"
-                    value={productForm.longDescription}
-                    onChange={(e) => setProductForm((p) => ({ ...p, longDescription: e.target.value }))}
-                    placeholder="Detailed product description, benefits, usage instructions..."
-                    rows={4}
-                  />
+                  <Label>Long Description (Rich Text)</Label>
+                  <div className="mt-1" style={{ minHeight: 150 }}>
+                    <ReactQuill
+                      theme="snow"
+                      value={productForm.longDescription}
+                      onChange={(val) => setProductForm((p) => ({ ...p, longDescription: val }))}
+                      modules={QUILL_MODULES}
+                      formats={QUILL_FORMATS}
+                      placeholder="Detailed product description, benefits, usage instructions..."
+                      style={{ background: '#fff', borderRadius: 8 }}
+                    />
+                  </div>
                 </div>
 
                 <div>
@@ -6634,6 +6668,8 @@ const Admin = () => {
         return <InfluencerImageSection />;
       case 'about-us':
         return <AboutUsManager />;
+      case 'slider':
+        return <ProductSliderManager />;
       case 'faqs':
         return renderFAQs();
       default:
