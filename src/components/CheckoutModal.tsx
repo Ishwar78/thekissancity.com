@@ -610,14 +610,14 @@ export const CheckoutModal: React.FC<Props> = ({ open, setOpen }) => {
         <div className="border-t border-border pt-4 mt-4 space-y-2">
           <label className="font-medium">Payment Method</label>
           <div className="flex flex-col gap-2">
-            <label className="flex items-center gap-2">
+            {/* <label className="flex items-center gap-2">
               <input
                 type="radio"
                 checked={payment === "COD"}
                 onChange={() => setPayment("COD")}
               />
               <span>Cash on Delivery</span>
-            </label>
+            </label> */}
             {razorpaySettings?.isActive && (
               <label className="flex items-center gap-2">
                 <input

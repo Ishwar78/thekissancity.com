@@ -51,19 +51,19 @@ export const Footer = () => {
           <div className="lg:col-span-2">
             <Link
               to="/"
-              className="inline-flex items-center gap-3 mb-3 md:mb-4"
+              className="flex items-center gap-3 mb-3 md:mb-4"
               aria-label="KisaanCity Home"
             >
               <img
-                src="/FinalLogo-removebg-preview.png"
+                src="/kissancityfooter-removebg-preview.png"
                 alt="KisaanCity Logo"
-                className="h-8 md:h-10 w-auto object-contain"
+                className="h-20 md:h-20 w-auto object-contain"
               />
               <span className="sr-only">The Kissan City</span>
             </Link>
 
             <p className="text-xs md:text-sm text-gray-300 leading-relaxed mb-4 md:mb-6 max-w-xs">
-              The Kissan City is a brand name owned by Nut and Nector Pvt Ltd and is bridging the gap between the rural heartland and urban doorstep.
+              The Kissan City is a brand name owned by Nut & Nectar Pvt Ltd and is bridging the gap between the rural heartland and urban doorstep.
             </p>
             <div className="space-y-2 md:space-y-3">
               <div className="flex items-center gap-2 md:gap-3 text-xs md:text-sm text-gray-300 hover:text-yellow-400 transition-colors">

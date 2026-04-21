@@ -85,19 +85,20 @@ export const Navbar = ({ cartItemCount = 0 }: NavbarProps) => {
     <>
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white text-gray-900 border-b border-gray-200 shadow-sm">
         <div className="container mx-auto pl-1 md:px-8 pr-2 md:pr-8">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between h-24">
 
             {/* Logo */}
-           <Link to="/" className="flex items-center gap-1 md:gap-6 -mt-1 -ml-3" aria-label="The Kissan City Home">
+           <Link to="/" className="flex items-center gap-1 md:gap-6 -mt-1 ml-3 md:ml-0" aria-label="The Kissan City Home">
               {logoFailed ? (
                 <div className="h-8 md:h-16 lg:h-[60px] w-auto select-none max-w-[150px] md:max-w-[200px] flex items-center justify-center bg-gray-100 rounded-lg">
                   <span className="text-gray-600 font-bold text-lg">The Kissan City</span>
                 </div>
               ) : (
                 <img
-                  src="/logo1.png"
+                   src="/kissancitylogo1.jpg"
+                  //  src="/NAVLOGO.JPG"
                   alt="The Kissan City"
-                  className="h-8 md:h-16 lg:h-[60px] w-auto select-none max-w-[150px] md:max-w-[200px]"
+                  className="h-18 md:h-22 lg:h-[60px] w-auto select-none max-w-[150px] md:max-w-[200px]"
                   loading="eager"
                   decoding="async"
                   onError={(e) => {

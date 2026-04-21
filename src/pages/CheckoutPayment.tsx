@@ -900,7 +900,7 @@ const CheckoutPayment = () => {
 
             {/* COD Option */}
             <Card className="p-4 rounded-xl text-sm shadow-sm border border-gray-200">
-              <div className="flex items-center gap-4 mb-6">
+              {/* <div className="flex items-center gap-4 mb-6">
                 <div
                   className="w-5 h-5 rounded-full border-2 cursor-pointer"
                   onClick={() => setPaymentMethod('cod')}
@@ -915,7 +915,7 @@ const CheckoutPayment = () => {
                     Pay in cash when your order is delivered.
                   </p>
                 </div>
-              </div>
+              </div> */}
 
               {paymentMethod === 'cod' && (
                 <div className="space-y-4">
