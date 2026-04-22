@@ -15,6 +15,7 @@ import { AboutUsManager } from "../components/admin/AboutUsManager";
 import { ProductSliderManager } from "../components/admin/ProductSliderManager";
 import { AboutSectionManager } from "../components/admin/AboutSectionManager";
 import { BlogManager } from "../components/admin/BlogManager";
+import { VideoManager } from "../components/admin/VideoManager";
 import { AdminEditReviewModal, AdminReview } from '@/components/AdminEditReviewModal';
 import { Pagination } from '@/components/Pagination';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
@@ -179,6 +180,7 @@ const NAV_ITEMS = [
   { id: 'about-us', label: 'About Us Section', icon: FileText },
   { id: 'aboutsection', label: 'About Section', icon: Users2 },
   { id: 'blog', label: 'Blog', icon: FileText },
+  { id: 'home-videos', label: 'Home Page Videos', icon: Video },
   { id: 'faqs', label: 'FAQ Management', icon: FileText },
 ] as const;
 
@@ -1120,6 +1122,12 @@ const Admin = () => {
 
   // When the admin navigates to different tabs
   useEffect(() => {
+    if (activeSection === 'blog') {
+      // Logic for blog
+    }
+    if (activeSection === 'home-videos') {
+      // Logic for home videos
+    }
     if (activeSection === 'users' && users.length === 0 && isAdmin) {
       void fetchAdminResources();
     }
@@ -6676,6 +6684,8 @@ const Admin = () => {
         return <AboutSectionManager />;
       case 'blog':
         return <BlogManager />;
+      case 'home-videos':
+        return <VideoManager />;
       case 'slider':
         return <ProductSliderManager />;
       case 'faqs':

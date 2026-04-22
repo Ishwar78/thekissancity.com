@@ -2,12 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
-import { ArrowLeft, Clock, User, Share2 } from 'lucide-react';
+import { ArrowLeft, Clock, User, Share2, ChevronDown } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 
 const BlogPost = () => {
   const { slug } = useParams();
   const [blog, setBlog] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
     const fetchBlog = async () => {
@@ -56,6 +58,31 @@ const BlogPost = () => {
 
   return (
     <div className="min-h-screen bg-[#F5F0E8] flex flex-col font-sans selection:bg-[#2d6a4f]/20">
+      <Helmet>
+        {/* Basic Meta Tags */}
+        <title>{blog.seoTitle || `${blog.title} | KissanCity Journal`}</title>
+        <meta name="description" content={blog.seoDescription || `Read about ${blog.title} and more on the KissanCity organic farming journal.`} />
+        {blog.seoKeywords && <meta name="keywords" content={blog.seoKeywords} />}
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content={window.location.href} />
+        <meta property="og:title" content={blog.seoTitle || blog.title} />
+        <meta property="og:description" content={blog.seoDescription || `Read about ${blog.title} on KissanCity.`} />
+        {blog.image && (
+          <meta property="og:image" content={blog.image.startsWith('http') ? blog.image : `${window.location.origin}/uploads/${blog.image}`} />
+        )}
+
+        {/* Twitter */}
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:url" content={window.location.href} />
+        <meta property="twitter:title" content={blog.seoTitle || blog.title} />
+        <meta property="twitter:description" content={blog.seoDescription || `Read about ${blog.title} on KissanCity.`} />
+        {blog.image && (
+          <meta property="twitter:image" content={blog.image.startsWith('http') ? blog.image : `${window.location.origin}/uploads/${blog.image}`} />
+        )}
+      </Helmet>
+      
       <Navbar />
       
       {/* Hero Section Container */}
@@ -105,34 +132,58 @@ const BlogPost = () => {
 
       {/* Content Section */}
       <div className="flex-1 w-full relative z-20">
-        <div className="max-w-3xl mx-auto px-4 lg:px-8 pb-24 lg:pb-32 -mt-4 lg:-mt-10">
+        <div className="max-w-6xl mx-auto px-4 lg:px-8 pb-24 lg:pb-32 -mt-4 lg:-mt-10">
           <div className="bg-white rounded-[2.5rem] shadow-sm p-8 md:p-12 lg:p-16 ring-1 ring-gray-100">
             {/* Share / Tags simple bar */}
-            <div className="flex justify-end mb-10 pb-6 border-b border-gray-100">
+            {/* <div className="flex justify-end mb-10 pb-6 border-b border-gray-100">
               <button onClick={() => navigator.clipboard.writeText(window.location.href)} className="flex items-center gap-2 text-gray-500 hover:text-[#2d6a4f] transition-colors text-sm font-medium">
                 <Share2 className="w-4 h-4" /> Copy Link
               </button>
-            </div>
+            </div> */}
 
-            {/* Rich Content injection */}
-            <div 
-              className="prose prose-lg md:prose-xl prose-stone max-w-none 
-                prose-headings:font-serif prose-headings:text-[#2d2117] prose-headings:font-bold prose-h2:mt-10 prose-h2:mb-6
-                prose-p:text-gray-600 prose-p:leading-relaxed
-                prose-a:text-[#ba8c5c] hover:prose-a:text-[#2d6a4f] prose-a:transition-colors
-                prose-img:rounded-2xl prose-img:shadow-sm prose-img:my-10
-                prose-blockquote:border-l-[#2d6a4f] prose-blockquote:bg-gray-50 prose-blockquote:py-2 prose-blockquote:px-6 prose-blockquote:rounded-r-2xl prose-blockquote:italic prose-blockquote:text-gray-700
-                prose-li:text-gray-600
-                [&>*:first-child]:mt-0"
-              dangerouslySetInnerHTML={{ __html: blog.content }}
-            />
+            {/* Rich Content with Read More */}
+            <div className="relative">
+              {/* Content wrapper with smooth height transition */}
+              <div
+                className="overflow-hidden transition-all duration-700 ease-in-out"
+                style={{ maxHeight: expanded ? '99999px' : '320px' }}
+              >
+                <div 
+                  className="prose prose-lg md:prose-xl prose-stone max-w-none 
+                    prose-headings:font-serif prose-headings:text-[#2d2117] prose-headings:font-bold prose-h2:mt-10 prose-h2:mb-6
+                    prose-p:text-gray-600 prose-p:leading-relaxed
+                    prose-a:text-[#ba8c5c] hover:prose-a:text-[#2d6a4f] prose-a:transition-colors
+                    prose-img:rounded-2xl prose-img:shadow-sm prose-img:my-10
+                    prose-blockquote:border-l-[#2d6a4f] prose-blockquote:bg-gray-50 prose-blockquote:py-2 prose-blockquote:px-6 prose-blockquote:rounded-r-2xl prose-blockquote:italic prose-blockquote:text-gray-700
+                    prose-li:text-gray-600
+                    [&>*:first-child]:mt-0"
+                  dangerouslySetInnerHTML={{ __html: blog.content }}
+                />
+              </div>
+
+              {/* Gradient fade overlay + Read More button — hidden when expanded */}
+              {!expanded && (
+                <div className="absolute bottom-0 left-0 right-0 flex flex-col items-center">
+                  {/* Gradient fade */}
+                  <div className="w-full h-32 bg-gradient-to-t from-white via-white/80 to-transparent" />
+                  {/* Button */}
+                  <button
+                    onClick={() => setExpanded(true)}
+                    className="-mt-2 mb-2 inline-flex items-center gap-2 px-7 py-3 bg-[#2d6a4f] text-white text-sm font-semibold rounded-full shadow-lg hover:bg-[#1b4332] hover:shadow-xl active:scale-95 transition-all duration-200"
+                  >
+                    Read More
+                    <ChevronDown className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+            </div>
             
             {/* End of article marker */}
-            <div className="flex justify-center mt-16 pt-16 border-t border-gray-100">
+            {/* <div className="flex justify-center mt-16 pt-16 border-t border-gray-100">
               <div className="h-1.5 w-1.5 rounded-full bg-[#ba8c5c] mx-1" />
               <div className="h-1.5 w-1.5 rounded-full bg-[#ba8c5c] mx-1 opacity-60" />
               <div className="h-1.5 w-1.5 rounded-full bg-[#ba8c5c] mx-1 opacity-30" />
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

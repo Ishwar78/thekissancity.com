@@ -84,6 +84,7 @@ const productSliderRoutes = require('./routes/productSlider');
 const aboutUsRoutes = require('./routes/aboutUs');
 const teamRoutes = require('./routes/team');
 const blogsRoutes = require('./routes/blogs');
+const videosRoutes = require('./routes/videos');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -169,6 +170,7 @@ app.use('/api/regions', regionsRoutes);
 app.use('/api/product-slider', productSliderRoutes);
 app.use('/api/team', teamRoutes);
 app.use('/api/blogs', blogsRoutes);
+app.use('/api/videos', videosRoutes);
 
 
 /* ------------------- SERVER-SIDE SEO META TAG INJECTION ------------------- */

@@ -8,6 +8,9 @@ const blogSchema = new mongoose.Schema({
   author: { type: String, default: 'KissanCity Admin' },
   date: { type: Date, default: Date.now },
   isActive: { type: Boolean, default: true },
+  seoTitle: { type: String },
+  seoDescription: { type: String },
+  seoKeywords: { type: String }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Blog', blogSchema);

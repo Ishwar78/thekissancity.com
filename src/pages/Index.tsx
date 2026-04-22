@@ -20,6 +20,7 @@ import { FeatureSection } from "@/components/FeatureSection";
 import RecentReviewsSection from "@/components/RecentReviewsSection";
 import InfoSection from "@/components/infoSection";
 import BestSellerSection from "@/components/BestSellerSection";
+import VideoSection from "@/components/VideoSection";
 
 
 
@@ -1216,6 +1217,10 @@ const Index = () => {
   
       {/* Best Seller Section */}
       <BestSellerSection />
+
+      {/* Video Section — below Best Sellers */}
+      <VideoSection />
+
       {/* Shop By Region */}
   
 <section
@@ -1604,7 +1609,7 @@ const Index = () => {
       <RecentReviewsSection />
 
       <Footer />
-      <PWAInstallPrompt />
+      {/* <PWAInstallPrompt /> */}
       <PostInstallExperience />
     
       <WhatsAppButton phoneNumber="+91 8295780500" />

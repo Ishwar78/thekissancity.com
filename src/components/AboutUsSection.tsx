@@ -415,7 +415,7 @@ const AboutUsSection = () => {
               <ImageCard height={260} />
             </div>
 
-            <div className="au-icons-row">
+     <div className="au-icons-row mt-6 lg:mt-8">
               {(aboutUsData.icons || []).map((icon, index) => {
                 const IconComponent = getIconComponent(icon?.icon || 'Leaf');
                 return (

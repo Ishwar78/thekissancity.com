@@ -19,6 +19,9 @@ interface Blog {
   author: string;
   isActive: boolean;
   date: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  seoKeywords?: string;
 }
 
 const DEFAULT_FORM: Omit<Blog, '_id' | 'date'> = {
@@ -28,6 +31,9 @@ const DEFAULT_FORM: Omit<Blog, '_id' | 'date'> = {
   image: '',
   author: 'KissanCity Admin',
   isActive: true,
+  seoTitle: '',
+  seoDescription: '',
+  seoKeywords: '',
 };
 
 const QUILL_MODULES = {
@@ -77,6 +83,7 @@ export const BlogManager = () => {
       const url = editingId ? `/api/blogs/${editingId}` : '/api/blogs';
       const method = editingId ? 'PUT' : 'POST';
       const payload = { ...formData, slug: formData.slug || generateSlug(formData.title) };
+      console.log('[BLOG SUBMIT] Payload sending:', payload);
 
       const { ok, json } = await api(url, { method, body: JSON.stringify(payload) });
       
@@ -97,7 +104,10 @@ export const BlogManager = () => {
       content: blog.content,
       image: blog.image || '',
       author: blog.author || '',
-      isActive: blog.isActive
+      isActive: blog.isActive,
+      seoTitle: blog.seoTitle || '',
+      seoDescription: blog.seoDescription || '',
+      seoKeywords: blog.seoKeywords || '',
     });
     setEditingId(blog._id!);
     setShowForm(true);
@@ -206,6 +216,38 @@ export const BlogManager = () => {
                     formats={QUILL_FORMATS}
                     style={{ background: '#fff', borderRadius: 8 }}
                   />
+                </div>
+              </div>
+
+              {/* SEO Data Section */}
+              <div className="border border-gray-200 rounded-lg p-4 mt-6 bg-gray-50/50">
+                <h3 className="text-lg font-semibold mb-4 text-[#2d6a4f]">SEO Settings</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label>SEO Title</Label>
+                    <Input 
+                      value={formData.seoTitle} 
+                      onChange={e => setFormData(p => ({...p, seoTitle: e.target.value}))} 
+                      placeholder="Title for search engines"
+                    />
+                  </div>
+                  <div>
+                    <Label>SEO Keywords</Label>
+                    <Input 
+                      value={formData.seoKeywords} 
+                      onChange={e => setFormData(p => ({...p, seoKeywords: e.target.value}))} 
+                      placeholder="e.g. organic farming, raw honey, healthy"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <Label>SEO Description</Label>
+                    <textarea 
+                      className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      value={formData.seoDescription} 
+                      onChange={e => setFormData(p => ({...p, seoDescription: e.target.value}))} 
+                      placeholder="A short description for search engine results..."
+                    />
+                  </div>
                 </div>
               </div>
 

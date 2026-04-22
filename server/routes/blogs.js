@@ -36,8 +36,10 @@ router.get('/:slug', async (req, res) => {
 // Admin: Create new blog
 router.post('/', requireAuth, requireAdmin, async (req, res) => {
   try {
+    console.log('[BLOG CREATE] Payload received:', req.body);
     const blog = new Blog(req.body);
     const savedBlog = await blog.save();
+    console.log('[BLOG CREATE] Saved successfully:', savedBlog._id);
     res.status(201).json({ ok: true, data: savedBlog });
   } catch (error) {
     if (error.code === 11000) {
@@ -50,10 +52,13 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
 // Admin: Update blog
 router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
   try {
+    console.log('[BLOG UPDATE] ID:', req.params.id, 'Payload:', req.body);
     const blog = await Blog.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!blog) {
+      console.log('[BLOG UPDATE] Not found:', req.params.id);
       return res.status(404).json({ ok: false, message: 'Blog post not found' });
     }
+    console.log('[BLOG UPDATE] Success:', blog._id);
     res.json({ ok: true, data: blog });
   } catch (error) {
     if (error.code === 11000) {

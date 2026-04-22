@@ -30,13 +30,13 @@ const resolveImage = (src?: string) => {
   const s = String(src || "");
   if (!s) return "/placeholder.svg";
   if (s.startsWith("http")) return s;
-  
+
   // Handle Cloudinary images
   if (s.includes('cloudinary')) {
     if (s.includes('/w_') || s.includes('/h_') || s.includes('/c_')) return s;
     return s.replace('/upload/', '/upload/w_400,h_400,c_fill,q_auto,f_auto/');
   }
-  
+
   const isLocalBase = (() => {
     try {
       return (
@@ -46,7 +46,7 @@ const resolveImage = (src?: string) => {
       return false;
     }
   })();
-  
+
   const isHttpsPage = (() => {
     try {
       return location.protocol === "https:";
@@ -54,7 +54,7 @@ const resolveImage = (src?: string) => {
       return false;
     }
   })();
-  
+
   if (s.startsWith("/uploads") || s.startsWith("uploads")) {
     if (API_BASE && !(isLocalBase && isHttpsPage)) {
       const base = API_BASE.endsWith("/")
@@ -575,7 +575,7 @@ export const RelatedProducts = ({ productId }: { productId: string }) => {
         <h2 className="rp-title">
           You May <span>Also Like</span>
         </h2>
-        
+
         <div className="rp-scroll">
           {products.map((product) => {
             const id = product._id || product.id;
@@ -586,9 +586,9 @@ export const RelatedProducts = ({ productId }: { productId: string }) => {
             const stock = Number(product.stock || 0);
             const discount = product.discount;
             const finalPrice = calculateDiscountedPrice(price, discount);
-            const discountPercentage = discount?.type === 'percentage' ? discount.value : 
+            const discountPercentage = discount?.type === 'percentage' ? discount.value :
               (discount?.value ? Math.round((discount.value / price) * 100) : 0);
-            
+
             const productLink = slug ? `/products/${slug}` : `/product/${id}`;
 
             const handleWishlistClick = (e: React.MouseEvent) => {
@@ -600,7 +600,7 @@ export const RelatedProducts = ({ productId }: { productId: string }) => {
             const handleAddToCart = (e: React.MouseEvent) => {
               e.preventDefault();
               e.stopPropagation();
-              
+
               const cartItem = {
                 id: id,
                 title: title,
@@ -608,7 +608,7 @@ export const RelatedProducts = ({ productId }: { productId: string }) => {
                 originalPrice: price,
                 image: image,
               };
-              
+
               addToCart(cartItem, 1);
             };
 
@@ -653,7 +653,7 @@ export const RelatedProducts = ({ productId }: { productId: string }) => {
 
                       {/* Add to cart button */}
                       <button className="rp-quick-view" onClick={handleAddToCart}>
-                       Add to cart
+                        Add to cart
                       </button>
                     </div>
 
@@ -664,14 +664,14 @@ export const RelatedProducts = ({ productId }: { productId: string }) => {
                       <div className="rp-category">
                         {product.category || 'Collection'}
                       </div>
-                      
+
                       <h3 className="rp-name">{title}</h3>
 
                       <div className="rp-price-row">
                         <span className="rp-price">
                           ₹{finalPrice.toLocaleString('en-IN')}
                         </span>
-                        
+
                         {discount && discount.value > 0 && (
                           <>
                             <span className="rp-original">
@@ -686,14 +686,14 @@ export const RelatedProducts = ({ productId }: { productId: string }) => {
                         )}
                       </div>
 
-                      {/* Stock indicator */}
-                      {stock > 0 ? (
+
+                      {/* {stock > 0 ? (
                         <div className={`rp-stock ${stock < 5 ? 'low-stock' : ''}`}>
                           {stock < 5 ? `Only ${stock} left` : 'In Stock'}
                         </div>
                       ) : (
                         <div className="rp-stock out-of-stock">Out of Stock</div>
-                      )}
+                      )} */}
                     </div>
                   </Card>
                 </Link>

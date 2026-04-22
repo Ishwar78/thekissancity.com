@@ -1,4 +1,5 @@
 import { createRoot } from "react-dom/client";
+import { HelmetProvider } from "react-helmet-async";
 import App from "./App.tsx";
 import "./index.css";
 import { CouponRefreshProvider } from "./hooks/useCouponRefresh.tsx";
@@ -29,7 +30,9 @@ if (typeof window !== "undefined" && (window as any).ResizeObserver) {
 }
 
 createRoot(document.getElementById("root")!).render(
-  <CouponRefreshProvider>
-    <App />
-  </CouponRefreshProvider>
+  <HelmetProvider>
+    <CouponRefreshProvider>
+      <App />
+    </CouponRefreshProvider>
+  </HelmetProvider>
 );
