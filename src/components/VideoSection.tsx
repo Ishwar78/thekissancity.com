@@ -41,6 +41,19 @@ const VideoPlayer: React.FC<{ video: VideoItem; isActive: boolean }> = ({ video,
     }
   }, [isActive]);
 
+
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+
+    if (isActive) {
+      v.play();
+      setPlaying(true);
+    }
+  }, [isActive]);
+
+
+
   const togglePlay = () => {
     const v = videoRef.current;
     if (!v) return;
@@ -90,8 +103,9 @@ const VideoPlayer: React.FC<{ video: VideoItem; isActive: boolean }> = ({ video,
         ref={videoRef}
         src={src}
         poster={thumb || undefined}
+        autoPlay
         loop
-        muted={muted}
+        muted
         playsInline
         onTimeUpdate={handleTimeUpdate}
         onEnded={() => setPlaying(false)}
@@ -210,10 +224,10 @@ export default function VideoSection() {
       style={{ backgroundColor: '#F5F0E8' }}
       className="py-8 sm:py-10"
     >
-      <div className="container mx-auto px-3 sm:px-4 max-w-5xl">
+      <div className="w-full px-3 sm:px-4">
 
         {/* Section Header — matches BestSellerSection style */}
-        <div className="flex items-center justify-center gap-3 sm:gap-4 mb-6 sm:mb-8">
+        <div className="flex items-center justify-center gap-3 sm:gap-4 mb-6 sm:mb-8 max-w-5xl mx-auto">
           <div
             className="flex-1 h-px"
             style={{ background: 'linear-gradient(to right, transparent, #c8973a)' }}
@@ -236,16 +250,16 @@ export default function VideoSection() {
 
         {/* Videos Grid */}
         {videos.length === 1 ? (
-          <div className="max-w-sm mx-auto">
+          <div className="max-w-4xl mx-auto">
             <VideoPlayer video={videos[0]} isActive={activeIdx === 0} />
           </div>
         ) : (
           <div
             className={`grid gap-3 sm:gap-4 ${videos.length === 2
-                ? 'grid-cols-1 sm:grid-cols-2'
-                : videos.length === 3
-                  ? 'grid-cols-1 sm:grid-cols-3'
-                  : 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-4'
+              ? 'grid-cols-1 sm:grid-cols-2'
+              : videos.length === 3
+                ? 'grid-cols-1 sm:grid-cols-3'
+                : 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-4'
               }`}
             onClick={(e) => {
               // detect which child was clicked to set activeIdx
