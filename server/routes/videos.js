@@ -29,14 +29,20 @@ router.get('/admin/list', requireAuth, requireAdmin, async (req, res) => {
 // Admin route: Create a new video entry
 router.post('/admin/create', requireAuth, requireAdmin, async (req, res) => {
   try {
-    const { title, videoUrl, thumbnailUrl, active, sortOrder } = req.body;
-    if (!videoUrl) {
-      return res.status(400).json({ ok: false, message: 'Video URL is required' });
+    const { title, type, videoUrl, thumbnailUrl, imageUrl, linkUrl, active, sortOrder } = req.body;
+    if (type === 'video' && !videoUrl) {
+      return res.status(400).json({ ok: false, message: 'Video URL is required for video type' });
+    }
+    if (type === 'image' && !imageUrl) {
+      return res.status(400).json({ ok: false, message: 'Image URL is required for image type' });
     }
     const newVideo = new Video({
       title,
+      type: type || 'video',
       videoUrl,
       thumbnailUrl,
+      imageUrl,
+      linkUrl,
       active: active !== undefined ? active : true,
       sortOrder: sortOrder || 0,
     });
@@ -50,10 +56,10 @@ router.post('/admin/create', requireAuth, requireAdmin, async (req, res) => {
 // Admin route: Update video
 router.put('/admin/update/:id', requireAuth, requireAdmin, async (req, res) => {
   try {
-    const { title, videoUrl, thumbnailUrl, active, sortOrder } = req.body;
+    const { title, type, videoUrl, thumbnailUrl, imageUrl, linkUrl, active, sortOrder } = req.body;
     const updated = await Video.findByIdAndUpdate(
       req.params.id,
-      { title, videoUrl, thumbnailUrl, active, sortOrder },
+      { title, type, videoUrl, thumbnailUrl, imageUrl, linkUrl, active, sortOrder },
       { new: true }
     );
     if (!updated) {

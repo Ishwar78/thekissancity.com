@@ -1,11 +1,24 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Play, Pause, Volume2, VolumeX } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, ChevronLeft, ChevronRight } from 'lucide-react';
 import { api } from '@/lib/api';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import { Link } from 'react-router-dom';
 
-interface VideoItem {
+import Autoplay from 'embla-carousel-autoplay';
+
+interface PromoItem {
   _id: string;
   title?: string;
+  type: 'video' | 'image';
   videoUrl?: string;
+  imageUrl?: string;
+  linkUrl?: string;
   thumbnailUrl?: string;
   description?: string;
 }
@@ -25,11 +38,10 @@ function resolveUrl(src?: string) {
   return s;
 }
 
-const VideoPlayer: React.FC<{ video: VideoItem; isActive: boolean }> = ({ video, isActive }) => {
+const VideoSlide: React.FC<{ video: PromoItem; isActive: boolean }> = ({ video, isActive }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
   const [muted, setMuted] = useState(true);
-  const [progress, setProgress] = useState(0);
 
   const src = resolveUrl(video.videoUrl);
   const thumb = resolveUrl(video.thumbnailUrl);
@@ -38,21 +50,11 @@ const VideoPlayer: React.FC<{ video: VideoItem; isActive: boolean }> = ({ video,
     if (!isActive && videoRef.current) {
       videoRef.current.pause();
       setPlaying(false);
-    }
-  }, [isActive]);
-
-
-  useEffect(() => {
-    const v = videoRef.current;
-    if (!v) return;
-
-    if (isActive) {
-      v.play();
+    } else if (isActive && videoRef.current) {
+      videoRef.current.play().catch(() => {});
       setPlaying(true);
     }
   }, [isActive]);
-
-
 
   const togglePlay = () => {
     const v = videoRef.current;
@@ -68,214 +70,154 @@ const VideoPlayer: React.FC<{ video: VideoItem; isActive: boolean }> = ({ video,
 
   const toggleMute = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const v = videoRef.current;
-    if (!v) return;
-    v.muted = !v.muted;
-    setMuted(v.muted);
-  };
-
-  const handleTimeUpdate = () => {
-    const v = videoRef.current;
-    if (!v || !v.duration) return;
-    setProgress((v.currentTime / v.duration) * 100);
-  };
-
-  const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
-    const v = videoRef.current;
-    if (!v) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const ratio = (e.clientX - rect.left) / rect.width;
-    v.currentTime = ratio * v.duration;
+    if (videoRef.current) {
+      videoRef.current.muted = !videoRef.current.muted;
+      setMuted(videoRef.current.muted);
+    }
   };
 
   return (
-    <div
-      className="relative overflow-hidden rounded-2xl cursor-pointer group"
-      style={{
-        background: '#0d0d0d',
-        boxShadow: '0 4px 24px rgba(0,0,0,0.18)',
-        border: '1px solid rgba(200,151,58,0.15)',
-      }}
-      onClick={togglePlay}
-    >
-      {/* Video element */}
+    <div className="relative w-full h-full overflow-hidden" onClick={togglePlay}>
       <video
         ref={videoRef}
         src={src}
         poster={thumb || undefined}
-        autoPlay
         loop
         muted
         playsInline
-        onTimeUpdate={handleTimeUpdate}
-        onEnded={() => setPlaying(false)}
-        className="w-full object-cover"
-        style={{ maxHeight: '340px', minHeight: '200px', display: 'block' }}
+        className="w-full h-full object-cover"
       />
-
-      {/* Gradient overlay */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: playing
-            ? 'linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 60%)'
-            : 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.15) 100%)',
-          transition: 'background 0.4s ease',
-        }}
-      />
-
-      {/* Center play button */}
+      <div className="absolute inset-0 bg-black/20" />
+      
       {!playing && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div
-            className="flex items-center justify-center rounded-full transition-transform duration-200 group-hover:scale-110"
-            style={{
-              width: 52,
-              height: 52,
-              background: 'rgba(255,255,255,0.15)',
-              backdropFilter: 'blur(6px)',
-              border: '2px solid rgba(255,255,255,0.5)',
-            }}
-          >
-            <Play fill="white" className="h-5 w-5 text-white ml-0.5" />
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-md border border-white/40 flex items-center justify-center">
+            <Play className="w-8 h-8 text-white fill-white ml-1" />
           </div>
         </div>
       )}
 
-      {/* Bottom controls */}
-      <div
-        className="absolute bottom-0 left-0 right-0 px-3 pb-2.5 flex flex-col gap-1.5"
-        onClick={(e) => e.stopPropagation()}
+      <button
+        onClick={toggleMute}
+        className="absolute bottom-4 right-4 p-2 rounded-full bg-black/40 backdrop-blur-sm text-white border border-white/10"
       >
-        {/* Progress bar */}
-        <div
-          className="w-full h-1 rounded-full cursor-pointer"
-          style={{ background: 'rgba(255,255,255,0.25)' }}
-          onClick={handleSeek}
-        >
-          <div
-            className="h-full rounded-full transition-all duration-100"
-            style={{
-              width: `${progress}%`,
-              background: 'linear-gradient(90deg, #c8973a, #e8b84b)',
-            }}
-          />
-        </div>
-
-        {/* Title + controls row */}
-        <div className="flex items-center justify-between gap-2">
-          {video.title && (
-            <p
-              className="text-white font-semibold line-clamp-1 flex-1 min-w-0"
-              style={{ fontSize: 'clamp(0.7rem, 2vw, 0.85rem)', textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}
-            >
-              {video.title}
-            </p>
-          )}
-          <div className="flex items-center gap-1.5 shrink-0">
-            <button
-              onClick={togglePlay}
-              className="text-white p-1 rounded-full hover:bg-white/20 transition-colors"
-              aria-label={playing ? 'Pause' : 'Play'}
-            >
-              {playing ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" fill="white" />}
-            </button>
-            <button
-              onClick={toggleMute}
-              className="text-white p-1 rounded-full hover:bg-white/20 transition-colors"
-              aria-label={muted ? 'Unmute' : 'Mute'}
-            >
-              {muted ? <VolumeX className="h-3.5 w-3.5" /> : <Volume2 className="h-3.5 w-3.5" />}
-            </button>
-          </div>
-        </div>
-      </div>
+        {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+      </button>
     </div>
   );
 };
 
 export default function VideoSection() {
-  const [videos, setVideos] = useState<VideoItem[]>([]);
+  const [items, setItems] = useState<PromoItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeIdx, setActiveIdx] = useState(0);
+  const [api, setApi] = useState<any>();
+  const [current, setCurrent] = useState(0);
+  const autoplay = useRef(Autoplay({ delay: 4000, stopOnInteraction: true }));
 
   useEffect(() => {
     (async () => {
       try {
-        const { ok, json } = await api('/api/videos?limit=4&active=true');
-        if (ok) {
-          const list: VideoItem[] = (json?.videos || json?.data || []).filter(
-            (v: VideoItem) => v.videoUrl
-          );
-          setVideos(list.slice(0, 4));
+        const res = await fetch('/api/videos?active=true');
+        const json = await res.json();
+        if (json.ok) {
+          setItems(json.data || []);
         }
       } catch {
-        // silent fail — section is hidden if no videos
+        // silent fail
       } finally {
         setLoading(false);
       }
     })();
   }, []);
 
-  if (loading || videos.length === 0) return null;
+  useEffect(() => {
+    if (!api) return;
+    setCurrent(api.selectedScrollSnap());
+    api.on("select", () => {
+      setCurrent(api.selectedScrollSnap());
+    });
+  }, [api]);
+
+  if (loading || items.length === 0) return null;
 
   return (
-    <section
-      style={{ backgroundColor: '#F5F0E8' }}
-      className="py-8 sm:py-10"
-    >
-      <div className="w-full px-3 sm:px-4">
-
-        {/* Section Header — matches BestSellerSection style */}
-        <div className="flex items-center justify-center gap-3 sm:gap-4 mb-6 sm:mb-8 max-w-5xl mx-auto">
-          <div
-            className="flex-1 h-px"
-            style={{ background: 'linear-gradient(to right, transparent, #c8973a)' }}
-          />
-          <h2
-            className="font-bold whitespace-nowrap px-2"
-            style={{
-              color: '#6b4423',
-              fontFamily: "'Georgia', 'Times New Roman', serif",
-              fontSize: 'clamp(1.2rem, 5vw, 2.25rem)',
-            }}
-          >
-            · Watch &amp; Discover ·
+    <section className="w-full bg-[#f8f5f0] py-6 sm:py-10">
+      <div className="max-w-[1400px] mx-auto px-0 sm:px-4">
+        
+        {/* Optional Header */}
+        <div className="flex items-center justify-center gap-4 mb-4 sm:mb-8 px-4">
+          <div className="flex-1 h-px bg-gradient-to-r from-transparent to-[#c8973a]/30" />
+          <h2 className="text-xl sm:text-2xl font-bold text-[#6b4423] font-serif italic">
+             Featured Highlights
           </h2>
-          <div
-            className="flex-1 h-px"
-            style={{ background: 'linear-gradient(to left, transparent, #c8973a)' }}
-          />
+          <div className="flex-1 h-px bg-gradient-to-l from-transparent to-[#c8973a]/30" />
         </div>
 
-        {/* Videos Grid */}
-        {videos.length === 1 ? (
-          <div className="max-w-4xl mx-auto">
-            <VideoPlayer video={videos[0]} isActive={activeIdx === 0} />
-          </div>
-        ) : (
-          <div
-            className={`grid gap-3 sm:gap-4 ${videos.length === 2
-              ? 'grid-cols-1 sm:grid-cols-2'
-              : videos.length === 3
-                ? 'grid-cols-1 sm:grid-cols-3'
-                : 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-4'
-              }`}
-            onClick={(e) => {
-              // detect which child was clicked to set activeIdx
-              const el = (e.target as HTMLElement).closest('[data-vidx]') as HTMLElement | null;
-              if (el) setActiveIdx(Number(el.dataset.vidx));
-            }}
+        <div className="relative group">
+          <Carousel
+            setApi={setApi}
+            plugins={[autoplay.current]}
+            opts={{ loop: true, align: "start" }}
+            className="w-full overflow-hidden sm:rounded-2xl"
           >
-            {videos.map((v, i) => (
-              <div key={v._id} data-vidx={i} onClick={() => setActiveIdx(i)}>
-                <VideoPlayer video={v} isActive={activeIdx === i} />
-              </div>
-            ))}
-          </div>
-        )}
+            <CarouselContent>
+              {items.map((item, i) => (
+                <CarouselItem key={item._id} className="basis-full">
+                  <div className="relative aspect-[16/9] sm:aspect-[21/9] lg:aspect-[25/9] w-full overflow-hidden bg-stone-200">
+                    {item.type === 'image' ? (
+                      <Link 
+                        to={item.linkUrl || '#'} 
+                        className={`block w-full h-full ${!item.linkUrl ? 'pointer-events-none' : ''}`}
+                      >
+                        <img
+                          src={resolveUrl(item.imageUrl)}
+                          alt={item.title || "Promo banner"}
+                          className="w-full h-full object-cover transition-transform duration-700 hover:scale-[1.02]"
+                          onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.svg' }}
+                        />
+                        {item.linkUrl && (
+                          <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        )}
+                      </Link>
+                    ) : (
+                      <VideoSlide video={item} isActive={current === i} />
+                    )}
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            
+            {items.length > 1 && (
+              <>
+                <CarouselPrevious className="hidden sm:flex -left-6 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 border-none shadow-lg hover:bg-white" />
+                <CarouselNext className="hidden sm:flex -right-6 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 border-none shadow-lg hover:bg-white" />
+              </>
+            )}
 
+            {/* Custom Indicators */}
+            <div className="flex justify-center gap-2 mt-4">
+              {items.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => api?.scrollTo(i)}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${
+                    current === i ? 'w-8 bg-[#c8973a]' : 'w-2 bg-stone-300 hover:bg-stone-400'
+                  }`}
+                  aria-label={`Go to slide ${i + 1}`}
+                />
+              ))}
+            </div>
+          </Carousel>
+        </div>
       </div>
+
+      <style>{`
+        @media (max-width: 640px) {
+          .aspect-mobile {
+            aspect-ratio: 16 / 10;
+          }
+        }
+      `}</style>
     </section>
   );
 }

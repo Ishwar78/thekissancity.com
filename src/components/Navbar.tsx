@@ -215,7 +215,7 @@ export const Navbar = ({ cartItemCount = 0 }: NavbarProps) => {
                       {category.name}
                     </Link>
                   ))}
-                </Dropdown>
+                </Dropdown> 
 
                 <Dropdown title="Wellness Products" gender="unisex">
                   {categories.filter(cat =>
@@ -309,58 +309,67 @@ export const Navbar = ({ cartItemCount = 0 }: NavbarProps) => {
             </div>
 
             {/* Actions */}
-            <div className="flex items-center -ml-2">
-              {/* Mobile Search Icon */}
-              <Button
-                type="button"
-                variant="link"
-                size="icon"
-                onClick={() => setIsSearchExpanded(true)}
-                className="md:hidden no-underline -mr-1"
-                aria-label="Search"
-              >
-                <Search className="h-5 w-5" style={{ color: '#6b4423' }} />
-              </Button>
+           <div className="flex items-center gap-2 -ml-2">
 
-              {user ? (
-                <Link to="/dashboard">
-                  <Button variant="link" size="icon" className="no-underline transition-colors -mr-1">
-                    <User className="h-5 w-5" style={{ color: '#6b4423' }} />
-                  </Button>
-                </Link>
-              ) : (
-                <Link to="/auth">
-                  <Button variant="link" size="icon" className="no-underline transition-colors -mr-1">
-                    <User className="h-5 w-5" style={{ color: '#6b4423' }} />
-                  </Button>
-                </Link>
-              )}
+  {/* COMMON STYLE */}
+  {[
+    {
+      icon: <Search className="h-5 w-5" />,
+      action: () => setIsSearchExpanded(true),
+    },
+    {
+      icon: <User className="h-5 w-5" />,
+      link: user ? "/dashboard" : "/auth",
+    },
+    {
+      icon: <ShoppingCart className="h-5 w-5" />,
+      link: "/cart",
+      badge: liveCount,
+    },
+  ].map((item, i) => {
+    const Wrapper: any = item.link ? Link : "button";
 
-              <Link to="/cart">
-                <Button variant="link" size="icon" className="relative no-underline transition-colors -mr-1" style={{ color: '#6b4423' }}>
-                  <ShoppingCart className="h-5 w-5" />
-                  {liveCount > 0 && (
-                    <span
-                      className="absolute -top-1 -right-1 rounded-full w-5 h-5 text-xs flex items-center justify-center font-bold text-white"
-                      style={{ backgroundColor: '#6b4423' }}
-                    >
-                      {liveCount}
-                    </span>
-                  )}
-                </Button>
-              </Link>
+    return (
+      <Wrapper
+        key={i}
+        to={item.link}
+        onClick={item.action}
+        className="relative flex items-center justify-center w-10 h-10 rounded-full 
+        bg-white/60 backdrop-blur-md border border-[#e6d3a3]
+        shadow-[0_4px_15px_rgba(200,151,58,0.25)]
+        hover:scale-110 active:scale-95
+        transition-all duration-300"
+      >
+        {/* GOLD ICON */}
+        <div className="text-[#c8973a] drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)]">
+          {item.icon}
+        </div>
 
-              {/* Mobile Menu Toggle */}
-              <Button
-                variant="link"
-                size="icon"
-                className="md:hidden no-underline"
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                aria-label="Toggle menu"
-              >
-                <Menu className="h-5 w-5 text-gray-900" />
-              </Button>
-            </div>
+        {/* GLOW EFFECT */}
+        <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-[#fff6d6] to-transparent opacity-40 pointer-events-none" />
+
+        {/* BADGE */}
+        {item.badge > 0 && (
+          <span className="absolute -top-1 -right-1 bg-[#6b4423] text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full font-bold shadow">
+            {item.badge}
+          </span>
+        )}
+      </Wrapper>
+    );
+  })}
+
+  {/* MENU BUTTON */}
+  <button
+    onClick={() => setIsMenuOpen(!isMenuOpen)}
+    className="md:hidden flex items-center justify-center w-10 h-10 rounded-full 
+    bg-white/60 backdrop-blur-md border border-[#e6d3a3]
+    shadow-[0_4px_15px_rgba(200,151,58,0.25)]
+    hover:scale-110 transition-all"
+  >
+    <Menu className="h-5 w-5 text-[#6b4423]" />
+  </button>
+
+</div>
           </div>
 
           {/* Mobile Menu */}

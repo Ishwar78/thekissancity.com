@@ -180,7 +180,7 @@ const NAV_ITEMS = [
   { id: 'about-us', label: 'About Us Section', icon: FileText },
   { id: 'aboutsection', label: 'About Section', icon: Users2 },
   { id: 'blog', label: 'Blog', icon: FileText },
-  { id: 'home-videos', label: 'Home Page Videos', icon: Video },
+  { id: 'home-videos', label: 'Home Promo Slider', icon: Video },
   { id: 'faqs', label: 'FAQ Management', icon: FileText },
 ] as const;
 
