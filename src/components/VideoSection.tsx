@@ -163,7 +163,7 @@ export default function VideoSection() {
             <CarouselContent>
               {items.map((item, i) => (
                 <CarouselItem key={item._id} className="basis-full">
-                  <div className="relative aspect-[16/9] sm:aspect-[21/9] lg:aspect-[25/9] w-full overflow-hidden bg-stone-200">
+                  <div className="relative aspect-[16/11] sm:aspect-[21/9] lg:aspect-[25/9] w-full overflow-hidden bg-stone-200">
                     {item.type === 'image' ? (
                       <Link 
                         to={item.linkUrl || '#'} 

@@ -172,7 +172,7 @@ const ExpertSection = () => {
                 <span className="es-specialty-text">{expert.specialty}</span>
               </div>
               <span className="es-quote-mark">❝</span>
-              <p className="es-quote">{expert.quote}</p>
+              <div className="es-quote" dangerouslySetInnerHTML={{ __html: expert.quote }} />
               
               {expert.experience && (
                 <p className="es-experience">Experience: <strong>{expert.experience}</strong></p>

@@ -131,10 +131,9 @@ export const BlogManager = () => {
       const urls = await Promise.all(files.map(async file => {
         const fd = new FormData();
         fd.append('image', file);
-        const res = await fetch('/api/uploads/single', { method: 'POST', body: fd });
-        if (!res.ok) throw new Error('Upload failed');
-        const data = await res.json();
-        return data.url;
+        const { ok, json } = await api('/api/uploads/single', { method: 'POST', body: fd });
+        if (!ok) throw new Error(json?.message || 'Upload failed');
+        return json.url;
       }));
       return urls;
     } finally {

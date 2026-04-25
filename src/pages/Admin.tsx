@@ -1732,42 +1732,20 @@ const Admin = () => {
   };
 
   const getUploadUrl = async (file: File): Promise<string> => {
-    const tryUpload = async (uploadUrl: string) => {
-      const fd = new FormData();
-      fd.append('file', file);
-      try {
-        const token = (typeof window !== 'undefined') ? localStorage.getItem('token') : null;
-        const headers: Record<string, string> = {};
-        if (token) headers['Authorization'] = `Bearer ${token}`;
-        const res = await fetch(uploadUrl, {
-          method: 'POST',
-          credentials: 'include',
-          headers,
-          body: fd,
-        });
-        let json: any = null;
-        try { json = await res.json(); } catch { }
-        if (!res.ok) throw new Error(json?.message || json?.error || `${res.status} ${res.statusText}`);
-        return json;
-      } catch (err: any) {
-        throw new Error(err?.message || String(err));
-      }
-    };
-
-    const base = API_BASE || '';
-    const baseNormalized = base.endsWith('/') ? base.slice(0, -1) : base;
-
-    // Prioritize API_BASE if set, otherwise fallback to relative /api/uploads
-    const uploadPath = baseNormalized ? `${baseNormalized}/api/uploads` : '/api/uploads';
-
+    const fd = new FormData();
+    fd.append('file', file);
     try {
-      const json = await tryUpload(uploadPath);
+      const { ok, json } = await api('/api/uploads', {
+        method: 'POST',
+        body: fd,
+      });
+      if (!ok) throw new Error(json?.message || json?.error || 'Upload failed');
       const url = json?.url || json?.data?.url;
       if (!url) throw new Error('No URL returned from upload');
-      return url; // Directly return the URL from the backend (should be Cloudinary URL)
+      return url;
     } catch (err) {
       console.error('Upload failed:', err);
-      throw err; // Re-throw to be caught by ImageUploader's onUpload error handling
+      throw err;
     }
   };
 

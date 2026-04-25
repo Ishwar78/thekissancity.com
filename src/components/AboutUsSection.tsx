@@ -384,15 +384,11 @@ const AboutUsSection = () => {
             <div className="au-title-underline" />
 
             {aboutUsData.content.main.map((paragraph, index) => (
-              <p key={index} className="au-body">
-                {paragraph.text}
-              </p>
+              <div key={index} className="au-body" dangerouslySetInnerHTML={{ __html: paragraph.text }} />
             ))}
 
             {isReadMore && aboutUsData.content.expanded.map((paragraph, index) => (
-              <p key={index} className="au-body-more">
-                {paragraph.text}
-              </p>
+              <div key={index} className="au-body-more" dangerouslySetInnerHTML={{ __html: paragraph.text }} />
             ))}
 
             <button className="au-toggle-btn" onClick={() => setIsReadMore(!isReadMore)}>

@@ -347,7 +347,7 @@ const FarmersSection = () => {
               </div>
 
               <span className="fs-quote-mark">❝</span>
-              <p className="fs-quote">{farmer.quote}</p>
+              <div className="fs-quote" dangerouslySetInnerHTML={{ __html: farmer.quote }} />
 
               <div className="fs-divider" />
 

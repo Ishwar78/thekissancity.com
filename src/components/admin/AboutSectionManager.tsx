@@ -9,6 +9,19 @@ import { Trash2, Edit, Plus, Save, X, MapPin } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { api } from '@/lib/api';
 import { ImageUploader } from '@/components/ImageUploader';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
+
+const QUILL_MODULES = {
+  toolbar: [
+    [{ header: [1, 2, 3, false] }],
+    ['bold', 'italic', 'underline', 'link'],
+    [{ list: 'ordered' }, { list: 'bullet' }],
+    ['clean'],
+  ],
+};
+
+const QUILL_FORMATS = ['header', 'bold', 'italic', 'underline', 'link', 'list', 'bullet'];
 
 interface TeamMember {
   _id?: string;
@@ -113,10 +126,9 @@ export const AboutSectionManager = () => {
       const urls = await Promise.all(files.map(async file => {
         const fd = new FormData();
         fd.append('image', file);
-        const res = await fetch('/api/uploads/single', { method: 'POST', body: fd });
-        if (!res.ok) throw new Error('Upload failed');
-        const data = await res.json();
-        return data.url;
+        const { ok, json } = await api('/api/uploads/single', { method: 'POST', body: fd });
+        if (!ok) throw new Error(json?.message || 'Upload failed');
+        return json.url;
       }));
       return urls;
     } finally {
@@ -219,7 +231,19 @@ export const AboutSectionManager = () => {
                 </div>
               </div>
 
-              <div><Label>Quote</Label><Textarea value={formData.quote} onChange={e => setFormData(p => ({...p, quote: e.target.value}))} rows={3} /></div>
+              <div>
+                <Label>Quote</Label>
+                <div className="mt-1 bg-white rounded-md overflow-hidden border border-input focus-within:ring-1 focus-within:ring-ring">
+                  <ReactQuill 
+                    theme="snow"
+                    value={formData.quote}
+                    onChange={val => setFormData(p => ({...p, quote: val}))}
+                    modules={QUILL_MODULES}
+                    formats={QUILL_FORMATS}
+                    className="h-32 mb-10"
+                  />
+                </div>
+              </div>
 
               <div className="flex items-center gap-2">
                 <Switch checked={formData.isActive} onCheckedChange={c => setFormData(p => ({...p, isActive: c}))} />

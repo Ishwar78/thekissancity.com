@@ -11,6 +11,19 @@ import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { api } from '@/lib/api';
 import { ImageUploader } from '@/components/ImageUploader';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
+
+const QUILL_MODULES = {
+  toolbar: [
+    [{ header: [1, 2, 3, false] }],
+    ['bold', 'italic', 'underline', 'link'],
+    [{ list: 'ordered' }, { list: 'bullet' }],
+    ['clean'],
+  ],
+};
+
+const QUILL_FORMATS = ['header', 'bold', 'italic', 'underline', 'link', 'list', 'bullet'];
 
 interface AboutUsData {
   _id?: string;
@@ -314,25 +327,19 @@ export const AboutUsManager = () => {
 
   const handleImageUpload = async (files: File[]): Promise<string[]> => {
     setIsUploading(true);
-    const uploadPromises = files.map(async (file) => {
-      const formData = new FormData();
-      formData.append('image', file);
-      
-      const response = await fetch('/api/uploads/single', {
-        method: 'POST',
-        body: formData,
-      });
-      
-      if (!response.ok) {
-        throw new Error('Upload failed');
-      }
-      
-      const result = await response.json();
-      return result.url;
-    });
-
     try {
-      const urls = await Promise.all(uploadPromises);
+      const urls = await Promise.all(files.map(async (file) => {
+        const formData = new FormData();
+        formData.append('image', file);
+        
+        const { ok, json } = await api('/api/uploads/single', {
+          method: 'POST',
+          body: formData,
+        });
+        
+        if (!ok) throw new Error(json?.message || 'Upload failed');
+        return json.url;
+      }));
       setIsUploading(false);
       return urls;
     } catch (error) {
@@ -511,18 +518,23 @@ export const AboutUsManager = () => {
                 </div>
                 {formData.content.main.map((paragraph, index) => (
                   <div key={index} className="flex gap-2 mb-2">
-                    <Textarea
-                      value={paragraph.text}
-                      onChange={(e) => updateMainContent(index, e.target.value)}
-                      placeholder="Enter main content paragraph..."
-                      rows={3}
-                    />
+                    <div className="flex-1 bg-white rounded-md overflow-hidden border border-input focus-within:ring-1 focus-within:ring-ring">
+                      <ReactQuill 
+                        theme="snow"
+                        value={paragraph.text}
+                        onChange={(val) => updateMainContent(index, val)}
+                        modules={QUILL_MODULES}
+                        formats={QUILL_FORMATS}
+                        className="h-32 mb-10"
+                      />
+                    </div>
                     {formData.content.main.length > 1 && (
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
                         onClick={() => removeMainContent(index)}
+                        className="self-start"
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -542,18 +554,23 @@ export const AboutUsManager = () => {
                 </div>
                 {formData.content.expanded.map((paragraph, index) => (
                   <div key={index} className="flex gap-2 mb-2">
-                    <Textarea
-                      value={paragraph.text}
-                      onChange={(e) => updateExpandedContent(index, e.target.value)}
-                      placeholder="Enter expanded content paragraph..."
-                      rows={3}
-                    />
+                    <div className="flex-1 bg-white rounded-md overflow-hidden border border-input focus-within:ring-1 focus-within:ring-ring">
+                      <ReactQuill 
+                        theme="snow"
+                        value={paragraph.text}
+                        onChange={(val) => updateExpandedContent(index, val)}
+                        modules={QUILL_MODULES}
+                        formats={QUILL_FORMATS}
+                        className="h-32 mb-10"
+                      />
+                    </div>
                     {formData.content.expanded.length > 1 && (
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
                         onClick={() => removeExpandedContent(index)}
+                        className="self-start"
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>

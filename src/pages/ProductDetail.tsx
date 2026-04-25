@@ -761,7 +761,7 @@ const ProductDetail = () => {
   <path d="M9 12l2 2 4-4"></path>
 </svg>
                       </span>
-                      <p className="text-green-700 font-medium leading-relaxed">{product.paragraph1}</p>
+                      <div className="text-green-700 font-medium leading-relaxed" dangerouslySetInnerHTML={{ __html: product.paragraph1 }} />
                     </div>
                   )}
 
@@ -777,7 +777,7 @@ const ProductDetail = () => {
   <polyline points="12 22.81 12 17"></polyline>
 </svg>
                       </span>
-                      <p className="text-gray-900 font-medium">{product.paragraph2}</p>
+                      <div className="text-gray-900 font-medium" dangerouslySetInnerHTML={{ __html: product.paragraph2 }} />
                     </div>
                   )}
                
@@ -1065,9 +1065,7 @@ const ProductDetail = () => {
                   id: "description",
                   label: "Description",
                   content: product?.longDescription ? (
-                    <p className="text-xs text-gray-600 leading-7 whitespace-pre-wrap break-words">
-                      {escapeHtml(product.longDescription)}
-                    </p>
+                    <div className="text-xs text-gray-600 leading-7 whitespace-pre-wrap break-words" dangerouslySetInnerHTML={{ __html: product.longDescription }} />
                   ) : (
                     <p className="text-xs text-gray-400 text-center py-6">No description available.</p>
                   )
@@ -1197,9 +1195,7 @@ const ProductDetail = () => {
                     <h3 className="text-xl font-black tracking-tight text-gray-900 mb-1">Product Description</h3>
                     <div className="h-0.5 w-10 bg-gray-900 rounded-full mb-5" />
                     {product?.longDescription ? (
-                      <p className="text-sm text-gray-600 leading-8 whitespace-pre-wrap break-words max-w-2xl">
-                        {escapeHtml(product.longDescription)}
-                      </p>
+                      <div className="text-sm text-gray-600 leading-8 whitespace-pre-wrap break-words max-w-2xl" dangerouslySetInnerHTML={{ __html: product.longDescription }} />
                     ) : (
                       <div className="flex flex-col items-center justify-center py-16 text-center">
                         <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-3">
