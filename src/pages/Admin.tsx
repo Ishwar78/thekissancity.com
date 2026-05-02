@@ -16,6 +16,7 @@ import { ProductSliderManager } from "../components/admin/ProductSliderManager";
 import { AboutSectionManager } from "../components/admin/AboutSectionManager";
 import { BlogManager } from "../components/admin/BlogManager";
 import { VideoManager } from "../components/admin/VideoManager";
+import SolarInquiryManager from "../components/admin/SolarInquiryManager";
 import { AdminEditReviewModal, AdminReview } from '@/components/AdminEditReviewModal';
 import { Pagination } from '@/components/Pagination';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
@@ -80,17 +81,18 @@ import slugify from 'slugify';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 
-// ReactQuill toolbar modules (bold, italic, underline, link, lists, headings, clear)
+// ReactQuill toolbar modules (bold, italic, underline, link, lists, headings, alignment, clear)
 const QUILL_MODULES = {
   toolbar: [
     [{ header: [1, 2, 3, false] }],
     ['bold', 'italic', 'underline', 'link'],
     [{ list: 'ordered' }, { list: 'bullet' }],
+    [{ align: [] }],
     ['clean'],
   ],
 };
 
-const QUILL_FORMATS = ['header', 'bold', 'italic', 'underline', 'link', 'list', 'bullet'];
+const QUILL_FORMATS = ['header', 'bold', 'italic', 'underline', 'link', 'list', 'bullet', 'align'];
 
 
 
@@ -182,6 +184,7 @@ const NAV_ITEMS = [
   { id: 'blog', label: 'Blog', icon: FileText },
   { id: 'home-videos', label: 'Home Promo Slider', icon: Video },
   { id: 'faqs', label: 'FAQ Management', icon: FileText },
+  { id: 'inquiries', label: 'Form Inquiries', icon: Mail },
 ] as const;
 
 function createDefaultPaymentSettings(): PaymentSettingsForm {
@@ -6668,6 +6671,8 @@ const Admin = () => {
         return <ProductSliderManager />;
       case 'faqs':
         return renderFAQs();
+      case 'inquiries':
+        return <SolarInquiryManager />;
       default:
         return null;
     }

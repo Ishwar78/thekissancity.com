@@ -54,6 +54,7 @@ import BestSellerProducts from "./pages/BestSellerProducts";
 import RegionProducts from "./pages/RegionProducts";
 import Blogs from "./pages/Blogs";
 import BlogPost from "./pages/BlogPost";
+import SolarDrying from "./pages/SolarDrying";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -182,6 +183,7 @@ const AppContent = () => {
         <Route path="/blog" element={<Blogs />} />
         <Route path="/blog/:slug" element={<BlogPost />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+        <Route path="/solar-drying" element={<SolarDrying />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/shipping" element={<HelpCenter />} />
         <Route path="/returns" element={<HelpCenter />} />

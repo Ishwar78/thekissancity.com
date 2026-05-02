@@ -257,7 +257,7 @@ router.post('/signup', async (req, res) => {
     // Check if email already exists
     const existingEmail = await User.findOne({ email: String(email).toLowerCase() });
     if (existingEmail) {
-      return res.status(400).json({ ok: false, message: 'Email already in use' });
+      return res.status(400).json({ ok: false, message: 'Email already in use please login use your id & password ' });
     }
 
     // Check if phone already exists

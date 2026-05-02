@@ -549,12 +549,9 @@ const Wishlist = () => {
           color: var(--green);
           line-height: 1.4;
           margin-bottom: 0.5rem;
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          line-clamp: 2;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-          text-overflow: ellipsis;
+          display: block;
+          overflow: visible;
+          white-space: normal;
           transition: color 0.2s;
           min-height: 2.5rem;
         }

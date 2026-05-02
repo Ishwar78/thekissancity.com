@@ -163,7 +163,7 @@ const BestSellerCard = ({ product, index }: { product: Product; index: number })
           {/* Title + Wishlist */}
           <div className="flex items-start justify-between gap-1 mb-1.5">
             <h3
-              className="font-bold leading-snug line-clamp-2 flex-1 min-w-0"
+              className="font-bold leading-snug flex-1 min-w-0"
               style={{
                 color: '#2d5a1b',
                 fontFamily: "'Georgia', serif",

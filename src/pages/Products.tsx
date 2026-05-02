@@ -207,7 +207,7 @@ const Products = () => {
                     <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
                       {product.category}
                     </p>
-                    <h3 className="text-sm sm:text-base font-semibold mb-1 sm:mb-2 line-clamp-2">{title}</h3>
+                    <h3 className="text-sm sm:text-base font-semibold mb-1 sm:mb-2">{title}</h3>
                     <div className="text-xs sm:text-sm text-muted-foreground mb-2 sm:mb-3 line-clamp-2" dangerouslySetInnerHTML={{ __html: product.description }} />
                    <div className="flex items-baseline gap-2 mb-2">
   {Number(product?.price) > 0 && (

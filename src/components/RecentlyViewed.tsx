@@ -493,13 +493,10 @@ export const RecentlyViewed = ({
           color: #2d6a4f;
           line-height: 1.4;
           margin-bottom: 6px;
-          display: -webkit-box;
-          -webkit-line-clamp: 1;
-          line-clamp: 1;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
+          /* Allow multi-line text to show complete name */
+          display: block;
+          overflow: visible;
+          white-space: normal;
           letter-spacing: 0.2px;
           transition: color 0.2s;
         }

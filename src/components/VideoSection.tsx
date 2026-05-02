@@ -51,7 +51,7 @@ const VideoSlide: React.FC<{ video: PromoItem; isActive: boolean }> = ({ video, 
       videoRef.current.pause();
       setPlaying(false);
     } else if (isActive && videoRef.current) {
-      videoRef.current.play().catch(() => {});
+      videoRef.current.play().catch(() => { });
       setPlaying(true);
     }
   }, [isActive]);
@@ -88,7 +88,7 @@ const VideoSlide: React.FC<{ video: PromoItem; isActive: boolean }> = ({ video, 
         className="w-full h-full object-cover"
       />
       <div className="absolute inset-0 bg-black/20" />
-      
+
       {!playing && (
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-md border border-white/40 flex items-center justify-center">
@@ -111,6 +111,7 @@ export default function VideoSection() {
   const [items, setItems] = useState<PromoItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [api, setApi] = useState<any>();
+
   const [current, setCurrent] = useState(0);
   const autoplay = useRef(Autoplay({ delay: 4000, stopOnInteraction: true }));
 
@@ -143,12 +144,12 @@ export default function VideoSection() {
   return (
     <section className="w-full bg-[#f8f5f0] py-6 sm:py-10">
       <div className="max-w-[1400px] mx-auto px-0 sm:px-4">
-        
+
         {/* Optional Header */}
         <div className="flex items-center justify-center gap-4 mb-4 sm:mb-8 px-4">
           <div className="flex-1 h-px bg-gradient-to-r from-transparent to-[#c8973a]/30" />
           <h2 className="text-xl sm:text-2xl font-bold text-[#6b4423] font-serif italic">
-             Featured Highlights
+            Featured Highlights
           </h2>
           <div className="flex-1 h-px bg-gradient-to-l from-transparent to-[#c8973a]/30" />
         </div>
@@ -163,11 +164,11 @@ export default function VideoSection() {
             <CarouselContent>
               {items.map((item, i) => (
                 <CarouselItem key={item._id} className="basis-full">
-                  <div className="relative aspect-[16/11] sm:aspect-[21/9] lg:aspect-[25/9] w-full overflow-hidden bg-stone-200">
+                  <div className="relative aspect-[16/7] sm:aspect-[21/9] lg:aspect-[25/9] w-full overflow-hidden bg-stone-200">
                     {item.type === 'image' ? (
-                      <Link 
-                        to={item.linkUrl || '#'} 
-                        className={`block w-full h-full ${!item.linkUrl ? 'pointer-events-none' : ''}`}
+                      <Link
+                        to={item.linkUrl || '/solar-drying'}
+                        className="block w-full h-full"
                       >
                         <img
                           src={resolveUrl(item.imageUrl)}
@@ -186,7 +187,7 @@ export default function VideoSection() {
                 </CarouselItem>
               ))}
             </CarouselContent>
-            
+
             {items.length > 1 && (
               <>
                 <CarouselPrevious className="hidden sm:flex -left-6 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 border-none shadow-lg hover:bg-white" />
@@ -200,9 +201,8 @@ export default function VideoSection() {
                 <button
                   key={i}
                   onClick={() => api?.scrollTo(i)}
-                  className={`h-1.5 rounded-full transition-all duration-300 ${
-                    current === i ? 'w-8 bg-[#c8973a]' : 'w-2 bg-stone-300 hover:bg-stone-400'
-                  }`}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${current === i ? 'w-8 bg-[#c8973a]' : 'w-2 bg-stone-300 hover:bg-stone-400'
+                    }`}
                   aria-label={`Go to slide ${i + 1}`}
                 />
               ))}

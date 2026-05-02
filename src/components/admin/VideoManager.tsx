@@ -266,7 +266,7 @@ export function VideoManager() {
                     )}
                   </div>
 
-                  <div className="space-y-2">
+                  {/* <div className="space-y-2">
                     <Label htmlFor="linkUrl">Redirect Link (URL)</Label>
                     <Input
                       id="linkUrl"
@@ -275,7 +275,7 @@ export function VideoManager() {
                       placeholder="e.g. /shop or https://example.com"
                     />
                     <p className="text-[10px] text-muted-foreground">User will go here when they click the image.</p>
-                  </div>
+                  </div> */}
                 </TabsContent>
 
                 <div className="flex items-center space-x-2 pt-2">

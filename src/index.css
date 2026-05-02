@@ -980,3 +980,90 @@ html body button.admin-toggle-btn > div {
     padding-right: 0.5rem !important;
   }
 }
+
+/* =========================================
+   Quill Rich Text Alignment - Frontend Fix
+   Ye classes tab apply hongi jab admin
+   ne Quill mein alignment set ki ho
+   ========================================= */
+
+/* Left align (default) */
+.ql-align-left,
+[class*="ql-align-left"],
+p.ql-align-left,
+h1.ql-align-left,
+h2.ql-align-left,
+h3.ql-align-left,
+li.ql-align-left {
+  text-align: left !important;
+}
+
+/* Center align */
+.ql-align-center,
+[class*="ql-align-center"],
+p.ql-align-center,
+h1.ql-align-center,
+h2.ql-align-center,
+h3.ql-align-center,
+li.ql-align-center {
+  text-align: center !important;
+}
+
+/* Right align */
+.ql-align-right,
+[class*="ql-align-right"],
+p.ql-align-right,
+h1.ql-align-right,
+h2.ql-align-right,
+h3.ql-align-right,
+li.ql-align-right {
+  text-align: right !important;
+}
+
+/* Justify align */
+.ql-align-justify,
+[class*="ql-align-justify"],
+p.ql-align-justify,
+h1.ql-align-justify,
+h2.ql-align-justify,
+h3.ql-align-justify,
+li.ql-align-justify {
+  text-align: justify !important;
+}
+
+/* Override prose (Tailwind Typography) interference with Quill alignment */
+.prose .ql-align-center,
+.prose p.ql-align-center,
+.prose h1.ql-align-center,
+.prose h2.ql-align-center,
+.prose h3.ql-align-center,
+.prose li.ql-align-center {
+  text-align: center !important;
+}
+
+.prose .ql-align-right,
+.prose p.ql-align-right,
+.prose h1.ql-align-right,
+.prose h2.ql-align-right,
+.prose h3.ql-align-right,
+.prose li.ql-align-right {
+  text-align: right !important;
+}
+
+.prose .ql-align-justify,
+.prose p.ql-align-justify,
+.prose h1.ql-align-justify,
+.prose h2.ql-align-justify,
+.prose h3.ql-align-justify,
+.prose li.ql-align-justify {
+  text-align: justify !important;
+}
+
+.prose .ql-align-left,
+.prose p.ql-align-left,
+.prose h1.ql-align-left,
+.prose h2.ql-align-left,
+.prose h3.ql-align-left,
+.prose li.ql-align-left {
+  text-align: left !important;
+}

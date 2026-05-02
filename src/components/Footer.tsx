@@ -115,12 +115,12 @@ export const Footer = () => {
                   </Link>
                 </li>
                 <li>
-                  <Link
+                  {/* <Link
                     to="/shop"
                     className="text-xs md:text-sm text-gray-300 hover:text-yellow-400 transition-colors font-medium"
                   >
                     All Products
-                  </Link>
+                  </Link> */}
                 </li>
                 <li>
                   <Link

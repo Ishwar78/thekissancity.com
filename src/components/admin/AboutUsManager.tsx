@@ -19,11 +19,12 @@ const QUILL_MODULES = {
     [{ header: [1, 2, 3, false] }],
     ['bold', 'italic', 'underline', 'link'],
     [{ list: 'ordered' }, { list: 'bullet' }],
+    [{ align: [] }],
     ['clean'],
   ],
 };
 
-const QUILL_FORMATS = ['header', 'bold', 'italic', 'underline', 'link', 'list', 'bullet'];
+const QUILL_FORMATS = ['header', 'bold', 'italic', 'underline', 'link', 'list', 'bullet', 'align'];
 
 interface AboutUsData {
   _id?: string;

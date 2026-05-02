@@ -88,14 +88,14 @@ export const Navbar = ({ cartItemCount = 0 }: NavbarProps) => {
           <div className="flex items-center justify-between h-24">
 
             {/* Logo */}
-           <Link to="/" className="flex items-center gap-1 md:gap-6 -mt-1 ml-3 md:ml-0" aria-label="The Kissan City Home">
+            <Link to="/" className="flex items-center gap-1 md:gap-6 -mt-1 ml-3 md:ml-0" aria-label="The Kissan City Home">
               {logoFailed ? (
                 <div className="h-8 md:h-16 lg:h-[60px] w-auto select-none max-w-[150px] md:max-w-[200px] flex items-center justify-center bg-gray-100 rounded-lg">
                   <span className="text-gray-600 font-bold text-lg">The Kissan City</span>
                 </div>
               ) : (
                 <img
-                   src="/kissancitylogo1.jpg"
+                  src="/kissancitylogo1.jpg"
                   //  src="/NAVLOGO.JPG"
                   alt="The Kissan City"
                   className="h-18 md:h-22 lg:h-[60px] w-auto select-none max-w-[150px] md:max-w-[200px]"
@@ -215,7 +215,7 @@ export const Navbar = ({ cartItemCount = 0 }: NavbarProps) => {
                       {category.name}
                     </Link>
                   ))}
-                </Dropdown> 
+                </Dropdown>
 
                 <Dropdown title="Wellness Products" gender="unisex">
                   {categories.filter(cat =>
@@ -309,67 +309,83 @@ export const Navbar = ({ cartItemCount = 0 }: NavbarProps) => {
             </div>
 
             {/* Actions */}
-           <div className="flex items-center gap-2 -ml-2">
+            <div className="flex items-center gap-2 -ml-2">
 
-  {/* COMMON STYLE */}
-  {[
-    {
-      icon: <Search className="h-5 w-5" />,
-      action: () => setIsSearchExpanded(true),
-    },
-    {
-      icon: <User className="h-5 w-5" />,
-      link: user ? "/dashboard" : "/auth",
-    },
-    {
-      icon: <ShoppingCart className="h-5 w-5" />,
-      link: "/cart",
-      badge: liveCount,
-    },
-  ].map((item, i) => {
-    const Wrapper: any = item.link ? Link : "button";
+              {/* SEARCH - mobile only */}
+              <div
+                role="button"
+                tabIndex={0}
+                onClick={() => setIsSearchExpanded(true)}
+                onKeyDown={(e) => e.key === 'Enter' && setIsSearchExpanded(true)}
+                className="md:hidden flex items-center justify-center"
+                style={{
+                  position: 'relative',
+                  width: '40px', height: '40px', borderRadius: '9999px',
+                  background: 'rgba(255,255,255,0.85)', border: '1.5px solid #e6d3a3',
+                  boxShadow: '0 4px 15px rgba(200,151,58,0.25)',
+                  cursor: 'pointer', flexShrink: 0,
+                }}
+              >
+                <Search size={20} style={{ color: '#c8973a', filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.2))' }} />
+              </div>
 
-    return (
-      <Wrapper
-        key={i}
-        to={item.link}
-        onClick={item.action}
-        className="relative flex items-center justify-center w-10 h-10 rounded-full 
-        bg-white/60 backdrop-blur-md border border-[#e6d3a3]
-        shadow-[0_4px_15px_rgba(200,151,58,0.25)]
-        hover:scale-110 active:scale-95
-        transition-all duration-300"
-      >
-        {/* GOLD ICON */}
-        <div className="text-[#c8973a] drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)]">
-          {item.icon}
-        </div>
+              {/* USER */}
+              <Link
+                to={user ? "/dashboard" : "/auth"}
+                style={{
+                  position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  width: '40px', height: '40px', borderRadius: '9999px',
+                  background: 'rgba(255,255,255,0.85)', border: '1.5px solid #e6d3a3',
+                  boxShadow: '0 4px 15px rgba(200,151,58,0.25)',
+                  flexShrink: 0,
+                }}
+              >
+                <User size={20} style={{ color: '#c8973a', filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.2))' }} />
+              </Link>
 
-        {/* GLOW EFFECT */}
-        <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-[#fff6d6] to-transparent opacity-40 pointer-events-none" />
+              {/* CART */}
+              <Link
+                to="/cart"
+                style={{
+                  position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  width: '40px', height: '40px', borderRadius: '9999px',
+                  background: 'rgba(255,255,255,0.85)', border: '1.5px solid #e6d3a3',
+                  boxShadow: '0 4px 15px rgba(200,151,58,0.25)',
+                  flexShrink: 0,
+                }}
+              >
+                <ShoppingCart size={20} style={{ color: '#c8973a', filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.2))' }} />
+                {liveCount > 0 && (
+                  <span style={{
+                    position: 'absolute', top: '-4px', right: '-4px',
+                    background: '#6b4423', color: 'white',
+                    fontSize: '10px', width: '16px', height: '16px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    borderRadius: '9999px', fontWeight: 700,
+                  }}>{liveCount}</span>
+                )}
+              </Link>
 
-        {/* BADGE */}
-        {item.badge > 0 && (
-          <span className="absolute -top-1 -right-1 bg-[#6b4423] text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full font-bold shadow">
-            {item.badge}
-          </span>
-        )}
-      </Wrapper>
-    );
-  })}
+              {/* MENU - mobile only */}
+              <div
+                role="button"
+                tabIndex={0}
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                onKeyDown={(e) => e.key === 'Enter' && setIsMenuOpen(!isMenuOpen)}
+                className="md:hidden flex items-center justify-center"
+                style={{
+                  position: 'relative',
+                  width: '40px', height: '40px', borderRadius: '9999px',
+                  background: 'rgba(255,255,255,0.85)', border: '1.5px solid #e6d3a3',
+                  boxShadow: '0 4px 15px rgba(200,151,58,0.25)',
+                  cursor: 'pointer', flexShrink: 0,
+                }}
+              >
+                <Menu size={20} style={{ color: '#c8973a', filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.2))' }} />
+              </div>
 
-  {/* MENU BUTTON */}
-  <button
-    onClick={() => setIsMenuOpen(!isMenuOpen)}
-    className="md:hidden flex items-center justify-center w-10 h-10 rounded-full 
-    bg-white/60 backdrop-blur-md border border-[#e6d3a3]
-    shadow-[0_4px_15px_rgba(200,151,58,0.25)]
-    hover:scale-110 transition-all"
-  >
-    <Menu className="h-5 w-5 text-[#6b4423]" />
-  </button>
+            </div>
 
-</div>
           </div>
 
           {/* Mobile Menu */}
