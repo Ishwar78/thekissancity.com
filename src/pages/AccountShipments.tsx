@@ -12,7 +12,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 import { ReturnProductForm } from "@/components/ReturnProductForm";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+
 
 // Shipment types
 export type ShipmentCheckpoint = { time: string; status: string; location?: string; note?: string };
@@ -81,6 +82,9 @@ export default function AccountShipments() {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState<Shipment | null>(null);
   const [returnDialogOpen, setReturnDialogOpen] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
 
   useEffect(() => {
     if (loading) return;
@@ -177,8 +181,62 @@ export default function AccountShipments() {
                   onClick={async () => { try { await signOut(); navigate("/"); toast.success("Signed out"); } catch { navigate("/"); } }}
                   className="w-full text-left px-3 py-2 rounded-md text-sm hover:bg-muted text-muted-foreground hover:text-foreground"
                 >Logout</button>
+                
+                <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+                  <DialogTrigger asChild>
+                    <button
+                      className="w-full text-left px-3 py-2 rounded-md text-sm text-red-600 hover:bg-red-100 hover:text-red-700 font-medium"
+                    >
+                      Delete Account
+                    </button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                      <DialogTitle className="text-red-600">Delete Account</DialogTitle>
+                      <DialogDescription>
+                        This action is <strong>permanent</strong> and cannot be undone. All your profile data will be deleted.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="flex sm:justify-between gap-2">
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        onClick={() => setShowDeleteConfirm(false)}
+                        disabled={deleting}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        disabled={deleting}
+                        onClick={async () => {
+                          try {
+                            setDeleting(true);
+                            const res = await api("/api/auth/me", { method: "DELETE" });
+                            if (res.ok) {
+                              toast.success("Account deleted permanently");
+                              await signOut();
+                              navigate("/");
+                            } else {
+                              toast.error("Failed to delete account");
+                            }
+                          } catch (e) {
+                            toast.error("An error occurred");
+                          } finally {
+                            setDeleting(false);
+                            setShowDeleteConfirm(false);
+                          }
+                        }}
+                      >
+                        {deleting ? "Deleting..." : "Delete Permanently"}
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               </div>
             </div>
+
           </aside>
 
           <section className="flex-1 min-w-0">

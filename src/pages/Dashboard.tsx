@@ -72,6 +72,9 @@ export default function Dashboard() {
   const location = useLocation() as any;
 
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
 
   const [orders, setOrders] = useState<Order[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
@@ -347,6 +350,62 @@ export default function Dashboard() {
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
+
+                <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full justify-start text-xs sm:text-sm text-red-600 hover:bg-red-100 hover:text-red-700 font-medium"
+                    >
+                      Delete Account
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                      <DialogTitle className="text-red-600">Delete Account</DialogTitle>
+                      <DialogDescription>
+                        This action is <strong>permanent</strong> and cannot be undone. All your profile data will be deleted.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="flex sm:justify-between gap-2">
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        onClick={() => setShowDeleteConfirm(false)}
+                        disabled={deleting}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        disabled={deleting}
+                        onClick={async () => {
+                          try {
+                            setDeleting(true);
+                            const res = await api("/api/auth/me", { method: "DELETE" });
+                            if (res.ok) {
+                              toast({ title: "Account Deleted", description: "Your account has been permanently removed." });
+                              await signOut();
+                              navigate("/");
+                            } else {
+                              toast({ title: "Error", description: "Failed to delete account. Please try again.", variant: "destructive" });
+                            }
+                          } catch (e) {
+                            toast({ title: "Error", description: "An error occurred.", variant: "destructive" });
+                          } finally {
+                            setDeleting(false);
+                            setShowDeleteConfirm(false);
+                          }
+                        }}
+                      >
+                        {deleting ? "Deleting..." : "Delete Permanently"}
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+
               </div>
             </div>
           </aside>

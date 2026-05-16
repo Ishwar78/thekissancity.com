@@ -1,5 +1,4 @@
 // server/index.js
-// server/index.js
 const path = require('path');
 
 // Load server/.env file

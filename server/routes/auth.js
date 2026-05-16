@@ -697,6 +697,19 @@ router.delete('/bank-details/:bankId', requireAuth, async (req, res) => {
   }
 });
 
+// Delete own account
+router.delete('/me', requireAuth, async (req, res) => {
+  try {
+    const userId = req.user._id;
+    await User.findByIdAndDelete(userId);
+    res.clearCookie(COOKIE_NAME, { httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production' });
+    return res.json({ ok: true, message: 'Account deleted successfully' });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ ok: false, message: 'Server error' });
+  }
+});
+
 // Logout
 router.post('/logout', (req, res) => {
   res.clearCookie(COOKIE_NAME, { httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production' });
