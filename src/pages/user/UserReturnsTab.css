@@ -1,0 +1,47 @@
+/* UserReturnsTab.css */
+
+.returns-tab-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.returns-tab-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 4px 0;
+}
+
+.returns-tab-desc {
+  font-size: 0.88rem;
+  color: #6b7280;
+  margin: 0 0 20px 0;
+}
+
+.returns-policy-banner {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  padding: 16px 20px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.return-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+  background: #ffffff;
+}
+
+.return-form {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  padding: 20px;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}

@@ -1,0 +1,27 @@
+{
+  "name": "thekissancitynewwebsite",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^6.0.3",
+    "vite": "^8.1.1"
+  },
+  "dependencies": {
+    "lucide-react": "^1.26.0",
+    "multer": "^2.2.0",
+    "quill": "^2.0.3",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-quill": "^2.0.0",
+    "react-quill-new": "^3.8.3",
+    "react-quilljs": "^2.0.5",
+    "react-router": "^7.18.1",
+    "react-router-dom": "^7.18.1"
+  }
+}

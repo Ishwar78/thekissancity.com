@@ -1,0 +1,1482 @@
+/* ============================================================
+   CATEGORY PAGE
+   Unique kcp prefix prevents old CSS conflicts
+   ============================================================ */
+
+.kcp-page {
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background: #f7faf4;
+}
+
+
+/* ============================================================
+   HERO SECTION
+   ============================================================ */
+
+.kcp-hero {
+  --kcp-dark: #123f25;
+  --kcp-primary: #28743e;
+  --kcp-secondary: #79a84e;
+  --kcp-field: #6f9f37;
+
+  position: relative;
+  isolation: isolate;
+
+  width: 100%;
+  min-height: 430px;
+  padding: 70px 0 65px;
+
+  display: flex;
+  align-items: center;
+
+  overflow: hidden;
+
+  background:
+    radial-gradient(
+      circle at 18% 12%,
+      rgba(255, 242, 182, 0.18),
+      transparent 25%
+    ),
+    linear-gradient(
+      125deg,
+      var(--kcp-dark) 0%,
+      var(--kcp-primary) 55%,
+      var(--kcp-secondary) 100%
+    );
+}
+
+.kcp-hero--food {
+  --kcp-dark: #164728;
+  --kcp-primary: #347d3c;
+  --kcp-secondary: #96b84b;
+  --kcp-field: #80a83a;
+}
+
+.kcp-hero--wellness {
+  --kcp-dark: #17493f;
+  --kcp-primary: #327664;
+  --kcp-secondary: #7ba36d;
+  --kcp-field: #68984c;
+}
+
+.kcp-hero--both {
+  --kcp-dark: #123f25;
+  --kcp-primary: #28743e;
+  --kcp-secondary: #79a84e;
+  --kcp-field: #6f9f37;
+}
+
+
+/* Dark overlay behind content */
+
+.kcp-hero::before {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(5, 34, 18, 0.78) 0%,
+      rgba(5, 34, 18, 0.57) 43%,
+      rgba(5, 34, 18, 0.1) 75%,
+      transparent 100%
+    );
+}
+
+
+/* Small dot texture */
+
+.kcp-hero::after {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+
+  pointer-events: none;
+
+  opacity: 0.045;
+
+  background-image:
+    radial-gradient(
+      circle,
+      #ffffff 1px,
+      transparent 1px
+    );
+
+  background-size: 25px 25px;
+}
+
+
+/* ============================================================
+   HERO CONTENT
+   ============================================================ */
+
+.kcp-hero__container {
+  position: relative;
+  z-index: 20;
+
+  width: 100%;
+}
+
+.kcp-hero__content {
+  position: relative;
+
+  width: min(620px, 58%);
+}
+
+
+/* ============================================================
+   BREADCRUMB
+   ============================================================ */
+
+.kcp-breadcrumb {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+
+  gap: 7px;
+
+  margin-bottom: 17px;
+
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.kcp-breadcrumb__link {
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+
+  transition: color 0.25s ease;
+}
+
+.kcp-breadcrumb__link:hover {
+  color: #ffffff;
+}
+
+.kcp-breadcrumb__arrow {
+  flex-shrink: 0;
+
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.kcp-breadcrumb__current {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+
+/* ============================================================
+   HERO BADGE
+   ============================================================ */
+
+.kcp-hero__badge {
+  width: fit-content;
+
+  display: inline-flex;
+  align-items: center;
+
+  gap: 8px;
+
+  margin-bottom: 15px;
+  padding: 8px 14px;
+
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.12);
+
+  font-size: 0.76rem;
+  font-weight: 700;
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  box-shadow:
+    0 8px 25px rgba(0, 0, 0, 0.08);
+}
+
+.kcp-hero__badge svg {
+  color: #dfffac;
+}
+
+
+/* ============================================================
+   TITLE AND SUBTITLE
+   ============================================================ */
+
+.kcp-hero__title {
+  display: block;
+
+  max-width: 100%;
+  margin: 0 0 14px;
+
+  color: #ffffff;
+
+  font-family: var(--font-serif, Georgia, serif);
+  font-size: clamp(2.2rem, 4.5vw, 3.65rem);
+  font-weight: 900;
+  line-height: 1.08;
+  letter-spacing: -1.4px;
+
+  text-transform: capitalize;
+
+  overflow-wrap: break-word;
+
+  text-shadow:
+    0 5px 22px rgba(0, 0, 0, 0.18);
+}
+
+/*
+  Safety rule:
+  Even if an image accidentally gets inserted inside the title,
+  it can never become full-screen.
+*/
+
+.kcp-hero__title img,
+.kcp-hero__title picture,
+.kcp-hero__title svg:not(.lucide) {
+  display: none !important;
+}
+
+.kcp-hero__subtitle {
+  max-width: 560px;
+
+  margin: 0;
+
+  color: rgba(255, 255, 255, 0.82);
+
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+
+/* ============================================================
+   HERO FEATURES
+   ============================================================ */
+
+.kcp-hero__features {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+
+  gap: 10px 18px;
+
+  margin-top: 20px;
+}
+
+.kcp-hero__features span {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 7px;
+
+  color: rgba(255, 255, 255, 0.94);
+
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.kcp-hero__features svg {
+  flex-shrink: 0;
+
+  color: #ddfba5;
+}
+
+
+/* ============================================================
+   CATEGORY PILLS
+   ============================================================ */
+
+.kcp-pills {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+
+  gap: 9px;
+
+  margin-top: 25px;
+}
+
+.kcp-pill {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 7px;
+
+  min-height: 39px;
+  padding: 8px 15px;
+
+  border: 1px solid rgba(255, 255, 255, 0.27);
+  border-radius: 999px;
+
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.13);
+
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-decoration: none;
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  transition:
+    transform 0.25s ease,
+    color 0.25s ease,
+    background 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.kcp-pill:hover {
+  color: #174829;
+  background: #ffffff;
+  border-color: #ffffff;
+
+  transform: translateY(-3px);
+
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.16);
+}
+
+.kcp-pill svg {
+  flex-shrink: 0;
+}
+
+
+/* ============================================================
+   FARM ART CONTAINER
+   ============================================================ */
+
+.kcp-farm-art {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+
+  overflow: hidden;
+  pointer-events: none;
+}
+
+
+/* ============================================================
+   SUN
+   ============================================================ */
+
+.kcp-sun {
+  position: absolute;
+  top: 45px;
+  right: 10%;
+
+  width: 95px;
+  height: 95px;
+
+  border-radius: 50%;
+
+  background:
+    radial-gradient(
+      circle,
+      #fff8ce 0%,
+      #ffd971 43%,
+      rgba(255, 213, 95, 0.35) 66%,
+      transparent 70%
+    );
+
+  filter:
+    drop-shadow(
+      0 0 32px rgba(255, 221, 110, 0.5)
+    );
+
+  animation: kcpSunPulse 5s ease-in-out infinite;
+}
+
+@keyframes kcpSunPulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.06);
+  }
+}
+
+
+/* ============================================================
+   CLOUDS
+   ============================================================ */
+
+.kcp-cloud {
+  position: absolute;
+
+  width: 102px;
+  height: 26px;
+
+  border-radius: 999px;
+
+  background: rgba(255, 255, 255, 0.23);
+
+  animation: kcpCloudMove 12s ease-in-out infinite;
+}
+
+.kcp-cloud span {
+  position: absolute;
+  bottom: 5px;
+
+  display: block;
+
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.23);
+}
+
+.kcp-cloud span:nth-child(1) {
+  left: 10px;
+
+  width: 38px;
+  height: 38px;
+}
+
+.kcp-cloud span:nth-child(2) {
+  left: 38px;
+
+  width: 49px;
+  height: 49px;
+}
+
+.kcp-cloud span:nth-child(3) {
+  right: 2px;
+
+  width: 32px;
+  height: 32px;
+}
+
+.kcp-cloud--one {
+  top: 78px;
+  right: 30%;
+}
+
+.kcp-cloud--two {
+  top: 150px;
+  right: 4%;
+
+  opacity: 0.55;
+  transform: scale(0.7);
+
+  animation-delay: -4s;
+}
+
+@keyframes kcpCloudMove {
+  0%,
+  100% {
+    margin-right: 0;
+  }
+
+  50% {
+    margin-right: 18px;
+  }
+}
+
+
+/* ============================================================
+   HILLS
+   ============================================================ */
+
+.kcp-hill {
+  position: absolute;
+
+  transform-origin: bottom center;
+}
+
+.kcp-hill--back {
+  right: -8%;
+  bottom: 108px;
+
+  width: 68%;
+  height: 210px;
+
+  opacity: 0.77;
+
+  background:
+    linear-gradient(
+      145deg,
+      #91b66d,
+      #4e8b58
+    );
+
+  clip-path: polygon(
+    0 63%,
+    14% 44%,
+    29% 55%,
+    43% 27%,
+    59% 50%,
+    73% 29%,
+    87% 48%,
+    100% 35%,
+    100% 100%,
+    0 100%
+  );
+}
+
+.kcp-hill--middle {
+  right: -5%;
+  bottom: 72px;
+
+  width: 62%;
+  height: 175px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #57904e,
+      #27633c
+    );
+
+  clip-path: polygon(
+    0 61%,
+    16% 38%,
+    30% 52%,
+    45% 26%,
+    60% 47%,
+    77% 22%,
+    100% 49%,
+    100% 100%,
+    0 100%
+  );
+}
+
+.kcp-hill--front {
+  right: -10%;
+  bottom: 38px;
+
+  width: 66%;
+  height: 140px;
+
+  background:
+    linear-gradient(
+      155deg,
+      #4c812e,
+      #1e5933
+    );
+
+  clip-path: polygon(
+    0 63%,
+    18% 35%,
+    34% 52%,
+    51% 29%,
+    68% 46%,
+    84% 26%,
+    100% 45%,
+    100% 100%,
+    0 100%
+  );
+}
+
+
+/* ============================================================
+   FIELD
+   ============================================================ */
+
+.kcp-field {
+  position: absolute;
+  right: -3%;
+  bottom: -2px;
+  z-index: 4;
+
+  width: 63%;
+  height: 108px;
+
+  overflow: hidden;
+
+  border-radius: 72% 0 0 0;
+
+  background:
+    linear-gradient(
+      180deg,
+      var(--kcp-field),
+      #4b7929
+    );
+
+  box-shadow:
+    inset 0 15px 20px rgba(255, 255, 255, 0.08);
+}
+
+.kcp-field__rows {
+  position: absolute;
+  inset: 0;
+
+  opacity: 0.42;
+
+  background:
+    repeating-linear-gradient(
+      104deg,
+      transparent 0,
+      transparent 20px,
+      rgba(255, 236, 151, 0.38) 21px,
+      rgba(255, 236, 151, 0.38) 24px,
+      transparent 25px,
+      transparent 47px
+    );
+
+  transform:
+    perspective(350px)
+    rotateX(24deg)
+    scale(1.25);
+}
+
+.kcp-field__crop {
+  position: absolute;
+  z-index: 5;
+
+  font-size: 1.65rem;
+
+  filter:
+    drop-shadow(0 6px 6px rgba(0, 0, 0, 0.16));
+}
+
+.kcp-field__crop--one {
+  bottom: 14px;
+  left: 13%;
+}
+
+.kcp-field__crop--two {
+  bottom: 35px;
+  left: 37%;
+}
+
+.kcp-field__crop--three {
+  right: 21%;
+  bottom: 15px;
+}
+
+.kcp-field__crop--four {
+  right: 7%;
+  bottom: 31px;
+}
+
+
+/* ============================================================
+   FARMHOUSE
+   ============================================================ */
+
+.kcp-house {
+  position: absolute;
+  right: 15%;
+  bottom: 83px;
+  z-index: 6;
+
+  width: 116px;
+  height: 89px;
+
+  filter:
+    drop-shadow(
+      0 14px 16px rgba(0, 0, 0, 0.2)
+    );
+}
+
+.kcp-house__roof {
+  position: absolute;
+  top: 0;
+  left: -8px;
+
+  width: 132px;
+  height: 42px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #704122,
+      #a05e30
+    );
+
+  clip-path: polygon(
+    50% 0,
+    100% 100%,
+    0 100%
+  );
+}
+
+.kcp-house__body {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+
+  height: 58px;
+
+  border-radius: 3px 3px 7px 7px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #dfb36c,
+      #ba793a
+    );
+}
+
+.kcp-house__window {
+  position: absolute;
+  top: 15px;
+  left: 18px;
+
+  width: 23px;
+  height: 21px;
+
+  border: 4px solid #f5dda8;
+  border-radius: 2px;
+
+  background: #4f7b80;
+}
+
+.kcp-house__window::after {
+  content: "";
+
+  position: absolute;
+  top: -4px;
+  left: 6px;
+
+  width: 3px;
+  height: 21px;
+
+  background: #f5dda8;
+}
+
+.kcp-house__door {
+  position: absolute;
+  right: 18px;
+  bottom: 0;
+
+  width: 27px;
+  height: 41px;
+
+  border-radius: 4px 4px 0 0;
+
+  background:
+    linear-gradient(
+      90deg,
+      #5b3724,
+      #805038
+    );
+}
+
+.kcp-house__chimney {
+  position: absolute;
+  top: 15px;
+  right: 21px;
+
+  width: 12px;
+  height: 28px;
+
+  background: #704229;
+}
+
+.kcp-house__smoke {
+  position: absolute;
+  top: -15px;
+  right: 15px;
+}
+
+.kcp-house__smoke span {
+  position: absolute;
+
+  width: 15px;
+  height: 15px;
+
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.2);
+
+  animation: kcpSmoke 4s ease-in-out infinite;
+}
+
+.kcp-house__smoke span:nth-child(2) {
+  top: -14px;
+  left: 7px;
+
+  width: 11px;
+  height: 11px;
+
+  animation-delay: -1.2s;
+}
+
+.kcp-house__smoke span:nth-child(3) {
+  top: -27px;
+  left: 2px;
+
+  width: 8px;
+  height: 8px;
+
+  animation-delay: -2.3s;
+}
+
+@keyframes kcpSmoke {
+  0% {
+    transform:
+      translateY(8px)
+      scale(0.75);
+
+    opacity: 0;
+  }
+
+  40% {
+    opacity: 0.55;
+  }
+
+  100% {
+    transform:
+      translateY(-24px)
+      translateX(7px)
+      scale(1.35);
+
+    opacity: 0;
+  }
+}
+
+
+/* ============================================================
+   TREES
+   ============================================================ */
+
+.kcp-tree {
+  position: absolute;
+  z-index: 5;
+}
+
+.kcp-tree__top {
+  position: absolute;
+
+  display: block;
+
+  width: 58px;
+  height: 58px;
+
+  border-radius:
+    50% 55% 48% 52%;
+
+  background:
+    radial-gradient(
+      circle at 35% 30%,
+      #5e9a4b,
+      #225a36 75%
+    );
+
+  box-shadow:
+    -20px 12px 0 -7px #2f6c3a,
+    19px 11px 0 -8px #397843;
+}
+
+.kcp-tree__trunk {
+  position: absolute;
+  top: 47px;
+  left: 25px;
+
+  display: block;
+
+  width: 10px;
+  height: 38px;
+
+  border-radius: 5px;
+
+  background: #70482c;
+}
+
+.kcp-tree--one {
+  right: 4%;
+  bottom: 79px;
+}
+
+.kcp-tree--two {
+  right: 38%;
+  bottom: 99px;
+
+  transform: scale(0.72);
+}
+
+
+/* ============================================================
+   TRACTOR
+   ============================================================ */
+
+.kcp-tractor {
+  position: absolute;
+  right: 30%;
+  bottom: 52px;
+  z-index: 8;
+
+  animation: kcpTractorMove 5s ease-in-out infinite;
+}
+
+.kcp-tractor__emoji {
+  display: block;
+
+  font-size: 4.2rem;
+  line-height: 1;
+
+  filter:
+    drop-shadow(
+      0 10px 10px rgba(0, 0, 0, 0.2)
+    );
+}
+
+@keyframes kcpTractorMove {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  50% {
+    transform: translateX(8px);
+  }
+}
+
+
+/* ============================================================
+   FLOATING ITEMS
+   ============================================================ */
+
+.kcp-floating {
+  position: absolute;
+  z-index: 9;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.13);
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  box-shadow:
+    0 11px 27px rgba(0, 0, 0, 0.13);
+
+  animation: kcpFloat 5s ease-in-out infinite;
+}
+
+.kcp-floating--mushroom {
+  top: 73px;
+  right: 22%;
+
+  width: 52px;
+  height: 52px;
+
+  font-size: 1.55rem;
+}
+
+.kcp-floating--flower {
+  top: 174px;
+  right: 9%;
+
+  width: 47px;
+  height: 47px;
+
+  font-size: 1.4rem;
+
+  animation-delay: -1.8s;
+}
+
+.kcp-floating--leaf {
+  top: 158px;
+  right: 37%;
+
+  width: 43px;
+  height: 43px;
+
+  font-size: 1.3rem;
+
+  animation-delay: -3s;
+}
+
+@keyframes kcpFloat {
+  0%,
+  100% {
+    transform:
+      translateY(0)
+      rotate(0deg);
+  }
+
+  50% {
+    transform:
+      translateY(-10px)
+      rotate(4deg);
+  }
+}
+
+
+/* ============================================================
+   PRODUCTS SECTION
+   ============================================================ */
+
+.kcp-products {
+  position: relative;
+
+  padding: 55px 0 80px;
+
+  background:
+    radial-gradient(
+      circle at 8% 10%,
+      rgba(112, 164, 67, 0.08),
+      transparent 24%
+    ),
+    radial-gradient(
+      circle at 92% 12%,
+      rgba(242, 201, 105, 0.1),
+      transparent 22%
+    ),
+    #f7faf4;
+}
+
+.kcp-products__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  margin-bottom: 25px;
+  padding-bottom: 20px;
+
+  border-bottom: 1px solid #dfe8da;
+}
+
+.kcp-products__eyebrow {
+  display: block;
+
+  margin-bottom: 6px;
+
+  color: #397642;
+
+  font-size: 0.73rem;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+}
+
+.kcp-products__title {
+  margin: 0;
+
+  color: #173b24;
+
+  font-family: var(--font-serif, Georgia, serif);
+  font-size: clamp(1.65rem, 3vw, 2.3rem);
+  font-weight: 900;
+  line-height: 1.2;
+
+  text-transform: capitalize;
+}
+
+.kcp-products__count {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 8px;
+
+  flex-shrink: 0;
+
+  padding: 10px 15px;
+
+  border: 1px solid #d7e3d1;
+  border-radius: 999px;
+
+  color: #326b3d;
+  background: #ffffff;
+
+  font-size: 0.79rem;
+  font-weight: 800;
+
+  box-shadow:
+    0 8px 22px rgba(31, 78, 43, 0.06);
+}
+
+
+/* ============================================================
+   TABLET RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 1050px) {
+  .kcp-hero__content {
+    width: 62%;
+  }
+
+  .kcp-house {
+    right: 10%;
+  }
+
+  .kcp-tractor {
+    right: 31%;
+  }
+
+  .kcp-floating--leaf {
+    display: none;
+  }
+}
+
+
+@media (max-width: 900px) {
+  .kcp-hero {
+    min-height: 470px;
+    padding: 58px 0 120px;
+  }
+
+  .kcp-hero::before {
+    background:
+      linear-gradient(
+        90deg,
+        rgba(5, 34, 18, 0.82) 0%,
+        rgba(5, 34, 18, 0.57) 66%,
+        rgba(5, 34, 18, 0.18) 100%
+      );
+  }
+
+  .kcp-hero__content {
+    width: 73%;
+  }
+
+  .kcp-hill--back,
+  .kcp-hill--middle,
+  .kcp-hill--front,
+  .kcp-field {
+    width: 82%;
+  }
+
+  .kcp-house {
+    right: 8%;
+    bottom: 67px;
+
+    transform: scale(0.82);
+    transform-origin: bottom right;
+  }
+
+  .kcp-tractor {
+    right: 35%;
+    bottom: 44px;
+
+    transform: scale(0.82);
+  }
+
+  .kcp-tree--two {
+    display: none;
+  }
+
+  .kcp-floating--flower {
+    display: none;
+  }
+}
+
+
+/* ============================================================
+   MOBILE RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 767px) {
+  .kcp-hero {
+    min-height: 570px;
+    padding: 40px 0 180px;
+
+    align-items: flex-start;
+  }
+
+  .kcp-hero::before {
+    background:
+      linear-gradient(
+        180deg,
+        rgba(5, 34, 18, 0.88) 0%,
+        rgba(5, 34, 18, 0.69) 58%,
+        rgba(5, 34, 18, 0.16) 100%
+      );
+  }
+
+  .kcp-hero__content {
+    width: 100%;
+
+    text-align: center;
+  }
+
+  .kcp-breadcrumb {
+    justify-content: center;
+
+    margin-bottom: 14px;
+  }
+
+  .kcp-hero__badge {
+    margin-right: auto;
+    margin-left: auto;
+  }
+
+  .kcp-hero__title {
+    margin-bottom: 12px;
+
+    font-size: clamp(2rem, 9vw, 2.8rem);
+    letter-spacing: -0.8px;
+  }
+
+  .kcp-hero__subtitle {
+    max-width: 540px;
+
+    margin-right: auto;
+    margin-left: auto;
+
+    font-size: 0.9rem;
+    line-height: 1.65;
+  }
+
+  .kcp-hero__features {
+    justify-content: center;
+
+    gap: 9px 14px;
+
+    margin-top: 17px;
+  }
+
+  .kcp-hero__features span {
+    font-size: 0.69rem;
+  }
+
+  .kcp-pills {
+    justify-content: center;
+
+    gap: 8px;
+
+    margin-top: 21px;
+  }
+
+  .kcp-pill {
+    min-height: 35px;
+    padding: 7px 11px;
+
+    font-size: 0.7rem;
+  }
+
+  .kcp-sun {
+    top: auto;
+    right: 9%;
+    bottom: 164px;
+
+    width: 69px;
+    height: 69px;
+  }
+
+  .kcp-cloud--one {
+    top: auto;
+    right: 40%;
+    bottom: 207px;
+
+    transform: scale(0.68);
+  }
+
+  .kcp-cloud--two {
+    display: none;
+  }
+
+  .kcp-hill--back {
+    right: -24%;
+    bottom: 95px;
+
+    width: 127%;
+    height: 160px;
+  }
+
+  .kcp-hill--middle {
+    right: -22%;
+    bottom: 57px;
+
+    width: 124%;
+    height: 143px;
+  }
+
+  .kcp-hill--front {
+    right: -30%;
+    bottom: 33px;
+
+    width: 133%;
+    height: 118px;
+  }
+
+  .kcp-field {
+    right: -6%;
+    bottom: -2px;
+
+    width: 112%;
+    height: 94px;
+
+    border-radius: 48% 0 0 0;
+  }
+
+  .kcp-house {
+    right: 7%;
+    bottom: 60px;
+
+    transform: scale(0.68);
+  }
+
+  .kcp-tractor {
+    right: auto;
+    bottom: 37px;
+    left: 34%;
+
+    transform: scale(0.7);
+  }
+
+  .kcp-tractor__emoji {
+    font-size: 3.8rem;
+  }
+
+  .kcp-tree--one {
+    right: 0;
+    bottom: 65px;
+
+    transform: scale(0.72);
+  }
+
+  .kcp-tree--two {
+    display: none;
+  }
+
+  .kcp-floating--mushroom {
+    top: auto;
+    right: auto;
+    bottom: 116px;
+    left: 5%;
+
+    width: 42px;
+    height: 42px;
+
+    font-size: 1.25rem;
+  }
+
+  .kcp-floating--flower,
+  .kcp-floating--leaf {
+    display: none;
+  }
+
+  .kcp-field__crop {
+    font-size: 1.3rem;
+  }
+
+  .kcp-products {
+    padding: 38px 0 60px;
+  }
+
+  .kcp-products__header {
+    align-items: flex-start;
+    flex-direction: column;
+
+    gap: 14px;
+
+    margin-bottom: 20px;
+    padding-bottom: 17px;
+  }
+
+  .kcp-products__title {
+    font-size: 1.7rem;
+  }
+
+  .kcp-products__count {
+    padding: 8px 12px;
+
+    font-size: 0.72rem;
+  }
+}
+
+
+/* ============================================================
+   SMALL MOBILE
+   ============================================================ */
+
+@media (max-width: 430px) {
+  .kcp-hero {
+    min-height: 600px;
+    padding-top: 32px;
+    padding-bottom: 178px;
+  }
+
+  .kcp-hero__title {
+    font-size: 2rem;
+  }
+
+  .kcp-hero__subtitle {
+    font-size: 0.83rem;
+  }
+
+  .kcp-hero__features {
+    gap: 8px 10px;
+  }
+
+  .kcp-hero__features span {
+    font-size: 0.63rem;
+  }
+
+  .kcp-hero__features svg {
+    width: 13px;
+    height: 13px;
+  }
+
+  .kcp-pill {
+    padding: 6px 10px;
+
+    font-size: 0.66rem;
+  }
+
+  .kcp-house {
+    right: 1%;
+  }
+
+  .kcp-tractor {
+    left: 28%;
+  }
+}
+
+
+@media (max-width: 360px) {
+  .kcp-hero {
+    min-height: 620px;
+  }
+
+  .kcp-hero__title {
+    font-size: 1.8rem;
+  }
+
+  .kcp-hero__badge {
+    padding: 7px 10px;
+
+    font-size: 0.66rem;
+  }
+
+  .kcp-hero__features span {
+    font-size: 0.59rem;
+  }
+
+  .kcp-house {
+    right: -5%;
+
+    transform: scale(0.6);
+  }
+
+  .kcp-tractor {
+    left: 24%;
+
+    transform: scale(0.62);
+  }
+}
+
+
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .kcp-sun,
+  .kcp-cloud,
+  .kcp-house__smoke span,
+  .kcp-tractor,
+  .kcp-floating {
+    animation: none;
+  }
+}

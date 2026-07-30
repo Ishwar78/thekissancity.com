@@ -1,0 +1,422 @@
+/* ============================================================
+   WHY CHOOSE US SECTION
+   ============================================================ */
+
+.why-choose-us {
+  padding: var(--space-20) 0;
+
+  overflow: hidden;
+
+  border-top: 1px solid var(--gray-100);
+  border-bottom: 1px solid var(--gray-100);
+
+  background: #b6f2b6;
+}
+
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+
+.why-header {
+  max-width: 600px;
+
+  margin: 0 auto var(--space-12);
+
+  text-align: center;
+}
+
+.why-header__badge {
+  display: inline-block;
+
+  margin-bottom: var(--space-3);
+  padding: 4px 14px;
+
+  border-radius: var(--radius-full);
+
+  color: #5d4037;
+  background: #efebe9;
+
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.why-header__title {
+  margin: 0 0 var(--space-4);
+
+  color: #3e2723;
+
+  font-family: var(--font-serif);
+  font-size: clamp(2rem, 3.5vw, 2.8rem);
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.why-header__title span {
+  color: var(--green-600);
+}
+
+.why-header__divider {
+  width: 60px;
+  height: 4px;
+
+  margin: 0 auto var(--space-4);
+
+  border-radius: var(--radius-full);
+
+  background: var(--green-500);
+}
+
+.why-header__subtitle {
+  margin: 0;
+
+  color: var(--gray-600);
+
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+
+/* ============================================================
+   DESKTOP GRID
+   Same original design
+   ============================================================ */
+
+.why-grid {
+  display: grid;
+
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+
+  gap: var(--space-6);
+}
+
+
+/* ============================================================
+   CARD
+   Same original sizing and design
+   ============================================================ */
+
+.why-card {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+
+  padding: var(--space-8) var(--space-6);
+
+  overflow: hidden;
+
+  border: 1px solid rgba(0, 0, 0, 0.02);
+  border-radius: 20px;
+
+  background: var(--white);
+
+  text-align: center;
+
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.03);
+
+  transition: all var(--transition-base);
+}
+
+.why-card:hover {
+  border-color: var(--green-200);
+
+  transform: translateY(-8px);
+
+  box-shadow: var(--shadow-lg);
+}
+
+
+/* ============================================================
+   WATERMARK
+   ============================================================ */
+
+.why-card__watermark {
+  position: absolute;
+  top: 10px;
+  right: 18px;
+
+  color: rgba(0, 0, 0, 0.03);
+
+  font-family: sans-serif;
+  font-size: 5rem;
+  font-weight: 900;
+  line-height: 1;
+
+  pointer-events: none;
+  user-select: none;
+}
+
+
+/* ============================================================
+   ICON
+   ============================================================ */
+
+.why-card__icon-wrap {
+  position: relative;
+  z-index: 2;
+
+  width: 64px;
+  height: 64px;
+  flex: 0 0 64px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-bottom: var(--space-5);
+
+  border-radius: 50%;
+
+  color: var(--green-700);
+  background: #dbebe1;
+
+  transition:
+    transform var(--transition-base);
+}
+
+.why-card:hover .why-card__icon-wrap {
+  transform:
+    scale(1.1)
+    rotate(5deg);
+}
+
+
+/* ============================================================
+   BADGE CONTENT
+   ============================================================ */
+
+.why-card__badge-row {
+  position: relative;
+  z-index: 2;
+
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+
+  margin-bottom: var(--space-3);
+}
+
+.why-card__badge-num {
+  color: var(--green-800);
+
+  font-size: 1.6rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.why-card__badge-label {
+  margin-top: 2px;
+
+  color: #b8884a;
+
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.why-card__divider {
+  width: 32px;
+  height: 3px;
+
+  margin-bottom: var(--space-5);
+
+  border-radius: var(--radius-full);
+
+  opacity: 0.6;
+
+  background: #b8884a;
+}
+
+
+/* ============================================================
+   CARD TEXT
+   ============================================================ */
+
+.why-card__title {
+  position: relative;
+  z-index: 2;
+
+  margin: 0 0 var(--space-3);
+
+  color: var(--gray-800);
+
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.why-card__desc {
+  position: relative;
+  z-index: 2;
+
+  margin: 0;
+
+  color: var(--gray-500);
+
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+
+/* ============================================================
+   SCROLL HINT
+   Desktop par hidden
+   ============================================================ */
+
+.why-grid__scroll-hint {
+  display: none;
+}
+
+
+/* ============================================================
+   TABLET
+   Same original two-column layout
+   ============================================================ */
+
+@media (max-width: 1100px) {
+  .why-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+
+/* ============================================================
+   MOBILE ONLY HORIZONTAL SCROLL
+   Card design and card width remain like original mobile view
+   ============================================================ */
+
+@media (max-width: 600px) {
+  .why-choose-us {
+    padding: var(--space-12) 0;
+  }
+
+  .why-header {
+    margin-bottom: 30px;
+    padding: 0 4px;
+  }
+
+  /*
+   * Grid sirf mobile mein horizontal flex slider banega.
+   * Har card container ki full width lega, jaise pehle
+   * single-column mobile layout mein leta tha.
+   */
+  .why-grid {
+    display: flex;
+
+    width: 100%;
+    max-width: 100%;
+
+    align-items: stretch;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+
+    grid-template-columns: none;
+
+    gap: var(--space-4);
+
+    padding:
+      8px
+      0
+      20px;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    scroll-behavior: smooth;
+    scroll-snap-type: x mandatory;
+    scroll-padding-left: 0;
+
+    overscroll-behavior-x: contain;
+    touch-action: pan-x;
+
+    -webkit-overflow-scrolling: touch;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .why-grid::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+
+    display: none;
+  }
+
+  /*
+   * Card ki mobile width wahi full width rakhi hai.
+   * Padding, radius, icon aur content size change nahi kiya.
+   */
+  .why-card {
+    flex: 0 0 100%;
+
+    width: 100%;
+    min-width: 100%;
+    max-width: 100%;
+
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+
+  /*
+   * Touch device par hover movement disable,
+   * design baki same rahega.
+   */
+  .why-card:hover {
+    transform: none;
+  }
+
+  .why-card:hover .why-card__icon-wrap {
+    transform: none;
+  }
+
+  .why-grid__scroll-hint {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-top: -8px;
+
+    color: rgba(45, 82, 52, 0.75);
+
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+  }
+}
+
+
+/* ============================================================
+   VERY SMALL MOBILE
+   Only spacing adjustment, card size unchanged
+   ============================================================ */
+
+@media (max-width: 380px) {
+  .why-grid {
+    gap: 12px;
+  }
+
+  .why-header__subtitle {
+    font-size: 0.9rem;
+  }
+}
+
+
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .why-grid {
+    scroll-behavior: auto;
+  }
+
+  .why-card,
+  .why-card__icon-wrap {
+    transition: none;
+  }
+}

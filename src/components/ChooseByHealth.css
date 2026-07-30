@@ -1,0 +1,2059 @@
+/* ============================================================
+   CHOOSE BY HEALTH
+   Compact pure CSS health + farm design
+   ============================================================ */
+
+.choose-health {
+  position: relative;
+  isolation: isolate;
+
+  width: 100%;
+  min-height: 520px;
+
+  padding: 38px 0 68px;
+
+  overflow: hidden;
+
+  background:
+    radial-gradient(
+      circle at 8% 8%,
+      rgba(215, 239, 174, 0.55),
+      transparent 25%
+    ),
+    radial-gradient(
+      circle at 91% 10%,
+      rgba(255, 223, 126, 0.3),
+      transparent 24%
+    ),
+    linear-gradient(
+      180deg,
+      #fffdf5 0%,
+      #f7faeb 50%,
+      #e4f0ce 100%
+    );
+}
+
+.choose-health::before {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+
+  pointer-events: none;
+
+  opacity: 0.17;
+
+  background-image:
+    radial-gradient(
+      circle,
+      rgba(66, 115, 56, 0.18) 1px,
+      transparent 1px
+    );
+
+  background-size: 27px 27px;
+}
+
+.choose-health::after {
+  content: "";
+
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 3;
+
+  height: 38px;
+
+  pointer-events: none;
+
+  background:
+    linear-gradient(
+      180deg,
+      transparent,
+      rgba(255, 255, 255, 0.9)
+    );
+}
+
+
+/* ============================================================
+   MAIN CONTENT
+   ============================================================ */
+
+.choose-health__container {
+  position: relative;
+  z-index: 20;
+}
+
+.choose-health__header {
+  position: relative;
+  z-index: 20;
+
+  max-width: 720px;
+
+  margin: 0 auto 38px;
+
+  text-align: center;
+}
+
+.choose-health__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 8px;
+
+  margin-bottom: 11px;
+  padding: 8px 15px;
+
+  border: 1px solid rgba(50, 123, 60, 0.17);
+  border-radius: 999px;
+
+  color: #34783d;
+  background: rgba(255, 255, 255, 0.78);
+
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.7px;
+
+  box-shadow:
+    0 9px 24px rgba(42, 91, 45, 0.08);
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.choose-health__title {
+  margin: 0;
+
+  color: #2c1a0e;
+
+  font-family: var(--font-serif, Georgia, serif);
+  font-size: clamp(2rem, 4vw, 2.9rem);
+  font-weight: 900;
+  line-height: 1.15;
+  letter-spacing: -1px;
+}
+
+.choose-health__title span {
+  position: relative;
+
+  display: inline-block;
+
+  color: var(--green-700, #237a38);
+}
+
+.choose-health__title span::after {
+  content: "";
+
+  position: absolute;
+  right: 2px;
+  bottom: -5px;
+  left: 2px;
+
+  height: 6px;
+
+  border-radius: 999px;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      #efc84c,
+      transparent
+    );
+}
+
+.choose-health__subtitle {
+  max-width: 590px;
+
+  margin: 14px auto 13px;
+
+  color: #667167;
+
+  font-size: 0.92rem;
+  line-height: 1.65;
+}
+
+.choose-health__divider {
+  width: 52px;
+  height: 4px;
+
+  margin: 0 auto;
+
+  border-radius: 999px;
+
+  background:
+    linear-gradient(
+      90deg,
+      #6fb257,
+      #287b3c
+    );
+}
+
+
+/* ============================================================
+   HEALTH GRID
+   ============================================================ */
+
+.choose-health__scroll-wrapper {
+  position: relative;
+  z-index: 20;
+
+  width: 100%;
+}
+
+.choose-health__grid {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  justify-content: center;
+
+  width: 100%;
+  max-width: 1200px;
+
+  gap: 24px;
+
+  padding: 8px 5px 18px;
+  margin: 0 auto;
+}
+
+.health-card {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+
+  flex: 0 0 calc(12.5% - 21px);
+
+  width: calc(12.5% - 21px);
+  max-width: calc(12.5% - 21px);
+  min-width: 110px;
+
+  gap: 11px;
+
+  padding: 5px 3px 10px;
+
+  color: inherit;
+  text-decoration: none;
+
+  scroll-snap-align: start;
+
+  transition:
+    transform 0.3s ease,
+    filter 0.3s ease;
+}
+
+.health-card:hover {
+  transform: translateY(-7px);
+}
+
+.health-card:focus-visible {
+  border-radius: 20px;
+
+  outline: 3px solid rgba(48, 132, 61, 0.25);
+  outline-offset: 5px;
+}
+
+.health-card__ring {
+  position: relative;
+
+  width: 112px;
+  height: 112px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.98),
+      rgba(228, 241, 205, 0.94)
+    );
+
+  box-shadow:
+    0 14px 30px rgba(50, 90, 42, 0.13),
+    inset 0 0 0 1px rgba(73, 133, 57, 0.12);
+
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.health-card__ring::before {
+  content: "";
+
+  position: absolute;
+  inset: -5px;
+  z-index: -1;
+
+  border: 1px dashed rgba(201, 163, 38, 0.4);
+  border-radius: 50%;
+
+  transition:
+    transform 0.5s ease,
+    border-color 0.3s ease;
+}
+
+.health-card__ring::after {
+  content: "🌿";
+
+  position: absolute;
+  right: -4px;
+  bottom: 0;
+  z-index: 5;
+
+  width: 29px;
+  height: 29px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 3px solid #f6faeb;
+  border-radius: 50%;
+
+  background: #ffffff;
+
+  font-size: 0.76rem;
+
+  box-shadow:
+    0 6px 15px rgba(46, 90, 40, 0.16);
+}
+
+.health-card:hover .health-card__ring {
+  transform: scale(1.055);
+
+  box-shadow:
+    0 20px 39px rgba(47, 95, 42, 0.2);
+}
+
+.health-card:hover .health-card__ring::before {
+  transform: rotate(25deg);
+
+  border-color: rgba(208, 164, 24, 0.8);
+}
+
+.health-card__icon-wrap {
+  position: relative;
+
+  display: block;
+
+  width: 100px;
+  height: 100px;
+  flex: 0 0 100px;
+
+  overflow: hidden;
+
+  border: 3px solid rgba(255, 255, 255, 0.96);
+  border-radius: 50%;
+
+  background:
+    linear-gradient(
+      145deg,
+      #fefce8,
+      #e4efd2
+    );
+
+  box-shadow:
+    inset 0 0 0 1px rgba(227, 184, 35, 0.25);
+}
+
+.health-card__icon-wrap::after {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  border-radius: inherit;
+
+  pointer-events: none;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.35),
+      transparent 45%
+    );
+}
+
+.health-card__icon-wrap img {
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  object-fit: cover;
+  object-position: center;
+
+  pointer-events: none;
+  user-select: none;
+
+  transition:
+    transform 0.45s ease,
+    filter 0.35s ease;
+}
+
+.health-card:hover .health-card__icon-wrap img {
+  transform: scale(1.1);
+
+  filter:
+    saturate(1.08)
+    contrast(1.02);
+}
+
+.health-card__title {
+  width: 100%;
+  min-height: 38px;
+
+  margin: 0;
+
+  color: #263128;
+
+  font-size: 0.94rem;
+  font-weight: 700;
+  line-height: 1.3;
+
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.health-card:hover .health-card__title {
+  color: #2c7b3b;
+}
+
+.health-card__leaf {
+  position: absolute;
+  top: 0;
+  left: 2px;
+
+  opacity: 0;
+
+  transform:
+    translateY(8px)
+    rotate(-15deg);
+
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+}
+
+.health-card:hover .health-card__leaf {
+  opacity: 1;
+
+  transform:
+    translateY(0)
+    rotate(-7deg);
+}
+
+
+/* ============================================================
+   LOADING / EMPTY
+   ============================================================ */
+
+.choose-health__loading,
+.choose-health__empty {
+  position: relative;
+  z-index: 20;
+
+  min-height: 150px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+
+  gap: 11px;
+
+  padding: 25px 15px;
+
+  color: #4b5563;
+
+  text-align: center;
+}
+
+.choose-health__loading p,
+.choose-health__empty p {
+  margin: 0;
+
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.choose-health__loader {
+  width: 35px;
+  height: 35px;
+
+  border: 3px solid rgba(45, 125, 59, 0.16);
+  border-top-color: #338145;
+  border-radius: 50%;
+
+  animation: chooseHealthLoader 0.8s linear infinite;
+}
+
+@keyframes chooseHealthLoader {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* ============================================================
+   BACKGROUND ART
+   ============================================================ */
+
+.choose-health__farm-art {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+
+  overflow: hidden;
+  pointer-events: none;
+}
+
+
+/* Sun */
+
+.choose-health__sun {
+  position: absolute;
+  top: 34px;
+  right: 7%;
+
+  width: 76px;
+  height: 76px;
+
+  border-radius: 50%;
+
+  opacity: 0.72;
+
+  background:
+    radial-gradient(
+      circle,
+      #fff9cf 0%,
+      #f8d869 43%,
+      rgba(251, 214, 102, 0.25) 68%,
+      transparent 71%
+    );
+
+  filter:
+    drop-shadow(
+      0 0 26px rgba(247, 212, 98, 0.42)
+    );
+
+  animation: chooseHealthSun 5s ease-in-out infinite;
+}
+
+.choose-health__sun span {
+  position: absolute;
+  inset: -13px;
+
+  border: 1px solid rgba(235, 199, 76, 0.24);
+  border-radius: 50%;
+}
+
+@keyframes chooseHealthSun {
+  50% {
+    transform: scale(1.07);
+  }
+}
+
+
+/* Clouds */
+
+.choose-health__cloud {
+  position: absolute;
+
+  width: 125px;
+  height: 42px;
+
+  border-radius: 999px;
+
+  opacity: 0.34;
+
+  background: #ffffff;
+
+  animation: chooseHealthCloud 12s ease-in-out infinite;
+}
+
+.choose-health__cloud span {
+  position: absolute;
+  bottom: 5px;
+
+  border-radius: 50%;
+
+  background: #ffffff;
+}
+
+.choose-health__cloud span:nth-child(1) {
+  left: 10px;
+
+  width: 34px;
+  height: 34px;
+}
+
+.choose-health__cloud span:nth-child(2) {
+  left: 36px;
+
+  width: 44px;
+  height: 44px;
+}
+
+.choose-health__cloud span:nth-child(3) {
+  right: 2px;
+
+  width: 29px;
+  height: 29px;
+}
+
+.choose-health__cloud--one {
+  top: 70px;
+  left: 8%;
+}
+
+.choose-health__cloud--two {
+  top: 116px;
+  right: 24%;
+
+  opacity: 0.22;
+
+  transform: scale(0.7);
+
+  animation-delay: -4s;
+}
+
+@keyframes chooseHealthCloud {
+  50% {
+    margin-left: 18px;
+  }
+}
+
+
+/* Hills */
+
+.choose-health__hill {
+  position: absolute;
+  z-index: 1;
+}
+
+.choose-health__hill--back {
+  right: -4%;
+  bottom: 65px;
+
+  width: 100%;
+  height: 180px;
+
+  opacity: 0.25;
+
+  background:
+    linear-gradient(
+      150deg,
+      #a9ca81,
+      #658e61
+    );
+
+  clip-path: polygon(
+    0 65%,
+    14% 45%,
+    28% 56%,
+    44% 31%,
+    59% 50%,
+    75% 28%,
+    90% 50%,
+    100% 38%,
+    100% 100%,
+    0 100%
+  );
+}
+
+.choose-health__hill--front {
+  right: -6%;
+  bottom: 35px;
+
+  width: 70%;
+  height: 135px;
+
+  opacity: 0.32;
+
+  background:
+    linear-gradient(
+      150deg,
+      #7eae60,
+      #47714a
+    );
+
+  clip-path: polygon(
+    0 68%,
+    18% 40%,
+    35% 57%,
+    53% 32%,
+    69% 50%,
+    85% 30%,
+    100% 48%,
+    100% 100%,
+    0 100%
+  );
+}
+
+
+/* Full width field */
+
+.choose-health__field {
+  position: absolute;
+  right: -3%;
+  bottom: -7px;
+  left: 18%;
+  z-index: 2;
+
+  height: 118px;
+
+  overflow: hidden;
+
+  border-radius: 60% 0 0 0;
+
+  opacity: 0.58;
+
+  background:
+    linear-gradient(
+      180deg,
+      #91b955,
+      #59863d
+    );
+}
+
+.choose-health__field-lines {
+  position: absolute;
+  inset: 0;
+
+  opacity: 0.32;
+
+  background:
+    repeating-linear-gradient(
+      106deg,
+      transparent 0,
+      transparent 23px,
+      rgba(255, 239, 163, 0.72) 24px,
+      rgba(255, 239, 163, 0.72) 27px,
+      transparent 28px,
+      transparent 52px
+    );
+
+  transform:
+    perspective(350px)
+    rotateX(25deg)
+    scale(1.23);
+}
+
+.choose-health__plant {
+  position: absolute;
+  z-index: 4;
+
+  font-size: 1.45rem;
+}
+
+.choose-health__plant--one {
+  bottom: 15px;
+  left: 11%;
+}
+
+.choose-health__plant--two {
+  bottom: 38px;
+  left: 37%;
+}
+
+.choose-health__plant--three {
+  right: 22%;
+  bottom: 16px;
+}
+
+.choose-health__plant--four {
+  right: 7%;
+  bottom: 37px;
+}
+
+
+/* Mushrooms */
+
+.choose-health__mushrooms {
+  position: absolute;
+  bottom: 19px;
+  left: 2%;
+  z-index: 7;
+
+  width: 135px;
+  height: 96px;
+
+  opacity: 0.88;
+
+  filter:
+    drop-shadow(
+      0 9px 10px rgba(73, 64, 46, 0.16)
+    );
+}
+
+.choose-health__mushroom {
+  position: absolute;
+  bottom: 0;
+}
+
+.choose-health__mushroom-cap {
+  position: absolute;
+  z-index: 2;
+
+  border-radius: 55% 55% 45% 45%;
+
+  background:
+    radial-gradient(
+      circle at 34% 25%,
+      #f3ead8,
+      #c1ab8b 58%,
+      #8c7256 100%
+    );
+}
+
+.choose-health__mushroom-stem {
+  position: absolute;
+  bottom: 0;
+
+  border-radius: 42% 42% 30% 30%;
+
+  background:
+    linear-gradient(
+      90deg,
+      #c8b99e,
+      #f0e5cf 45%,
+      #a89476
+    );
+}
+
+.choose-health__mushroom--large {
+  right: 10px;
+
+  width: 68px;
+  height: 90px;
+
+  transform: rotate(5deg);
+}
+
+.choose-health__mushroom--large .choose-health__mushroom-cap {
+  width: 68px;
+  height: 37px;
+}
+
+.choose-health__mushroom--large .choose-health__mushroom-stem {
+  right: 16px;
+
+  width: 36px;
+  height: 66px;
+}
+
+.choose-health__mushroom--medium {
+  left: 5px;
+
+  width: 57px;
+  height: 70px;
+
+  transform: rotate(-7deg);
+}
+
+.choose-health__mushroom--medium .choose-health__mushroom-cap {
+  width: 57px;
+  height: 31px;
+}
+
+.choose-health__mushroom--medium .choose-health__mushroom-stem {
+  right: 13px;
+
+  width: 30px;
+  height: 51px;
+}
+
+.choose-health__mushroom--small {
+  right: 58px;
+
+  width: 40px;
+  height: 54px;
+}
+
+.choose-health__mushroom--small .choose-health__mushroom-cap {
+  width: 40px;
+  height: 23px;
+}
+
+.choose-health__mushroom--small .choose-health__mushroom-stem {
+  right: 9px;
+
+  width: 22px;
+  height: 39px;
+}
+
+
+/* Grain bowl */
+
+.choose-health__grain-bowl {
+  position: absolute;
+  bottom: 24px;
+  left: 16%;
+  z-index: 7;
+
+  width: 105px;
+  height: 68px;
+
+  opacity: 0.84;
+}
+
+.choose-health__grain-top {
+  position: absolute;
+  top: 0;
+  left: 5px;
+  z-index: 3;
+
+  width: 95px;
+  height: 29px;
+
+  border: 4px solid #906039;
+  border-radius: 50%;
+
+  background:
+    radial-gradient(
+      circle at 6px 6px,
+      #5f3c25 0,
+      #5f3c25 2px,
+      transparent 2.5px
+    ),
+    radial-gradient(
+      circle at 12px 9px,
+      #92633a 0,
+      #92633a 2px,
+      transparent 2.5px
+    ),
+    #b48149;
+
+  background-size:
+    14px 12px,
+    17px 14px,
+    auto;
+}
+
+.choose-health__grain-body {
+  position: absolute;
+  top: 16px;
+  left: 9px;
+
+  width: 88px;
+  height: 52px;
+
+  border-radius: 10% 10% 48% 48%;
+
+  background:
+    linear-gradient(
+      90deg,
+      #8f5b32,
+      #b97b45 25%,
+      #8d542e 52%,
+      #b87943 75%,
+      #7d492a
+    );
+}
+
+
+/* Wheat */
+
+.choose-health__wheat-bunch {
+  position: absolute;
+  bottom: 14px;
+  left: 24%;
+  z-index: 6;
+
+  width: 90px;
+  height: 105px;
+
+  opacity: 0.74;
+
+  transform: rotate(15deg);
+}
+
+.choose-health__wheat {
+  position: absolute;
+  bottom: 0;
+
+  width: 4px;
+  height: 92px;
+
+  border-radius: 999px;
+
+  background:
+    linear-gradient(
+      #e0b64e,
+      #997431
+    );
+}
+
+.choose-health__wheat::before {
+  content: "";
+
+  position: absolute;
+  top: 0;
+  left: -7px;
+
+  width: 18px;
+  height: 45px;
+
+  background:
+    repeating-linear-gradient(
+      145deg,
+      #d6a93e 0,
+      #d6a93e 5px,
+      #f2d06d 6px,
+      #f2d06d 9px
+    );
+
+  clip-path: polygon(
+    50% 0,
+    100% 14%,
+    70% 27%,
+    100% 40%,
+    68% 53%,
+    100% 66%,
+    50% 100%,
+    0 66%,
+    32% 53%,
+    0 40%,
+    30% 27%,
+    0 14%
+  );
+}
+
+.choose-health__wheat--one {
+  left: 10px;
+
+  transform: rotate(-13deg);
+}
+
+.choose-health__wheat--two {
+  left: 29px;
+
+  transform: rotate(-4deg);
+}
+
+.choose-health__wheat--three {
+  left: 49px;
+
+  transform: rotate(5deg);
+}
+
+.choose-health__wheat--four {
+  left: 68px;
+
+  transform: rotate(14deg);
+}
+
+
+/* Mortar */
+
+.choose-health__mortar {
+  position: absolute;
+  right: 15%;
+  bottom: 21px;
+  z-index: 7;
+
+  width: 100px;
+  height: 112px;
+
+  opacity: 0.8;
+}
+
+.choose-health__pestle {
+  position: absolute;
+  top: 0;
+  left: 37px;
+  z-index: 1;
+
+  width: 27px;
+  height: 91px;
+
+  border-radius: 14px;
+
+  background:
+    linear-gradient(
+      90deg,
+      #b9b4a4,
+      #efebdc 42%,
+      #9d9a8f
+    );
+
+  transform: rotate(-27deg);
+  transform-origin: bottom;
+}
+
+.choose-health__mortar-bowl {
+  position: absolute;
+  right: 2px;
+  bottom: 0;
+  left: 2px;
+  z-index: 3;
+
+  height: 62px;
+
+  border-radius: 14px 14px 45px 45px;
+
+  background:
+    linear-gradient(
+      110deg,
+      #aca797,
+      #e5e1d3 40%,
+      #9f9a8d
+    );
+}
+
+.choose-health__mortar-bowl::before {
+  content: "";
+
+  position: absolute;
+  top: -6px;
+  left: 4px;
+
+  width: calc(100% - 8px);
+  height: 21px;
+
+  border: 4px solid #9e9a8d;
+  border-radius: 50%;
+
+  background: #cad0b5;
+}
+
+.choose-health__mortar-herb {
+  position: absolute;
+  top: -4px;
+  z-index: 5;
+
+  width: 26px;
+  height: 14px;
+
+  border-radius: 100% 0 100% 0;
+
+  background:
+    linear-gradient(
+      135deg,
+      #7eb35c,
+      #3b753d
+    );
+}
+
+.choose-health__mortar-herb--one {
+  left: 13px;
+
+  transform: rotate(18deg);
+}
+
+.choose-health__mortar-herb--two {
+  right: 12px;
+
+  transform:
+    scaleX(-1)
+    rotate(18deg);
+}
+
+
+/* Herbal bottle */
+
+.choose-health__medicine {
+  position: absolute;
+  right: 6%;
+  bottom: 33px;
+  z-index: 8;
+
+  width: 58px;
+  height: 94px;
+
+  opacity: 0.82;
+
+  filter:
+    drop-shadow(
+      0 9px 11px rgba(51, 76, 48, 0.17)
+    );
+}
+
+.choose-health__medicine-cap {
+  position: absolute;
+  top: 0;
+  left: 15px;
+
+  width: 28px;
+  height: 16px;
+
+  border-radius: 5px 5px 2px 2px;
+
+  background:
+    linear-gradient(
+      90deg,
+      #6e813d,
+      #a4b864,
+      #65763a
+    );
+}
+
+.choose-health__medicine-body {
+  position: absolute;
+  bottom: 0;
+  left: 5px;
+
+  width: 48px;
+  height: 79px;
+
+  border: 2px solid rgba(86, 103, 54, 0.25);
+  border-radius: 9px 9px 13px 13px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(226, 235, 177, 0.95),
+      rgba(150, 178, 93, 0.93)
+    );
+
+  box-shadow:
+    inset 8px 0 10px rgba(255, 255, 255, 0.22);
+}
+
+.choose-health__medicine-cross {
+  position: absolute;
+  top: 18px;
+  left: 14px;
+
+  width: 20px;
+  height: 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  color: #ffffff;
+  background: #3d7d43;
+
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.choose-health__medicine-label {
+  position: absolute;
+  right: 3px;
+  bottom: 14px;
+  left: 3px;
+
+  color: #315a31;
+
+  font-size: 0.38rem;
+  font-weight: 900;
+  text-align: center;
+  letter-spacing: 0.6px;
+}
+
+.choose-health__medicine-leaf {
+  position: absolute;
+  z-index: 5;
+
+  width: 24px;
+  height: 13px;
+
+  border-radius: 100% 0 100% 0;
+
+  background:
+    linear-gradient(
+      135deg,
+      #73ad55,
+      #37723a
+    );
+}
+
+.choose-health__medicine-leaf--one {
+  right: -9px;
+  bottom: 10px;
+
+  transform: rotate(-20deg);
+}
+
+.choose-health__medicine-leaf--two {
+  bottom: 3px;
+  left: -10px;
+
+  transform:
+    scaleX(-1)
+    rotate(-20deg);
+}
+
+
+/* Health heart */
+
+.choose-health__health-heart {
+  position: absolute;
+  top: 138px;
+  right: 7%;
+  z-index: 7;
+
+  width: 51px;
+  height: 51px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid rgba(55, 122, 62, 0.16);
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.65);
+
+  box-shadow:
+    0 10px 24px rgba(47, 99, 49, 0.1);
+
+  animation: chooseHealthHeartFloat 5s ease-in-out infinite;
+}
+
+.choose-health__heart-icon {
+  font-size: 1.7rem;
+}
+
+.choose-health__heart-leaf {
+  position: absolute;
+  right: -6px;
+  bottom: -4px;
+
+  font-size: 0.95rem;
+}
+
+@keyframes chooseHealthHeartFloat {
+  50% {
+    transform: translateY(-9px);
+  }
+}
+
+
+/* Farmhouse */
+
+.choose-health__farmhouse {
+  position: absolute;
+  right: 24%;
+  bottom: 72px;
+  z-index: 5;
+
+  width: 92px;
+  height: 70px;
+
+  opacity: 0.62;
+}
+
+.choose-health__farmhouse-roof {
+  position: absolute;
+  top: 0;
+  left: -7px;
+
+  width: 106px;
+  height: 34px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #76502a,
+      #a87238
+    );
+
+  clip-path: polygon(
+    50% 0,
+    100% 100%,
+    0 100%
+  );
+}
+
+.choose-health__farmhouse-body {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+
+  height: 45px;
+
+  border-radius: 3px 3px 7px 7px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #e4ba72,
+      #bd8248
+    );
+}
+
+.choose-health__farmhouse-window {
+  position: absolute;
+  top: 11px;
+  left: 14px;
+
+  width: 19px;
+  height: 17px;
+
+  border: 3px solid #f5dfaa;
+
+  background: #62847c;
+}
+
+.choose-health__farmhouse-door {
+  position: absolute;
+  right: 13px;
+  bottom: 0;
+
+  width: 21px;
+  height: 32px;
+
+  border-radius: 4px 4px 0 0;
+
+  background: #6e492f;
+}
+
+.choose-health__farmhouse-chimney {
+  position: absolute;
+  top: 13px;
+  right: 16px;
+
+  width: 9px;
+  height: 21px;
+
+  background: #72492e;
+}
+
+.choose-health__farmhouse-smoke {
+  position: absolute;
+  top: -10px;
+  right: 13px;
+}
+
+.choose-health__farmhouse-smoke span {
+  position: absolute;
+
+  width: 12px;
+  height: 12px;
+
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.45);
+
+  animation: chooseHealthSmoke 4s ease-in-out infinite;
+}
+
+.choose-health__farmhouse-smoke span:nth-child(2) {
+  top: -11px;
+  left: 6px;
+
+  width: 9px;
+  height: 9px;
+
+  animation-delay: -1.3s;
+}
+
+.choose-health__farmhouse-smoke span:nth-child(3) {
+  top: -21px;
+  left: 2px;
+
+  width: 7px;
+  height: 7px;
+
+  animation-delay: -2.4s;
+}
+
+@keyframes chooseHealthSmoke {
+  100% {
+    opacity: 0;
+
+    transform:
+      translateY(-20px)
+      translateX(6px)
+      scale(1.3);
+  }
+}
+
+
+/* Butterflies */
+
+.choose-health__butterfly {
+  position: absolute;
+  z-index: 9;
+
+  line-height: 1;
+
+  filter:
+    drop-shadow(
+      0 4px 4px rgba(46, 73, 39, 0.15)
+    );
+
+  animation: chooseHealthButterfly 7s ease-in-out infinite;
+}
+
+.choose-health__butterfly--one {
+  top: 89px;
+  left: 16%;
+
+  font-size: 1.35rem;
+}
+
+.choose-health__butterfly--two {
+  top: 167px;
+  right: 17%;
+
+  font-size: 1.15rem;
+
+  animation-delay: -2.7s;
+}
+
+.choose-health__butterfly--bottom-one {
+  bottom: 41px;
+  left: 34%;
+
+  font-size: 1.25rem;
+
+  animation-delay: -1.5s;
+}
+
+.choose-health__butterfly--bottom-two {
+  right: 29%;
+  bottom: 24px;
+
+  font-size: 1rem;
+
+  animation-delay: -4s;
+}
+
+.choose-health__butterfly--bottom-three {
+  right: 3%;
+  bottom: 88px;
+
+  font-size: 1.18rem;
+
+  animation-delay: -5.4s;
+}
+
+@keyframes chooseHealthButterfly {
+  0%,
+  100% {
+    transform:
+      translate(0, 0)
+      rotate(-8deg);
+  }
+
+  28% {
+    transform:
+      translate(15px, -12px)
+      rotate(8deg);
+  }
+
+  58% {
+    transform:
+      translate(27px, 3px)
+      rotate(-3deg);
+  }
+
+  78% {
+    transform:
+      translate(10px, 9px)
+      rotate(6deg);
+  }
+}
+
+
+/* Leaves and bee */
+
+.choose-health__floating-leaf,
+.choose-health__bee {
+  position: absolute;
+  z-index: 8;
+
+  line-height: 1;
+}
+
+.choose-health__floating-leaf--one {
+  top: 145px;
+  left: 5%;
+
+  font-size: 1.3rem;
+
+  animation: chooseHealthLeaf 6s ease-in-out infinite;
+}
+
+.choose-health__floating-leaf--two {
+  top: 194px;
+  right: 5%;
+
+  font-size: 1.15rem;
+
+  animation:
+    chooseHealthLeaf 7s ease-in-out infinite -2s;
+}
+
+.choose-health__bee {
+  top: 31%;
+  right: 2%;
+
+  font-size: 1.15rem;
+
+  animation: chooseHealthBee 6s ease-in-out infinite;
+}
+
+@keyframes chooseHealthLeaf {
+  50% {
+    transform:
+      translateY(-11px)
+      rotate(11deg);
+  }
+}
+
+@keyframes chooseHealthBee {
+  45% {
+    transform:
+      translate(-18px, -10px)
+      rotate(8deg);
+  }
+
+  75% {
+    transform:
+      translate(-29px, 4px)
+      rotate(-4deg);
+  }
+}
+
+
+/* ============================================================
+   TABLET
+   ============================================================ */
+
+@media (max-width: 1024px) {
+  .choose-health {
+    min-height: 500px;
+
+    padding: 53px 0 105px;
+  }
+
+  .choose-health__header {
+    margin-bottom: 34px;
+  }
+
+  .choose-health__grid {
+    gap: 19px;
+  }
+
+  .health-card {
+    flex-basis: calc(16.666% - 18px);
+
+    width: calc(16.666% - 18px);
+    max-width: calc(16.666% - 18px);
+  }
+
+  .choose-health__grain-bowl {
+    left: 14%;
+
+    transform: scale(0.82);
+    transform-origin: bottom left;
+  }
+
+  .choose-health__wheat-bunch {
+    left: 23%;
+
+    transform:
+      scale(0.82)
+      rotate(15deg);
+
+    transform-origin: bottom left;
+  }
+
+  .choose-health__mortar {
+    right: 14%;
+
+    transform: scale(0.83);
+    transform-origin: bottom right;
+  }
+
+  .choose-health__medicine {
+    right: 4%;
+
+    transform: scale(0.85);
+    transform-origin: bottom right;
+  }
+
+  .choose-health__farmhouse {
+    right: 25%;
+  }
+}
+
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media (max-width: 768px) {
+  .choose-health {
+    min-height: 435px;
+
+    padding: 40px 0 86px;
+  }
+
+  .choose-health__header {
+    margin-bottom: 25px;
+    padding: 0 15px;
+  }
+
+  .choose-health__badge {
+    padding: 7px 12px;
+
+    font-size: 0.65rem;
+  }
+
+  .choose-health__title {
+    font-size: clamp(1.85rem, 8vw, 2.3rem);
+  }
+
+  .choose-health__subtitle {
+    margin-top: 11px;
+
+    font-size: 0.79rem;
+    line-height: 1.55;
+  }
+
+  .choose-health__scroll-wrapper {
+    width: calc(100% + 30px);
+
+    margin-left: -15px;
+
+    overflow: hidden;
+  }
+
+  .choose-health__grid {
+    display: flex;
+
+    max-width: none;
+
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+
+    gap: 14px;
+
+    padding: 5px 15px 20px;
+    margin: 0;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    scroll-behavior: smooth;
+    scroll-padding-left: 15px;
+    scroll-snap-type: x mandatory;
+
+    overscroll-behavior-x: contain;
+    touch-action: pan-x;
+
+    -webkit-overflow-scrolling: touch;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .choose-health__grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .health-card {
+    flex: 0 0 94px;
+
+    width: 94px;
+    max-width: 94px;
+    min-width: 94px;
+
+    gap: 8px;
+
+    scroll-snap-align: start;
+  }
+
+  .health-card:hover {
+    transform: none;
+  }
+
+  .health-card__ring {
+    width: 88px;
+    height: 88px;
+  }
+
+  .health-card__ring::before {
+    inset: -3px;
+  }
+
+  .health-card__ring::after {
+    width: 23px;
+    height: 23px;
+
+    border-width: 2px;
+
+    font-size: 0.61rem;
+  }
+
+  .health-card__icon-wrap {
+    width: 78px;
+    height: 78px;
+    flex-basis: 78px;
+
+    border-width: 2px;
+  }
+
+  .health-card__title {
+    min-height: 33px;
+
+    font-size: 0.7rem;
+    line-height: 1.23;
+
+    display: -webkit-box;
+
+    overflow: hidden;
+
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .health-card__leaf {
+    display: none;
+  }
+
+  /* Mobile background */
+
+  .choose-health__sun {
+    top: 22px;
+    right: 2%;
+
+    width: 52px;
+    height: 52px;
+  }
+
+  .choose-health__cloud--one {
+    top: 59px;
+    left: -6%;
+
+    transform: scale(0.63);
+  }
+
+  .choose-health__cloud--two {
+    display: none;
+  }
+
+  .choose-health__hill--back {
+    right: -30%;
+    bottom: 43px;
+
+    width: 138%;
+    height: 120px;
+  }
+
+  .choose-health__hill--front {
+    right: -34%;
+    bottom: 20px;
+
+    width: 145%;
+    height: 93px;
+  }
+
+  .choose-health__field {
+    right: -8%;
+    bottom: -5px;
+    left: 12%;
+
+    height: 77px;
+  }
+
+  .choose-health__mushrooms {
+    bottom: 4px;
+    left: -11px;
+
+    transform: scale(0.47);
+    transform-origin: bottom left;
+  }
+
+  .choose-health__grain-bowl {
+    bottom: 5px;
+    left: 21%;
+
+    transform: scale(0.48);
+  }
+
+  .choose-health__wheat-bunch {
+    bottom: 0;
+    left: 33%;
+
+    transform:
+      scale(0.43)
+      rotate(15deg);
+  }
+
+  .choose-health__mortar {
+    right: 14%;
+    bottom: 3px;
+
+    transform: scale(0.49);
+  }
+
+  .choose-health__medicine {
+    right: 2%;
+    bottom: 7px;
+
+    transform: scale(0.55);
+  }
+
+  .choose-health__farmhouse {
+    right: 24%;
+    bottom: 45px;
+
+    transform: scale(0.47);
+    transform-origin: bottom right;
+  }
+
+  .choose-health__health-heart {
+    top: 121px;
+    right: 3%;
+
+    width: 39px;
+    height: 39px;
+  }
+
+  .choose-health__heart-icon {
+    font-size: 1.3rem;
+  }
+
+  .choose-health__butterfly--one {
+    top: 83px;
+    left: 6%;
+
+    font-size: 1rem;
+  }
+
+  .choose-health__butterfly--two {
+    top: 143px;
+    right: 5%;
+
+    font-size: 0.9rem;
+  }
+
+  .choose-health__butterfly--bottom-one {
+    bottom: 35px;
+    left: 45%;
+
+    font-size: 0.94rem;
+  }
+
+  .choose-health__butterfly--bottom-two {
+    right: 26%;
+    bottom: 14px;
+
+    font-size: 0.8rem;
+  }
+
+  .choose-health__butterfly--bottom-three {
+    display: none;
+  }
+
+  .choose-health__floating-leaf--one {
+    top: 112px;
+    left: 2%;
+
+    font-size: 0.9rem;
+  }
+
+  .choose-health__floating-leaf--two,
+  .choose-health__bee {
+    display: none;
+  }
+}
+
+
+/* ============================================================
+   SMALL MOBILE
+   ============================================================ */
+
+@media (max-width: 480px) {
+  .choose-health {
+    min-height: 420px;
+
+    padding: 36px 0 81px;
+  }
+
+  .choose-health__header {
+    margin-bottom: 22px;
+  }
+
+  .choose-health__title {
+    font-size: 1.95rem;
+  }
+
+  .choose-health__scroll-wrapper {
+    width: calc(100% + 24px);
+
+    margin-left: -12px;
+  }
+
+  .choose-health__grid {
+    gap: 12px;
+
+    padding: 5px 12px 18px;
+
+    scroll-padding-left: 12px;
+  }
+
+  .health-card {
+    flex: 0 0 83px;
+
+    width: 83px;
+    max-width: 83px;
+    min-width: 83px;
+  }
+
+  .health-card__ring {
+    width: 78px;
+    height: 78px;
+  }
+
+  .health-card__icon-wrap {
+    width: 69px;
+    height: 69px;
+    flex-basis: 69px;
+  }
+
+  .health-card__title {
+    font-size: 0.65rem;
+  }
+
+  .choose-health__grain-bowl {
+    left: 18%;
+  }
+
+  .choose-health__wheat-bunch {
+    left: 30%;
+  }
+
+  .choose-health__mortar {
+    right: 11%;
+  }
+
+  .choose-health__medicine {
+    right: -1%;
+  }
+}
+
+
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .choose-health__sun,
+  .choose-health__cloud,
+  .choose-health__farmhouse-smoke span,
+  .choose-health__butterfly,
+  .choose-health__floating-leaf,
+  .choose-health__bee,
+  .choose-health__health-heart,
+  .choose-health__loader {
+    animation: none;
+  }
+}

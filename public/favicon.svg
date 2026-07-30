@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <circle cx="50" cy="50" r="48" fill="#2fa62f"/>
+  <text x="50" y="42" text-anchor="middle" fill="white" font-size="14" font-weight="bold" font-family="serif">THE</text>
+  <text x="50" y="58" text-anchor="middle" fill="white" font-size="10" font-family="serif">KISSAN</text>
+  <text x="50" y="72" text-anchor="middle" fill="white" font-size="10" font-family="serif">CITY</text>
+  <text x="50" y="28" text-anchor="middle" font-size="16">🌾</text>
+</svg>

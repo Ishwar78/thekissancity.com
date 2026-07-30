@@ -1,0 +1,76 @@
+/* UserWishlistTab.css */
+
+.wishlist-tab-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.wishlist-tab-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 4px 0;
+}
+
+.wishlist-tab-desc {
+  font-size: 0.88rem;
+  color: #6b7280;
+  margin: 0 0 20px 0;
+}
+
+.wishlist-tab-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 18px;
+}
+
+.wishlist-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.wishlist-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+}
+
+.wishlist-img-wrap {
+  height: 160px;
+  position: relative;
+  background: #f9fafb;
+  overflow: hidden;
+}
+
+.wishlist-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.wishlist-card-body {
+  padding: 14px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.wishlist-prod-name {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #111827;
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+
+.wishlist-prod-price {
+  font-weight: 800;
+  font-size: 1rem;
+  color: #16a34a;
+  margin-bottom: 12px;
+}
