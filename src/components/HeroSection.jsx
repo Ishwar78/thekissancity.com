@@ -1,11 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { api } from '../utils/api';
+import { api, getApiUrl } from '../utils/api';
 
 export default function HeroSection() {
   const [current, setCurrent] = useState(0);
   const [mainBanners, setMainBanners] = useState([]);
   const [sideBanners, setSideBanners] = useState([]);
   const timerRef = useRef(null);
+
+  const API_URL = getApiUrl();
+
+  const getFullImageUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    return `${API_URL}${url.startsWith('/') ? '' : '/'}${url}`;
+  };
 
   useEffect(() => {
     const fetchBanners = async () => {
@@ -36,12 +44,6 @@ export default function HeroSection() {
     return () => clearInterval(timerRef.current);
   }, [mainBanners]);
 
-  const goTo = (idx) => {
-    clearInterval(timerRef.current);
-    setCurrent(idx);
-    startTimer();
-  };
-
   const slide = mainBanners.length > 0 ? mainBanners[current] : null;
 
   return (
@@ -59,7 +61,7 @@ export default function HeroSection() {
             {slide && (
               <>
                 <img
-                  src={`${import.meta.env.VITE_API_URL}${slide.imageUrl}`}
+                  src={getFullImageUrl(slide.imageUrl)}
                   alt="Hero"
                   className="hero__main-img"
                   style={{ objectFit: 'cover' }}
@@ -69,21 +71,6 @@ export default function HeroSection() {
                   style={{ position: 'absolute', inset: 0, zIndex: 1, cursor: 'pointer' }} 
                   onClick={() => window.location.href = slide.link || '#products'} 
                 />
-
-                {/* Dots */}
-                {mainBanners.length > 1 && (
-                  <div className="hero__dots">
-                    {mainBanners.map((_, i) => (
-                      <button
-                        key={i}
-                        className={`hero__dot${i === current ? ' active' : ''}`}
-                        onClick={() => goTo(i)}
-                        id={`hero-dot-${i}`}
-                        aria-label={`Go to slide ${i + 1}`}
-                      />
-                    ))}
-                  </div>
-                )}
               </>
             )}
             {!slide && (
@@ -98,7 +85,7 @@ export default function HeroSection() {
             {sideBanners.slice(0, 2).map((card) => ( // Restrict to max 2 side banners to preserve layout
               <div key={card._id} className="hero__promo-card" style={{ overflow: 'hidden' }}>
                 <img 
-                  src={`${import.meta.env.VITE_API_URL}${card.imageUrl}`} 
+                  src={getFullImageUrl(card.imageUrl)} 
                   alt="Promo Banner" 
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                 />

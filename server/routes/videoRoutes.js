@@ -62,6 +62,37 @@ router.get('/', async (req, res) => {
   }
 });
 
+// PUT update video
+router.put('/:id', upload.fields([{ name: 'video', maxCount: 1 }, { name: 'poster', maxCount: 1 }]), async (req, res) => {
+  try {
+    const videoId = req.params.id;
+    const { productName, productSlug, tag } = req.body;
+
+    const video = await InfluencerVideo.findById(videoId);
+    if (!video) {
+      return res.status(404).json({ success: false, message: 'Influencer video not found' });
+    }
+
+    if (productName) video.productName = productName.trim();
+    if (productSlug) video.productSlug = productSlug.trim();
+    if (tag) video.tag = tag.trim();
+
+    if (req.files && req.files.video && req.files.video[0]) {
+      video.videoUrl = `/uploads/${req.files.video[0].filename}`;
+    }
+
+    if (req.files && req.files.poster && req.files.poster[0]) {
+      video.posterUrl = `/uploads/${req.files.poster[0].filename}`;
+    }
+
+    await video.save();
+    res.json({ success: true, video });
+  } catch (error) {
+    console.error('Error updating video:', error);
+    res.status(500).json({ success: false, message: 'Server error updating video' });
+  }
+});
+
 // DELETE video
 router.delete('/:id', async (req, res) => {
   try {

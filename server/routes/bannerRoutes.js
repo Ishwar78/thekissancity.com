@@ -45,6 +45,29 @@ router.get('/', async (req, res) => {
   }
 });
 
+// PUT update a banner
+router.put('/:id', upload.single('image'), async (req, res) => {
+  try {
+    const { type, link } = req.body;
+    const banner = await Banner.findById(req.params.id);
+    if (!banner) {
+      return res.status(404).json({ success: false, message: 'Banner not found' });
+    }
+
+    if (type) banner.type = type;
+    if (link !== undefined) banner.link = link.trim();
+    if (req.file) {
+      banner.imageUrl = `/uploads/${req.file.filename}`;
+    }
+
+    await banner.save();
+    res.json({ success: true, banner });
+  } catch (error) {
+    console.error('Error updating banner:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
 // DELETE a banner
 router.delete('/:id', async (req, res) => {
   try {

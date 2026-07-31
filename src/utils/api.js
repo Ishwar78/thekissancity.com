@@ -1,8 +1,20 @@
-const BASE_URL = import.meta.env.VITE_API_URL || 'https://thekissancity.com';
+const getBaseUrl = () => {
+  if (
+    typeof window !== 'undefined' &&
+    (window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1')
+  ) {
+    return 'https://thekissancity.com';
+  }
+  return (import.meta.env.VITE_API_URL || 'https://thekissancity.com').replace(/\/$/, '');
+};
+
+export const getApiUrl = getBaseUrl;
 
 export const api = async (endpoint, options = {}) => {
   const token = localStorage.getItem('adminToken');
-  
+  const baseUrl = getBaseUrl();
+
   const headers = {
     'Content-Type': 'application/json',
     ...(token && { Authorization: `Bearer ${token}` }),
@@ -10,12 +22,19 @@ export const api = async (endpoint, options = {}) => {
   };
 
   try {
-    const response = await fetch(`${BASE_URL}${endpoint}`, {
+    const response = await fetch(`${baseUrl}${endpoint}`, {
       ...options,
       headers,
     });
 
-    const data = await response.json();
+    const contentType = response.headers.get('content-type');
+    let data = {};
+    if (contentType && contentType.includes('application/json')) {
+      data = await response.json();
+    } else {
+      const text = await response.text();
+      throw new Error(`Server returned non-JSON response (${response.status})`);
+    }
 
     if (!response.ok) {
       throw new Error(data.message || 'Something went wrong');

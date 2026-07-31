@@ -134,6 +134,35 @@ function resolveImageUrl(imagePath, baseUrl) {
   return `${baseUrl}${imagePath.startsWith("/") ? "" : "/"}${imagePath}`;
 }
 
+function formatRelatedProduct(p, baseUrl) {
+  const imgs = Array.isArray(p.images) && p.images.length > 0
+    ? p.images.map(img => resolveImageUrl(img, baseUrl))
+    : ["/product_ghee.png"];
+
+  let price = 0;
+  let originalPrice = 0;
+
+  if (p.hasVariants && Array.isArray(p.variants) && p.variants.length > 0) {
+    price = Number(p.variants[0].salePrice) || 0;
+    originalPrice = Number(p.variants[0].originalPrice) || price;
+  } else if (p.simplePrice) {
+    price = Number(p.simplePrice.salePrice) || 0;
+    originalPrice = Number(p.simplePrice.originalPrice) || price;
+  }
+
+  return {
+    id: p._id,
+    slug: p.slug,
+    name: p.name,
+    category: p.category?.name || p.category || "Farm Product",
+    imgs,
+    img: imgs[0],
+    price,
+    originalPrice,
+    rating: Number(p.rating) || 4.8,
+  };
+}
+
 function getReviewStorageKey(productId, productSlug) {
   return `kissan-product-reviews-${productId || productSlug || "default"}`;
 }
@@ -292,16 +321,16 @@ export default function ProductDetailPage() {
                   .split(/\n|•/)
                   .map((item) => item.trim())
                   .filter(Boolean)
-              : FALLBACK_PRODUCT.highlights,
+              : [],
             nutrition:
               Array.isArray(prod.nutritionFacts) &&
               prod.nutritionFacts.length > 0
                 ? prod.nutritionFacts
-                : FALLBACK_PRODUCT.nutrition,
+                : [],
             faqs:
               Array.isArray(prod.faqs) && prod.faqs.length > 0
                 ? prod.faqs
-                : FALLBACK_PRODUCT.faqs,
+                : [],
           };
 
           // Set product data first
@@ -322,13 +351,33 @@ export default function ProductDetailPage() {
           try {
             const productsResponse = await fetch(`${baseUrl}/api/products`);
             const productsData = await productsResponse.json();
-            if (productsData.success && isMounted) {
-              const categoryId = prod.category?._id || prod.category;
-              const related = productsData.products
-                .filter(p => p._id !== prod._id && (p.category?._id === categoryId || p.category === categoryId))
+            if (productsData.success && isMounted && Array.isArray(productsData.products)) {
+              const currentId = (prod._id || prod.id || "").toString();
+              const categoryId = (prod.category?._id || prod.category || "").toString();
+              const categoryName = (prod.category?.name || prod.category || "").toString().toLowerCase().trim();
+
+              let categoryMatches = productsData.products.filter(p => {
+                const pId = (p._id || p.id || "").toString();
+                if (pId === currentId) return false;
+                const pCatId = (p.category?._id || p.category || "").toString();
+                const pCatName = (p.category?.name || p.category || "").toString().toLowerCase().trim();
+                return (categoryId && pCatId === categoryId) || (categoryName && pCatName === categoryName);
+              });
+
+              // Fallback to top up if category has fewer than 4 products
+              if (categoryMatches.length < 4) {
+                const remaining = productsData.products.filter(p => {
+                  const pId = (p._id || p.id || "").toString();
+                  return pId !== currentId && !categoryMatches.some(cm => (cm._id || cm.id).toString() === pId);
+                });
+                categoryMatches = [...categoryMatches, ...remaining];
+              }
+
+              const formattedRelated = categoryMatches
                 .slice(0, 4)
-                .map(formatProduct);
-              setRelatedProducts(related);
+                .map(p => formatRelatedProduct(p, baseUrl));
+
+              setRelatedProducts(formattedRelated);
             }
           } catch (relatedErr) {
             console.error("Failed to fetch related products:", relatedErr);
@@ -1034,36 +1083,35 @@ export default function ProductDetailPage() {
                 )}
               </article>
 
-              <aside className="pd-highlights-card">
-                <div className="pd-highlights-card__header">
-                  <Sparkles size={20} />
-                  <div>
-                    <span>Product highlights</span>
-                    <strong>Why customers choose it</strong>
-                  </div>
-                </div>
-                <div className="pd-highlights-list">
-                  {(product.highlights?.length
-                    ? product.highlights
-                    : FALLBACK_PRODUCT.highlights
-                  ).map((highlight, index) => (
-                    <div
-                      className="pd-highlight-item"
-                      key={`${highlight}-${index}`}
-                    >
-                      <CheckCircle size={18} />
-                      <span>{highlight}</span>
+              {Array.isArray(product.highlights) && product.highlights.length > 0 && (
+                <aside className="pd-highlights-card">
+                  <div className="pd-highlights-card__header">
+                    <Sparkles size={20} />
+                    <div>
+                      <span>Product highlights</span>
+                      <strong>Why customers choose it</strong>
                     </div>
-                  ))}
-                </div>
-                <div className="pd-description-note">
-                  <Leaf size={18} />
-                  <span>
-                    Store in a cool and dry place. Always use a clean, dry
-                    spoon.
-                  </span>
-                </div>
-              </aside>
+                  </div>
+                  <div className="pd-highlights-list">
+                    {product.highlights.map((highlight, index) => (
+                      <div
+                        className="pd-highlight-item"
+                        key={`${highlight}-${index}`}
+                      >
+                        <CheckCircle size={18} />
+                        <span>{highlight}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="pd-description-note">
+                    <Leaf size={18} />
+                    <span>
+                      Store in a cool and dry place. Always use a clean, dry
+                      spoon.
+                    </span>
+                  </div>
+                </aside>
+              )}
             </div>
           )}
 

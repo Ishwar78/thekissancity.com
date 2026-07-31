@@ -2,6 +2,7 @@ import React, { useMemo, useRef, useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { getApiUrl } from "../utils/api";
 import {
   ArrowLeft,
   BadgeCheck,
@@ -203,7 +204,7 @@ export default function CheckoutPage() {
   useEffect(() => {
     const fetchAdminCoupons = async () => {
       try {
-        const baseUrl = (import.meta.env.VITE_API_URL || "https://thekissancity.com").replace(/\/$/, "");
+        const baseUrl = getApiUrl();
         const res = await fetch(`${baseUrl}/api/coupons`);
         const data = await res.json().catch(() => ({}));
         if (data.success && Array.isArray(data.coupons)) {
@@ -228,7 +229,7 @@ export default function CheckoutPage() {
     }
     setAuthLoading(true);
     try {
-      const baseUrl = (import.meta.env.VITE_API_URL || 'https://thekissancity.com').replace(/\/$/, '');
+      const baseUrl = getApiUrl();
       const res = await fetch(`${baseUrl}/api/user/send-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -260,7 +261,7 @@ export default function CheckoutPage() {
     setAuthLoading(true);
     setAuthError('');
     try {
-      const baseUrl = (import.meta.env.VITE_API_URL || 'https://thekissancity.com').replace(/\/$/, '');
+      const baseUrl = getApiUrl();
       const res = await fetch(`${baseUrl}/api/user/verify-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -403,14 +404,19 @@ export default function CheckoutPage() {
     setCouponError("");
 
     try {
-      const baseUrl = (
-        import.meta.env.VITE_API_URL || "https://thekissancity.com"
-      ).replace(/\/$/, "");
+      const baseUrl = getApiUrl();
+      const userIdent = form.email || form.phone || (user ? user.email || user.phone : null);
+      const uId = user ? (user._id || user.id) : null;
 
       const res = await fetch(`${baseUrl}/api/coupons/validate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: codeToValidate.trim(), orderTotal: totalPrice })
+        body: JSON.stringify({
+          code: codeToValidate.trim(),
+          orderTotal: totalPrice,
+          userIdentifier: userIdent,
+          userId: uId,
+        })
       });
       const data = await res.json();
 
@@ -477,9 +483,7 @@ export default function CheckoutPage() {
         setSavedAddress(addressToValidate);
       }
 
-      const baseUrl = (
-        import.meta.env.VITE_API_URL || "https://thekissancity.com"
-      ).replace(/\/$/, "");
+      const baseUrl = getApiUrl();
 
       // Save address to user profile in backend if user is logged in
       if (user) {
@@ -514,7 +518,8 @@ export default function CheckoutPage() {
         paymentMethod,
         totalAmount: finalTotal,
         deliveryCharge,
-        discountAmount: discountAmt
+        discountAmount: discountAmt,
+        couponCode: appliedCouponCode || null,
       };
 
       const token = localStorage.getItem('kissanUserToken');

@@ -1,24 +1,27 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
   CheckCircle2,
+  Edit2,
   Film,
   Image as ImageIcon,
   Link2,
   Loader2,
-  Plus,
   PlayCircle,
+  Plus,
   Tag,
   Trash2,
   Upload,
   Video,
+  X,
 } from "lucide-react";
-import { api } from "../../utils/api";
+import { api, getApiUrl } from "../../utils/api";
 import "./AdminVideos.css";
 
 export default function AdminVideos() {
   const [videos, setVideos] = useState([]);
   const [fetching, setFetching] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [editingId, setEditingId] = useState(null);
 
   const [productName, setProductName] = useState("");
   const [productSlug, setProductSlug] = useState("");
@@ -32,9 +35,9 @@ export default function AdminVideos() {
   const videoInputRef = useRef(null);
   const posterInputRef = useRef(null);
 
-  const baseUrl = (
-    import.meta.env.VITE_API_URL || "https://thekissancity.com"
-  ).replace(/\/$/, "");
+  const getBaseUrl = () => {
+    return getApiUrl();
+  };
 
   const getMediaUrl = (mediaUrl) => {
     if (!mediaUrl) return "";
@@ -43,7 +46,8 @@ export default function AdminVideos() {
       return mediaUrl;
     }
 
-    return `${baseUrl}${mediaUrl.startsWith("/") ? "" : "/"}${mediaUrl}`;
+    const base = getBaseUrl();
+    return `${base}${mediaUrl.startsWith("/") ? "" : "/"}${mediaUrl}`;
   };
 
   const fetchVideos = async () => {
@@ -135,6 +139,7 @@ export default function AdminVideos() {
       URL.revokeObjectURL(posterPreview);
     }
 
+    setEditingId(null);
     setProductName("");
     setProductSlug("");
     setTag("");
@@ -152,6 +157,18 @@ export default function AdminVideos() {
     }
   };
 
+  const handleEdit = (video) => {
+    setEditingId(video._id);
+    setProductName(video.productName || "");
+    setProductSlug(video.productSlug || "");
+    setTag(video.tag || "");
+    setVideoFile(null);
+    setPosterFile(null);
+    setVideoPreview(getMediaUrl(video.videoUrl));
+    setPosterPreview(getMediaUrl(video.posterUrl));
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const handleDelete = async (id) => {
     const confirmed = window.confirm(
       "Are you sure you want to delete this video?"
@@ -161,6 +178,7 @@ export default function AdminVideos() {
 
     try {
       const token = localStorage.getItem("adminToken");
+      const baseUrl = getBaseUrl();
 
       const response = await fetch(`${baseUrl}/api/videos/${id}`, {
         method: "DELETE",
@@ -169,7 +187,13 @@ export default function AdminVideos() {
         },
       });
 
-      const data = await response.json();
+      const contentType = response.headers.get("content-type");
+      let data = {};
+      if (contentType && contentType.includes("application/json")) {
+        data = await response.json();
+      } else {
+        throw new Error(`Server error (${response.status})`);
+      }
 
       if (!response.ok || !data.success) {
         throw new Error(data?.message || "Failed to delete video");
@@ -189,8 +213,13 @@ export default function AdminVideos() {
     const trimmedSlug = productSlug.trim();
     const trimmedTag = tag.trim();
 
-    if (!trimmedName || !trimmedSlug || !trimmedTag || !videoFile) {
-      alert("Product Name, Slug, Tag and Video file are required.");
+    if (!trimmedName || !trimmedSlug || !trimmedTag) {
+      alert("Product Name, Slug and Tag are required.");
+      return;
+    }
+
+    if (!editingId && !videoFile) {
+      alert("Video file is required.");
       return;
     }
 
@@ -201,23 +230,39 @@ export default function AdminVideos() {
       formData.append("productName", trimmedName);
       formData.append("productSlug", trimmedSlug);
       formData.append("tag", trimmedTag);
-      formData.append("video", videoFile);
+
+      if (videoFile) {
+        formData.append("video", videoFile);
+      }
 
       if (posterFile) {
         formData.append("poster", posterFile);
       }
 
       const token = localStorage.getItem("adminToken");
+      const baseUrl = getBaseUrl();
+      const url = editingId
+        ? `${baseUrl}/api/videos/${editingId}`
+        : `${baseUrl}/api/videos`;
 
-      const response = await fetch(`${baseUrl}/api/videos`, {
-        method: "POST",
+      const response = await fetch(url, {
+        method: editingId ? "PUT" : "POST",
         headers: {
           ...(token && { Authorization: `Bearer ${token}` }),
         },
         body: formData,
       });
 
-      const data = await response.json();
+      const contentType = response.headers.get("content-type");
+      let data = {};
+      if (contentType && contentType.includes("application/json")) {
+        data = await response.json();
+      } else {
+        const text = await response.text();
+        throw new Error(
+          `Server returned HTML/non-JSON response (${response.status}). Please verify backend server running at ${baseUrl}.`
+        );
+      }
 
       if (!response.ok || !data.success) {
         throw new Error(data?.message || "Failed to save video");
@@ -245,7 +290,7 @@ export default function AdminVideos() {
           <h1>Manage Influencer Videos</h1>
 
           <p>
-            Upload product-focused videos, poster images and promotional tags.
+            Upload and edit product-focused videos, poster images and promotional tags.
           </p>
         </div>
 
@@ -265,9 +310,29 @@ export default function AdminVideos() {
         <section className="admin-video-form-card">
           <div className="admin-video-card-header">
             <div>
-              <span>Create video</span>
-              <h2>Add New Video</h2>
+              <span>{editingId ? "Update media" : "Create video"}</span>
+              <h2>{editingId ? "Edit Influencer Video" : "Add New Video"}</h2>
             </div>
+            {editingId && (
+              <button
+                type="button"
+                onClick={resetForm}
+                style={{
+                  padding: "4px 10px",
+                  borderRadius: "6px",
+                  border: "1px solid #cbd5e1",
+                  background: "#ffffff",
+                  fontSize: "0.8rem",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "4px",
+                }}
+              >
+                <X size={14} /> Cancel Edit
+              </button>
+            )}
           </div>
 
           <form className="admin-video-form" onSubmit={handleSubmit}>
@@ -318,7 +383,7 @@ export default function AdminVideos() {
 
             <div className="admin-video-field">
               <label>
-                Video File <span>*</span>
+                Video File <span>{editingId ? "(Optional if unchanged)" : "*"}</span>
               </label>
 
               <button
@@ -334,9 +399,9 @@ export default function AdminVideos() {
                       <CheckCircle2 size={23} />
                     </span>
 
-                    <strong>Video selected</strong>
+                    <strong>{videoFile ? "New video selected" : "Current video retained"}</strong>
 
-                    <small>{videoFile?.name || "Selected video file"}</small>
+                    <small>{videoFile?.name || "Click to replace video file"}</small>
                   </span>
                 ) : (
                   <span className="admin-video-upload-placeholder">
@@ -409,12 +474,12 @@ export default function AdminVideos() {
               {loading ? (
                 <>
                   <Loader2 size={18} className="admin-video-spin" />
-                  Saving Video...
+                  {editingId ? "Updating Video..." : "Saving Video..."}
                 </>
               ) : (
                 <>
-                  <Plus size={18} />
-                  Add Video
+                  {editingId ? <Edit2 size={18} /> : <Plus size={18} />}
+                  {editingId ? "Update Video" : "Add Video"}
                 </>
               )}
             </button>
@@ -467,15 +532,49 @@ export default function AdminVideos() {
                       Product Video
                     </span>
 
-                    <button
-                      type="button"
-                      className="admin-video-delete-btn"
-                      onClick={() => handleDelete(video._id)}
-                      aria-label={`Delete ${video.productName}`}
-                      title="Delete video"
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: "10px",
+                        right: "10px",
+                        display: "flex",
+                        gap: "6px",
+                        zIndex: 4,
+                      }}
                     >
-                      <Trash2 size={16} />
-                    </button>
+                      <button
+                        type="button"
+                        style={{
+                          backgroundColor: "rgba(59, 130, 246, 0.9)",
+                          color: "white",
+                          border: "none",
+                          borderRadius: "50%",
+                          width: "32px",
+                          height: "32px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          cursor: "pointer",
+                          boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
+                        }}
+                        onClick={() => handleEdit(video)}
+                        aria-label={`Edit ${video.productName}`}
+                        title="Edit video"
+                      >
+                        <Edit2 size={15} />
+                      </button>
+
+                      <button
+                        type="button"
+                        className="admin-video-delete-btn"
+                        style={{ position: "relative", top: 0, right: 0 }}
+                        onClick={() => handleDelete(video._id)}
+                        aria-label={`Delete ${video.productName}`}
+                        title="Delete video"
+                      >
+                        <Trash2 size={15} />
+                      </button>
+                    </div>
                   </div>
 
                   <div className="admin-video-card-body">

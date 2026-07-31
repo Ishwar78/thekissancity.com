@@ -9,12 +9,40 @@ import {
 import { Link } from 'react-router-dom';
 import { api } from '../utils/api';
 
-const AUTO_SCROLL_TIME = 4000; // 4 seconds
+const AUTO_SCROLL_TIME = 5000; // 4 seconds
 
-function VideoCard({ video, isCenter }) {
+function VideoCard({ video, isCenter, isSectionInView }) {
   const [muted, setMuted] = useState(true);
+  const videoRef = useRef(null);
 
-  const API_URL = import.meta.env.VITE_API_URL || '';
+  const API_URL = (import.meta.env.VITE_API_URL || 'https://thekissancity.com').replace(/\/$/, '');
+
+  const videoSrc = video.videoUrl?.startsWith('http')
+    ? video.videoUrl
+    : `${API_URL}${video.videoUrl?.startsWith('/') ? '' : '/'}${video.videoUrl}`;
+
+  const posterSrc = video.posterUrl
+    ? (video.posterUrl.startsWith('http')
+        ? video.posterUrl
+        : `${API_URL}${video.posterUrl.startsWith('/') ? '' : '/'}${video.posterUrl}`)
+    : '';
+
+  useEffect(() => {
+    const videoEl = videoRef.current;
+    if (!videoEl) return;
+
+    if (isCenter && isSectionInView) {
+      videoEl.currentTime = 0;
+      const playPromise = videoEl.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((err) => {
+          console.log('Video autoplay interrupted:', err);
+        });
+      }
+    } else {
+      videoEl.pause();
+    }
+  }, [isCenter, isSectionInView]);
 
   return (
     <div
@@ -29,18 +57,14 @@ function VideoCard({ video, isCenter }) {
       {/* Video */}
       <div className="spotlight-card__media">
         <video
-          src={`${API_URL}${video.videoUrl}`}
-          poster={
-            video.posterUrl
-              ? `${API_URL}${video.posterUrl}`
-              : ''
-          }
+          ref={videoRef}
+          src={videoSrc}
+          poster={posterSrc}
           className="spotlight-card__video"
-          autoPlay={isCenter}
           loop
           muted={muted}
           playsInline
-          preload="metadata"
+          preload="auto"
         />
 
         {/* Video Gradient Overlay */}
@@ -95,8 +119,32 @@ export default function VideoSection() {
   const [videos, setVideos] = useState([]);
   const [isPaused, setIsPaused] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSectionInView, setIsSectionInView] = useState(true);
 
+  const sectionRef = useRef(null);
   const intervalRef = useRef(null);
+
+  /*
+   * Intersection Observer to auto-play when section enters viewport
+   */
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsSectionInView(entry.isIntersecting);
+      },
+      { threshold: 0.3 }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => {
+      if (sectionRef.current) {
+        observer.unobserve(sectionRef.current);
+      }
+    };
+  }, []);
 
   /*
    * Fetch Videos
@@ -144,19 +192,15 @@ export default function VideoSection() {
   }, []);
 
   /*
-   * Auto Scroll Every 6 Seconds
+   * Auto Scroll Every 4 Seconds
    */
   useEffect(() => {
-    if (videos.length <= 1 || isPaused) {
+    if (videos.length <= 1 || isPaused || !isSectionInView) {
       return undefined;
     }
 
     intervalRef.current = window.setInterval(() => {
       setCurrent((previousCurrent) => {
-        /*
-         * Last video ke baad first video show hoga,
-         * jisse slider continuously chalta rahega.
-         */
         return (previousCurrent + 1) % videos.length;
       });
     }, AUTO_SCROLL_TIME);
@@ -166,7 +210,7 @@ export default function VideoSection() {
         window.clearInterval(intervalRef.current);
       }
     };
-  }, [videos.length, isPaused]);
+  }, [videos.length, isPaused, isSectionInView]);
 
   /*
    * Previous Slide
@@ -210,6 +254,7 @@ export default function VideoSection() {
 
   return (
     <section
+      ref={sectionRef}
       className="spotlight-section"
       id="influencer-spotlight"
     >
@@ -256,10 +301,6 @@ export default function VideoSection() {
             {videos.map((video, index) => {
               let offset = index - current;
 
-              /*
-               * Infinite carousel ke liye shortest distance
-               * calculate kar rahe hain.
-               */
               if (videos.length > 2) {
                 if (offset > videos.length / 2) {
                   offset -= videos.length;
@@ -268,7 +309,6 @@ export default function VideoSection() {
                 }
               }
 
-              // Center se maximum 2 cards tak render honge.
               if (Math.abs(offset) > 2) {
                 return null;
               }
@@ -315,6 +355,7 @@ export default function VideoSection() {
                   <VideoCard
                     video={video}
                     isCenter={offset === 0}
+                    isSectionInView={isSectionInView}
                   />
                 </div>
               );

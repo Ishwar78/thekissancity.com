@@ -22,7 +22,8 @@ import {
   Type,
   PhoneCall,
   FileText,
-  Users
+  Users,
+  Layers
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -47,6 +48,7 @@ import AdminReviews from "./AdminReviews";
 import AdminCreateReview from "./AdminCreateReview";
 import AdminPolicies from "./AdminPolicies";
 import AdminFarmersExperts from "./AdminFarmersExperts";
+import AdminBulkCoupons from "./AdminBulkCoupons";
 
 import "./AdminDashboard.css";
 
@@ -126,11 +128,11 @@ const navItems = [
     label: "Coupon Management",
     icon: <Percent size={20} />,
   },
-  // {
-  //   id: "bulk-coupons",
-  //   label: "Bulk Coupons",
-  //   icon: <Mail size={20} />,
-  // },
+  {
+    id: "bulk-coupons",
+    label: "Bulk Coupons",
+    icon: <Layers size={20} />,
+  },
   // {
   //   id: "pages",
   //   label: "Pages",
@@ -296,6 +298,9 @@ export default function AdminDashboard() {
 
       case "coupons":
         return <AdminCoupons />;
+
+      case "bulk-coupons":
+        return <AdminBulkCoupons />;
 
       case "returns":
         return <AdminReturns />;

@@ -15,13 +15,24 @@ const usedByUserSchema = new mongoose.Schema({
   }
 });
 
-const couponSchema = new mongoose.Schema({
+const bulkCouponSchema = new mongoose.Schema({
   code: {
     type: String,
     required: true,
     unique: true,
     uppercase: true,
     trim: true
+  },
+  prefix: {
+    type: String,
+    default: 'INFLUENCER',
+    uppercase: true,
+    trim: true
+  },
+  batchId: {
+    type: String,
+    required: true,
+    index: true
   },
   discountType: {
     type: String,
@@ -45,23 +56,15 @@ const couponSchema = new mongoose.Schema({
     type: Number,
     default: 1
   },
-  isBulk: {
-    type: Boolean,
-    default: false
-  },
-  isPrivate: {
-    type: Boolean,
-    default: false
-  },
-  batchId: {
-    type: String,
-    default: ''
-  },
   usedByUsers: [usedByUserSchema],
   isActive: {
+    type: Boolean,
+    default: true
+  },
+  isInfluencerCoupon: {
     type: Boolean,
     default: true
   }
 }, { timestamps: true });
 
-module.exports = mongoose.model('Coupon', couponSchema);
+module.exports = mongoose.model('BulkCoupon', bulkCouponSchema);

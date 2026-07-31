@@ -131,7 +131,7 @@ export default function Navbar() {
                 <>
                   <span className="announcement-bar__item"><span className="dot" />🌾 Free Delivery on Orders Above ₹499</span>
                   <span className="announcement-bar__item"><span className="dot" />🥛 100% Pure A2 Desi Cow Ghee — Farm to Table</span>
-                  <span className="announcement-bar__item"><span className="dot" />🌿 Certified Organic — No Chemicals, No Shortcuts</span>
+                  <span className="announcement-bar__item"><span className="dot" />🌿 Certified Natural — No Chemicals, No Shortcuts</span>
                   <span className="announcement-bar__item"><span className="dot" />🚜 Directly from 500+ Kissan Farmers Across India</span>
                 </>
               )}

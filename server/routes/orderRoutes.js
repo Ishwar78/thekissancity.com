@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const Order = require('../models/Order');
+const Coupon = require('../models/Coupon');
+const BulkCoupon = require('../models/BulkCoupon');
 const jwt = require('jsonwebtoken');
 const Product = require('../models/Product');
 const { pushOrderToShiprocket } = require('../utils/shiprocket');
@@ -31,14 +33,18 @@ router.post('/', authenticate, async (req, res) => {
       totalAmount,
       deliveryCharge,
       discountAmount,
+      couponCode,
     } = req.body;
 
     const expectedDelivery = new Date();
     expectedDelivery.setDate(expectedDelivery.getDate() + 5);
 
+    const userId = req.user ? (req.user.userId || req.user.id || req.user._id) : undefined;
+    const userIdent = shippingAddress?.email || shippingAddress?.phone || (req.user ? req.user.email || req.user.phone : 'guest');
+
     const newOrder = new Order({
       orderId: orderId || `KC${String(Date.now()).slice(-8)}`,
-      user: req.user ? (req.user.userId || req.user.id || req.user._id) : undefined,
+      user: userId,
       shippingAddress,
       items,
       paymentMethod,
@@ -51,6 +57,27 @@ router.post('/', authenticate, async (req, res) => {
     });
 
     await newOrder.save();
+
+    // Record coupon usage if couponCode was provided
+    if (couponCode && typeof couponCode === 'string') {
+      try {
+        const cleanCode = couponCode.trim().toUpperCase();
+        let foundCoupon = await Coupon.findOne({ code: cleanCode });
+        if (!foundCoupon) {
+          foundCoupon = await BulkCoupon.findOne({ code: cleanCode });
+        }
+        if (foundCoupon) {
+          foundCoupon.usedByUsers.push({
+            userId: userId || undefined,
+            userIdentifier: userIdent,
+            usedAt: new Date()
+          });
+          await foundCoupon.save();
+        }
+      } catch (cpErr) {
+        console.error('Error recording coupon usage:', cpErr);
+      }
+    }
 
     // Auto-sync order to Shiprocket
     try {

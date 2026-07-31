@@ -1,12 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
-  Image as ImageIcon,
+  Edit2,
+  ImageIcon,
   LayoutTemplate,
   Link2,
   Loader2,
   Plus,
   Trash2,
   Upload,
+  X,
 } from "lucide-react";
 import { api } from "../../utils/api";
 import "./AdminBanners.css";
@@ -15,6 +17,7 @@ export default function AdminBanners() {
   const [banners, setBanners] = useState([]);
   const [fetching, setFetching] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [editingId, setEditingId] = useState(null);
   const [type, setType] = useState("main");
   const [link, setLink] = useState("");
   const [image, setImage] = useState(null);
@@ -92,6 +95,7 @@ export default function AdminBanners() {
       URL.revokeObjectURL(preview);
     }
 
+    setEditingId(null);
     setType("main");
     setLink("");
     setImage(null);
@@ -102,11 +106,25 @@ export default function AdminBanners() {
     }
   };
 
+  const handleEdit = (banner) => {
+    setEditingId(banner._id);
+    setType(banner.type || "main");
+    setLink(banner.link || "");
+    setImage(null);
+    setPreview(getImageUrl(banner.imageUrl));
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!type || !image) {
-      alert("Banner type and image are required.");
+    if (!type) {
+      alert("Banner type is required.");
+      return;
+    }
+
+    if (!editingId && !image) {
+      alert("Banner image is required.");
       return;
     }
 
@@ -116,12 +134,17 @@ export default function AdminBanners() {
       const formData = new FormData();
       formData.append("type", type);
       formData.append("link", link.trim());
-      formData.append("image", image);
+      if (image) {
+        formData.append("image", image);
+      }
 
       const token = localStorage.getItem("adminToken");
+      const url = editingId
+        ? `${baseUrl}/api/banners/${editingId}`
+        : `${baseUrl}/api/banners`;
 
-      const response = await fetch(`${baseUrl}/api/banners`, {
-        method: "POST",
+      const response = await fetch(url, {
+        method: editingId ? "PUT" : "POST",
         headers: {
           ...(token && { Authorization: `Bearer ${token}` }),
         },
@@ -131,14 +154,14 @@ export default function AdminBanners() {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data?.message || "Failed to add banner");
+        throw new Error(data?.message || "Failed to save banner");
       }
 
       resetForm();
       await fetchBanners();
     } catch (error) {
-      console.error("Error adding banner:", error);
-      alert(error.message || "An error occurred while adding the banner.");
+      console.error("Error saving banner:", error);
+      alert(error.message || "An error occurred while saving the banner.");
     } finally {
       setLoading(false);
     }
@@ -223,15 +246,49 @@ export default function AdminBanners() {
                   {sectionType === "main" ? "Main Slider" : "Side Promo"}
                 </span>
 
-                <button
-                  type="button"
-                  className="admin-banner-delete-btn"
-                  onClick={() => handleDelete(banner._id)}
-                  aria-label="Delete banner"
-                  title="Delete banner"
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "8px",
+                    right: "8px",
+                    display: "flex",
+                    gap: "6px",
+                    zIndex: 4,
+                  }}
                 >
-                  <Trash2 size={16} />
-                </button>
+                  <button
+                    type="button"
+                    style={{
+                      backgroundColor: "rgba(59, 130, 246, 0.9)",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "50%",
+                      width: "30px",
+                      height: "30px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: "pointer",
+                      boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
+                    }}
+                    onClick={() => handleEdit(banner)}
+                    aria-label="Edit banner"
+                    title="Edit banner"
+                  >
+                    <Edit2 size={15} />
+                  </button>
+
+                  <button
+                    type="button"
+                    className="admin-banner-delete-btn"
+                    style={{ position: "relative", top: 0, right: 0 }}
+                    onClick={() => handleDelete(banner._id)}
+                    aria-label="Delete banner"
+                    title="Delete banner"
+                  >
+                    <Trash2 size={15} />
+                  </button>
+                </div>
               </div>
 
               <div className="admin-banner-card-footer">
@@ -257,10 +314,10 @@ export default function AdminBanners() {
             Banner Management
           </span>
 
-          <h1>Manage Product Banners</h1>
+          <h1>Manage Product Banners & Slider</h1>
 
           <p>
-            Upload main slider and side promotional banners for your storefront.
+            Upload and edit main slider and side promotional banners for your storefront.
           </p>
         </div>
 
@@ -286,9 +343,29 @@ export default function AdminBanners() {
         <section className="admin-banner-form-card">
           <div className="admin-banner-card-header">
             <div>
-              <span>Create banner</span>
-              <h2>Add New Banner</h2>
+              <span>{editingId ? "Update media" : "Create banner"}</span>
+              <h2>{editingId ? "Edit Banner / Slider" : "Add New Banner"}</h2>
             </div>
+            {editingId && (
+              <button
+                type="button"
+                onClick={resetForm}
+                style={{
+                  padding: "4px 10px",
+                  borderRadius: "6px",
+                  border: "1px solid #cbd5e1",
+                  background: "#ffffff",
+                  fontSize: "0.8rem",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "4px",
+                }}
+              >
+                <X size={14} /> Cancel Edit
+              </button>
+            )}
           </div>
 
           <form className="admin-banner-form" onSubmit={handleSubmit}>
@@ -317,13 +394,13 @@ export default function AdminBanners() {
                 type="text"
                 value={link}
                 onChange={(event) => setLink(event.target.value)}
-                placeholder="e.g. /category/health/1 or #products"
+                placeholder="e.g. /category/food or #products"
               />
             </div>
 
             <div className="admin-banner-field">
               <label>
-                Banner Image <span>*</span>
+                Banner Image <span>{editingId ? "(Optional if unchanged)" : "*"}</span>
               </label>
 
               <button
@@ -339,7 +416,7 @@ export default function AdminBanners() {
 
                     <span className="admin-banner-upload-overlay">
                       <Upload size={19} />
-                      Change Banner
+                      Change Banner Image
                     </span>
                   </>
                 ) : (
@@ -367,23 +444,26 @@ export default function AdminBanners() {
               </p>
             </div>
 
-            <button
-              type="submit"
-              className="admin-banner-submit-btn"
-              disabled={loading}
-            >
-              {loading ? (
-                <>
-                  <Loader2 size={18} className="admin-banner-spin" />
-                  Adding Banner...
-                </>
-              ) : (
-                <>
-                  <Plus size={18} />
-                  Add Banner
-                </>
-              )}
-            </button>
+            <div style={{ display: "flex", gap: "10px" }}>
+              <button
+                type="submit"
+                className="admin-banner-submit-btn"
+                disabled={loading}
+                style={{ flex: 1 }}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 size={18} className="admin-banner-spin" />
+                    {editingId ? "Updating Banner..." : "Adding Banner..."}
+                  </>
+                ) : (
+                  <>
+                    {editingId ? <Edit2 size={18} /> : <Plus size={18} />}
+                    {editingId ? "Update Banner" : "Add Banner"}
+                  </>
+                )}
+              </button>
+            </div>
           </form>
         </section>
 

@@ -1,0 +1,917 @@
+/* =========================================================
+   ADMIN BULK COUPONS
+   Premium Green Admin Theme
+========================================================= */
+
+.admin-bulk-coupons-page,
+.admin-bulk-coupons-page * {
+  box-sizing: border-box;
+}
+
+.admin-bulk-coupons-page {
+  width: 100%;
+  max-width: 1600px;
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 28px;
+  position: relative;
+  isolation: isolate;
+  font-family: inherit;
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(34, 197, 94, 0.1),
+      transparent 320px
+    ),
+    radial-gradient(
+      circle at bottom right,
+      rgba(5, 150, 105, 0.08),
+      transparent 360px
+    ),
+    #f5faf7;
+}
+
+/* Decorative background */
+
+.admin-bulk-coupons-page::before {
+  content: "";
+  position: fixed;
+  top: 90px;
+  right: 3%;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: rgba(34, 197, 94, 0.07);
+  filter: blur(70px);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* =========================================================
+   PAGE HEADER
+========================================================= */
+
+.admin-bulk-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  padding: 24px 26px;
+  overflow: hidden;
+  border: 1px solid rgba(21, 128, 61, 0.12);
+  border-radius: 20px;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.98),
+      rgba(240, 253, 244, 0.96)
+    );
+  box-shadow:
+    0 14px 35px rgba(20, 83, 45, 0.07),
+    0 3px 10px rgba(20, 83, 45, 0.04);
+}
+
+.admin-bulk-header::after {
+  content: "";
+  position: absolute;
+  top: -80px;
+  right: -45px;
+  width: 190px;
+  height: 190px;
+  border-radius: 50%;
+  background: linear-gradient(
+    135deg,
+    rgba(34, 197, 94, 0.14),
+    rgba(5, 150, 105, 0.04)
+  );
+  pointer-events: none;
+}
+
+.admin-bulk-header > * {
+  position: relative;
+  z-index: 1;
+}
+
+.admin-bulk-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 8px;
+  padding: 6px 11px;
+  border: 1px solid #bbf7d0;
+  border-radius: 999px;
+  background: #ecfdf3;
+  color: #15803d;
+  font-size: 0.76rem;
+  font-weight: 800;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+}
+
+.admin-bulk-eyebrow svg {
+  color: #16a34a;
+}
+
+.admin-bulk-header h1 {
+  margin: 0 0 7px;
+  color: #102a1a;
+  font-size: clamp(1.55rem, 2vw, 2rem);
+  font-weight: 850;
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+}
+
+.admin-bulk-header p {
+  max-width: 720px;
+  margin: 0;
+  color: #607068;
+  font-size: 0.94rem;
+  line-height: 1.65;
+}
+
+/* =========================================================
+   NOTICE BANNER
+========================================================= */
+
+.admin-bulk-notice-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+  margin-bottom: 26px;
+  padding: 17px 19px;
+  border: 1px solid #a7f3d0;
+  border-left: 4px solid #16a34a;
+  border-radius: 15px;
+  background:
+    linear-gradient(
+      135deg,
+      #ecfdf3 0%,
+      #f0fdf4 55%,
+      #ffffff 100%
+    );
+  color: #166534;
+  font-size: 0.88rem;
+  line-height: 1.65;
+  box-shadow: 0 7px 22px rgba(22, 101, 52, 0.06);
+}
+
+.admin-bulk-notice-banner > svg {
+  width: 37px;
+  height: 37px;
+  padding: 9px;
+  flex: 0 0 auto;
+  border-radius: 10px;
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.admin-bulk-notice-banner strong {
+  color: #14532d;
+  font-weight: 800;
+}
+
+/* =========================================================
+   MAIN GRID
+========================================================= */
+
+.admin-bulk-grid {
+  display: grid;
+  grid-template-columns: minmax(340px, 410px) minmax(0, 1fr);
+  align-items: start;
+  gap: 24px;
+}
+
+/* =========================================================
+   CARDS
+========================================================= */
+
+.admin-bulk-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(21, 128, 61, 0.13);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow:
+    0 16px 40px rgba(20, 83, 45, 0.07),
+    0 3px 10px rgba(20, 83, 45, 0.04);
+}
+
+.admin-bulk-card::before {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(
+    90deg,
+    #14532d,
+    #16a34a,
+    #4ade80
+  );
+}
+
+.admin-bulk-card-header {
+  min-height: 72px;
+  padding: 18px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  border-bottom: 1px solid #e8f3eb;
+  background:
+    linear-gradient(
+      180deg,
+      #ffffff 0%,
+      #fbfefc 100%
+    );
+}
+
+.admin-bulk-card-header h2 {
+  margin: 0;
+  color: #153421;
+  font-size: 1.08rem;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.admin-bulk-heading-icon {
+  width: 36px;
+  height: 36px;
+  padding: 8px;
+  border-radius: 10px;
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.admin-bulk-card-body {
+  padding: 22px;
+}
+
+.admin-bulk-card-body--flush {
+  padding: 0;
+}
+
+/* =========================================================
+   FORM
+========================================================= */
+
+.admin-bulk-form-group {
+  margin-bottom: 18px;
+}
+
+.admin-bulk-form-group:last-child {
+  margin-bottom: 0;
+}
+
+.admin-bulk-form-group label {
+  display: block;
+  margin-bottom: 7px;
+  color: #294437;
+  font-size: 0.82rem;
+  font-weight: 750;
+}
+
+.admin-bulk-form-group label span {
+  color: #dc2626;
+}
+
+.admin-bulk-form-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 13px;
+}
+
+.admin-bulk-input-wrap {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.admin-bulk-input-wrap > svg {
+  position: absolute;
+  left: 13px;
+  z-index: 2;
+  color: #4f8a68;
+  pointer-events: none;
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.admin-bulk-input-wrap input,
+.admin-bulk-input-wrap select {
+  width: 100%;
+  height: 46px;
+  padding: 10px 13px 10px 40px;
+  border: 1px solid #cfe2d5;
+  border-radius: 11px;
+  outline: none;
+  background: #f8fcf9;
+  color: #163320;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 500;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.admin-bulk-input-wrap select {
+  cursor: pointer;
+}
+
+.admin-bulk-input-wrap input::placeholder {
+  color: #9aaba1;
+  font-weight: 400;
+}
+
+.admin-bulk-input-wrap input:hover,
+.admin-bulk-input-wrap select:hover {
+  border-color: #86c99d;
+  background: #ffffff;
+}
+
+.admin-bulk-input-wrap:focus-within > svg {
+  color: #16a34a;
+  transform: scale(1.06);
+}
+
+.admin-bulk-input-wrap input:focus,
+.admin-bulk-input-wrap select:focus {
+  border-color: #22c55e;
+  background: #ffffff;
+  box-shadow:
+    0 0 0 4px rgba(34, 197, 94, 0.12),
+    0 4px 12px rgba(22, 101, 52, 0.05);
+}
+
+.admin-bulk-input-wrap input[type="date"] {
+  color-scheme: light;
+}
+
+.admin-bulk-help {
+  display: block;
+  margin-top: 6px;
+  color: #77897f;
+  font-size: 0.73rem;
+  line-height: 1.45;
+}
+
+/* =========================================================
+   PRIMARY BUTTON
+========================================================= */
+
+.admin-bulk-submit-btn {
+  width: 100%;
+  min-height: 48px;
+  margin-top: 4px;
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border: none;
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(
+      135deg,
+      #15803d 0%,
+      #16a34a 48%,
+      #059669 100%
+    );
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 0.91rem;
+  font-weight: 800;
+  letter-spacing: 0.1px;
+  cursor: pointer;
+  box-shadow:
+    0 10px 20px rgba(22, 163, 74, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    filter 0.2s ease;
+}
+
+.admin-bulk-submit-btn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -130%;
+  width: 90%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.22),
+    transparent
+  );
+  transform: skewX(-20deg);
+  transition: left 0.6s ease;
+}
+
+.admin-bulk-submit-btn:hover:not(:disabled)::before {
+  left: 140%;
+}
+
+.admin-bulk-submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  filter: saturate(1.08);
+  box-shadow:
+    0 14px 26px rgba(22, 163, 74, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.admin-bulk-submit-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.admin-bulk-submit-btn:disabled {
+  opacity: 0.62;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* =========================================================
+   SECONDARY BUTTONS
+========================================================= */
+
+.admin-bulk-table-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.admin-bulk-btn-secondary {
+  min-height: 38px;
+  padding: 8px 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid #cce5d4;
+  border-radius: 10px;
+  outline: none;
+  background: #f4fbf6;
+  color: #24623a;
+  font-family: inherit;
+  font-size: 0.79rem;
+  font-weight: 750;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.admin-bulk-btn-secondary svg {
+  color: #16a34a;
+}
+
+.admin-bulk-btn-secondary:hover:not(:disabled) {
+  border-color: #86d19d;
+  background: #dcfce7;
+  color: #14532d;
+  transform: translateY(-1px);
+  box-shadow: 0 5px 12px rgba(22, 101, 52, 0.08);
+}
+
+.admin-bulk-btn-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   SEARCH
+========================================================= */
+
+.admin-bulk-search-box {
+  padding: 15px 20px;
+  border-bottom: 1px solid #e8f3eb;
+  background: #fbfefc;
+}
+
+.admin-bulk-search-box .admin-bulk-input-wrap {
+  max-width: 440px;
+}
+
+.admin-bulk-search-box input {
+  background: #ffffff;
+}
+
+/* =========================================================
+   TABLE
+========================================================= */
+
+.admin-bulk-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #9fceb0 #eff8f2;
+}
+
+.admin-bulk-table-wrap::-webkit-scrollbar {
+  height: 8px;
+}
+
+.admin-bulk-table-wrap::-webkit-scrollbar-track {
+  background: #eff8f2;
+}
+
+.admin-bulk-table-wrap::-webkit-scrollbar-thumb {
+  border-radius: 20px;
+  background: #9fceb0;
+}
+
+.admin-bulk-table {
+  width: 100%;
+  min-width: 760px;
+  border-spacing: 0;
+  border-collapse: separate;
+  color: #203b2a;
+  font-size: 0.84rem;
+  text-align: left;
+}
+
+.admin-bulk-table thead {
+  position: relative;
+}
+
+.admin-bulk-table th {
+  padding: 13px 15px;
+  border-bottom: 1px solid #dcece1;
+  background: #effaf2;
+  color: #3c694c;
+  font-size: 0.7rem;
+  font-weight: 850;
+  letter-spacing: 0.65px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.admin-bulk-table td {
+  padding: 14px 15px;
+  border-bottom: 1px solid #edf5ef;
+  background: #ffffff;
+  color: #31483a;
+  vertical-align: middle;
+  transition: background 0.2s ease;
+}
+
+.admin-bulk-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.admin-bulk-table tbody tr:hover td {
+  background: #f8fdf9;
+}
+
+.admin-bulk-table td strong {
+  color: #166534;
+  font-weight: 800;
+}
+
+/* =========================================================
+   COUPON CODE BADGE
+========================================================= */
+
+.admin-bulk-code-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px dashed #71cf91;
+  border-radius: 8px;
+  background:
+    linear-gradient(
+      135deg,
+      #ecfdf3,
+      #f7fff9
+    );
+  color: #08743d;
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    "Liberation Mono",
+    monospace;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+}
+
+/* =========================================================
+   EXPIRY STATUS
+========================================================= */
+
+.admin-bulk-expiry {
+  color: #31483a;
+  font-size: 0.81rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.admin-bulk-expiry--expired {
+  color: #dc2626;
+}
+
+/* =========================================================
+   TABLE ACTION BUTTONS
+========================================================= */
+
+.admin-bulk-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.admin-bulk-icon-btn {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  outline: none;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.admin-bulk-icon-btn:hover {
+  transform: translateY(-1px);
+}
+
+.admin-bulk-icon-btn--copy {
+  border-color: #cce5d4;
+  background: #effaf2;
+  color: #15803d;
+}
+
+.admin-bulk-icon-btn--copy:hover {
+  border-color: #86d19d;
+  background: #dcfce7;
+  box-shadow: 0 4px 10px rgba(22, 101, 52, 0.1);
+}
+
+.admin-bulk-icon-btn--delete {
+  border-color: #fecaca;
+  background: #fff5f5;
+  color: #dc2626;
+}
+
+.admin-bulk-icon-btn--delete:hover {
+  border-color: #fca5a5;
+  background: #fee2e2;
+  box-shadow: 0 4px 10px rgba(220, 38, 38, 0.1);
+}
+
+/* =========================================================
+   EMPTY / LOADING STATE
+========================================================= */
+
+.admin-bulk-empty {
+  min-height: 250px;
+  padding: 48px 25px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #799084;
+  text-align: center;
+}
+
+.admin-bulk-empty > svg {
+  width: 58px;
+  height: 58px;
+  margin-bottom: 14px;
+  padding: 14px;
+  border-radius: 16px;
+  background: #effaf2;
+  color: #6eaa82;
+}
+
+.admin-bulk-empty p {
+  max-width: 390px;
+  margin: 0;
+  color: #72857a;
+  font-size: 0.87rem;
+  line-height: 1.65;
+}
+
+/* =========================================================
+   ACCESSIBILITY
+========================================================= */
+
+.admin-bulk-submit-btn:focus-visible,
+.admin-bulk-btn-secondary:focus-visible,
+.admin-bulk-icon-btn:focus-visible {
+  outline: 3px solid rgba(34, 197, 94, 0.25);
+  outline-offset: 2px;
+}
+
+/* =========================================================
+   LOADING ROTATION
+========================================================= */
+
+.spin {
+  animation: adminBulkSpin 0.8s linear infinite;
+}
+
+@keyframes adminBulkSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* =========================================================
+   RESPONSIVE - LAPTOP
+========================================================= */
+
+@media (max-width: 1200px) {
+  .admin-bulk-coupons-page {
+    padding: 22px;
+  }
+
+  .admin-bulk-grid {
+    grid-template-columns: minmax(320px, 370px) minmax(0, 1fr);
+    gap: 20px;
+  }
+
+  .admin-bulk-card-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-bulk-table-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+/* =========================================================
+   RESPONSIVE - TABLET
+========================================================= */
+
+@media (max-width: 980px) {
+  .admin-bulk-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-bulk-card-header {
+    align-items: center;
+    flex-direction: row;
+  }
+
+  .admin-bulk-table-actions {
+    width: auto;
+    justify-content: flex-end;
+  }
+}
+
+/* =========================================================
+   RESPONSIVE - MOBILE
+========================================================= */
+
+@media (max-width: 700px) {
+  .admin-bulk-coupons-page {
+    padding: 15px;
+  }
+
+  .admin-bulk-header {
+    padding: 19px;
+    border-radius: 16px;
+  }
+
+  .admin-bulk-header > div {
+    width: 100%;
+  }
+
+  .admin-bulk-header .admin-bulk-btn-secondary {
+    width: 100%;
+  }
+
+  .admin-bulk-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .admin-bulk-header p {
+    font-size: 0.86rem;
+    line-height: 1.55;
+  }
+
+  .admin-bulk-notice-banner {
+    padding: 14px;
+    font-size: 0.81rem;
+    border-radius: 13px;
+  }
+
+  .admin-bulk-notice-banner > svg {
+    width: 33px;
+    height: 33px;
+    padding: 8px;
+  }
+
+  .admin-bulk-card {
+    border-radius: 16px;
+  }
+
+  .admin-bulk-card-header {
+    min-height: auto;
+    padding: 17px;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-bulk-card-body {
+    padding: 17px;
+  }
+
+  .admin-bulk-form-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .admin-bulk-table-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-bulk-table-actions .admin-bulk-btn-secondary {
+    width: 100%;
+    padding-inline: 9px;
+    font-size: 0.72rem;
+  }
+
+  .admin-bulk-search-box {
+    padding: 13px 15px;
+  }
+
+  .admin-bulk-search-box .admin-bulk-input-wrap {
+    max-width: none;
+  }
+
+  .admin-bulk-empty {
+    min-height: 220px;
+    padding: 38px 20px;
+  }
+}
+
+/* =========================================================
+   RESPONSIVE - SMALL MOBILE
+========================================================= */
+
+@media (max-width: 430px) {
+  .admin-bulk-coupons-page {
+    padding: 11px;
+  }
+
+  .admin-bulk-header {
+    padding: 16px;
+  }
+
+  .admin-bulk-eyebrow {
+    font-size: 0.66rem;
+  }
+
+  .admin-bulk-header h1 {
+    font-size: 1.3rem;
+  }
+
+  .admin-bulk-notice-banner {
+    align-items: flex-start;
+  }
+
+  .admin-bulk-table-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-bulk-input-wrap input,
+  .admin-bulk-input-wrap select {
+    font-size: 0.84rem;
+  }
+
+  .admin-bulk-submit-btn {
+    font-size: 0.84rem;
+  }
+}

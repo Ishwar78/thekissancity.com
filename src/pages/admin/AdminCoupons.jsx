@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   ChevronDown,
   Copy,
+  Edit2,
   IndianRupee,
   Percent,
   Plus,
@@ -23,6 +24,9 @@ const initialForm = {
   code: "",
   discountType: "percentage",
   discountValue: "",
+  minOrderAmount: "",
+  expiryDate: "",
+  perUserLimit: 1,
   isActive: true,
 };
 
@@ -33,6 +37,7 @@ export default function AdminCoupons() {
   const [submitting, setSubmitting] = useState(false);
 
   const [showModal, setShowModal] = useState(false);
+  const [editingId, setEditingId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
@@ -124,7 +129,30 @@ export default function AdminCoupons() {
   }, [coupons]);
 
   const openCreateModal = () => {
+    setEditingId(null);
     setForm(initialForm);
+    setFormError("");
+    setShowModal(true);
+  };
+
+  const openEditModal = (coupon) => {
+    setEditingId(coupon._id);
+    let expFormatted = "";
+    if (coupon.expiryDate) {
+      const d = new Date(coupon.expiryDate);
+      if (!Number.isNaN(d.getTime())) {
+        expFormatted = d.toISOString().split("T")[0];
+      }
+    }
+    setForm({
+      code: coupon.code || "",
+      discountType: coupon.discountType || "percentage",
+      discountValue: coupon.discountValue || "",
+      minOrderAmount: coupon.minOrderAmount || "",
+      expiryDate: expFormatted,
+      perUserLimit: coupon.perUserLimit || 1,
+      isActive: coupon.isActive !== undefined ? coupon.isActive : true,
+    });
     setFormError("");
     setShowModal(true);
   };
@@ -133,6 +161,7 @@ export default function AdminCoupons() {
     if (submitting) return;
 
     setShowModal(false);
+    setEditingId(null);
     setForm(initialForm);
     setFormError("");
   };
@@ -176,11 +205,18 @@ export default function AdminCoupons() {
         code: form.code.trim().toUpperCase(),
         discountType: form.discountType,
         discountValue: Number(form.discountValue),
+        minOrderAmount: form.minOrderAmount ? Number(form.minOrderAmount) : 0,
+        expiryDate: form.expiryDate ? form.expiryDate : null,
+        perUserLimit: form.perUserLimit ? Number(form.perUserLimit) : 1,
         isActive: form.isActive,
       };
 
-      const response = await fetch(`${getBaseUrl()}/api/coupons`, {
-        method: "POST",
+      const url = editingId
+        ? `${getBaseUrl()}/api/coupons/${editingId}`
+        : `${getBaseUrl()}/api/coupons`;
+
+      const response = await fetch(url, {
+        method: editingId ? "PUT" : "POST",
         headers: {
           "Content-Type": "application/json",
         },
@@ -190,17 +226,23 @@ export default function AdminCoupons() {
       const data = await response.json().catch(() => ({}));
 
       if (!response.ok || !data.success) {
-        throw new Error(data.message || "Failed to create coupon.");
+        throw new Error(data.message || "Failed to save coupon.");
       }
 
-      setCoupons((previousCoupons) => [
-        data.coupon,
-        ...previousCoupons,
-      ]);
+      if (editingId) {
+        setCoupons((previousCoupons) =>
+          previousCoupons.map((c) => (c._id === editingId ? data.coupon : c))
+        );
+      } else {
+        setCoupons((previousCoupons) => [
+          data.coupon,
+          ...previousCoupons,
+        ]);
+      }
 
       closeModal();
     } catch (error) {
-      console.error("Error creating coupon:", error);
+      console.error("Error saving coupon:", error);
 
       setFormError(
         error.message || "Server error. Please try again later."
@@ -519,8 +561,9 @@ export default function AdminCoupons() {
                   <tr>
                     <th>Coupon Details</th>
                     <th>Discount</th>
+                    <th>Min Order Criteria</th>
+                    <th>Valid Till (Expiry)</th>
                     <th>Status</th>
-                    <th>Created Date</th>
                     <th className="admin-coupons-table__actions-heading">
                       Actions
                     </th>
@@ -528,127 +571,169 @@ export default function AdminCoupons() {
                 </thead>
 
                 <tbody>
-                  {filteredCoupons.map((coupon) => (
-                    <tr key={coupon._id}>
-                      <td data-label="Coupon Details">
-                        <div className="admin-coupons-code-cell">
-                          <div className="admin-coupons-code-icon">
-                            {coupon.discountType ===
-                            "percentage" ? (
-                              <Percent size={19} />
+                  {filteredCoupons.map((coupon) => {
+                    const isExpired =
+                      coupon.expiryDate &&
+                      new Date() > new Date(new Date(coupon.expiryDate).setHours(23, 59, 59, 999));
+                    const usedCount = Array.isArray(coupon.usedByUsers) ? coupon.usedByUsers.length : 0;
+
+                    return (
+                      <tr key={coupon._id}>
+                        <td data-label="Coupon Details">
+                          <div className="admin-coupons-code-cell">
+                            <div className="admin-coupons-code-icon">
+                              {coupon.discountType === "percentage" ? (
+                                <Percent size={19} />
+                              ) : (
+                                <IndianRupee size={19} />
+                              )}
+                            </div>
+
+                            <div className="admin-coupons-code-info">
+                              <strong>
+                                {coupon.code || "NO CODE"}
+                              </strong>
+
+                              <div style={{ display: "flex", gap: "6px", alignItems: "center", marginTop: "3px", flexWrap: "wrap" }}>
+                                <span style={{ fontSize: "0.72rem", background: "#eff6ff", color: "#1d4ed8", padding: "2px 6px", borderRadius: "4px", fontWeight: 600 }}>
+                                  1-Use per user
+                                </span>
+                                {usedCount > 0 && (
+                                  <span style={{ fontSize: "0.72rem", background: "#f1f5f9", color: "#475569", padding: "2px 6px", borderRadius: "4px" }}>
+                                    Used by {usedCount} user{usedCount === 1 ? "" : "s"}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            <button
+                              type="button"
+                              className={`admin-coupons-copy-button ${
+                                copiedId === coupon._id ? "is-copied" : ""
+                              }`}
+                              onClick={() =>
+                                copyCouponCode(coupon._id, coupon.code)
+                              }
+                              aria-label={`Copy ${coupon.code}`}
+                            >
+                              {copiedId === coupon._id ? (
+                                <Check size={15} />
+                              ) : (
+                                <Copy size={15} />
+                              )}
+                            </button>
+                          </div>
+                        </td>
+
+                        <td data-label="Discount">
+                          <span
+                            className={`admin-coupons-discount-badge ${
+                              coupon.discountType === "flat"
+                                ? "is-flat"
+                                : "is-percentage"
+                            }`}
+                          >
+                            {coupon.discountType === "percentage" ? (
+                              <Percent size={14} />
                             ) : (
-                              <IndianRupee size={19} />
+                              <IndianRupee size={14} />
+                            )}
+
+                            {formatDiscount(coupon)}
+                          </span>
+                        </td>
+
+                        <td data-label="Min Order Criteria">
+                          <div style={{ fontSize: "0.88rem", fontWeight: 700, color: coupon.minOrderAmount > 0 ? "#1e293b" : "#64748b" }}>
+                            {coupon.minOrderAmount > 0 ? (
+                              <span>₹{coupon.minOrderAmount.toLocaleString("en-IN")}</span>
+                            ) : (
+                              <span style={{ fontWeight: 500, fontStyle: "italic", color: "#94a3b8" }}>No Minimum</span>
                             )}
                           </div>
+                        </td>
 
-                          <div className="admin-coupons-code-info">
-                            <strong>
-                              {coupon.code || "NO CODE"}
-                            </strong>
-
+                        <td data-label="Valid Till (Expiry)">
+                          <div className="admin-coupons-date-cell">
                             <span>
-                              {coupon.discountType ===
-                              "percentage"
-                                ? "Percentage discount"
-                                : "Flat amount discount"}
+                              <CalendarDays size={16} />
                             </span>
-                          </div>
 
+                            <div>
+                              <strong style={{ color: isExpired ? "#dc2626" : "#1e293b" }}>
+                                {coupon.expiryDate ? formatDate(coupon.expiryDate) : "No Expiry"}
+                              </strong>
+
+                              <small style={{ color: isExpired ? "#dc2626" : "#64748b", fontWeight: isExpired ? 700 : 500 }}>
+                                {isExpired ? "⚠️ EXPIRED" : coupon.expiryDate ? "Valid Till Date" : "Lifetime valid"}
+                              </small>
+                            </div>
+                          </div>
+                        </td>
+
+                        <td data-label="Status">
                           <button
                             type="button"
-                            className={`admin-coupons-copy-button ${
-                              copiedId === coupon._id
-                                ? "is-copied"
-                                : ""
+                            className={`admin-coupons-status-button ${
+                              isExpired
+                                ? "is-inactive"
+                                : coupon.isActive
+                                ? "is-active"
+                                : "is-inactive"
                             }`}
                             onClick={() =>
-                              copyCouponCode(
-                                coupon._id,
-                                coupon.code
-                              )
+                              toggleStatus(coupon._id, coupon.isActive)
                             }
-                            aria-label={`Copy ${coupon.code}`}
+                            disabled={updatingId === coupon._id}
                           >
-                            {copiedId === coupon._id ? (
-                              <Check size={15} />
+                            {updatingId === coupon._id ? (
+                              <span className="admin-coupons-small-loader" />
+                            ) : isExpired ? (
+                              <XCircle size={14} />
+                            ) : coupon.isActive ? (
+                              <CheckCircle2 size={14} />
                             ) : (
-                              <Copy size={15} />
+                              <XCircle size={14} />
                             )}
-                          </button>
-                        </div>
-                      </td>
 
-                      <td data-label="Discount">
-                        <span
-                          className={`admin-coupons-discount-badge ${
-                            coupon.discountType === "flat"
-                              ? "is-flat"
-                              : "is-percentage"
-                          }`}
-                        >
-                          {coupon.discountType ===
-                          "percentage" ? (
-                            <Percent size={14} />
-                          ) : (
-                            <IndianRupee size={14} />
-                          )}
-
-                          {formatDiscount(coupon)}
-                        </span>
-                      </td>
-
-                      <td data-label="Status">
-                        <button
-                          type="button"
-                          className={`admin-coupons-status-button ${
-                            coupon.isActive
-                              ? "is-active"
-                              : "is-inactive"
-                          }`}
-                          onClick={() =>
-                            toggleStatus(
-                              coupon._id,
-                              coupon.isActive
-                            )
-                          }
-                          disabled={updatingId === coupon._id}
-                        >
-                          {updatingId === coupon._id ? (
-                            <span className="admin-coupons-small-loader" />
-                          ) : coupon.isActive ? (
-                            <CheckCircle2 size={14} />
-                          ) : (
-                            <XCircle size={14} />
-                          )}
-
-                          {updatingId === coupon._id
-                            ? "Updating"
-                            : coupon.isActive
+                            {updatingId === coupon._id
+                              ? "Updating"
+                              : isExpired
+                              ? "Expired"
+                              : coupon.isActive
                               ? "Active"
                               : "Inactive"}
-                        </button>
-                      </td>
-
-                      <td data-label="Created Date">
-                        <div className="admin-coupons-date-cell">
-                          <span>
-                            <CalendarDays size={16} />
-                          </span>
-
-                          <div>
-                            <strong>
-                              {formatDate(coupon.createdAt)}
-                            </strong>
-
-                            <small>Creation date</small>
-                          </div>
-                        </div>
-                      </td>
+                          </button>
+                        </td>
 
                       <td
                         data-label="Actions"
                         className="admin-coupons-actions-cell"
+                        style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}
                       >
+                        <button
+                          type="button"
+                          className="admin-coupons-edit-button"
+                          style={{
+                            padding: "6px 12px",
+                            borderRadius: "8px",
+                            border: "1px solid #bfdbfe",
+                            background: "#eff6ff",
+                            color: "#1d4ed8",
+                            fontWeight: 600,
+                            fontSize: "0.82rem",
+                            cursor: "pointer",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "4px",
+                          }}
+                          onClick={() => openEditModal(coupon)}
+                          aria-label={`Edit ${coupon.code}`}
+                        >
+                          <Edit2 size={15} />
+                          <span>Edit</span>
+                        </button>
+
                         <button
                           type="button"
                           className="admin-coupons-delete-button"
@@ -675,7 +760,8 @@ export default function AdminCoupons() {
                         </button>
                       </td>
                     </tr>
-                  ))}
+                  );
+                })}
                 </tbody>
               </table>
             ) : (
@@ -733,14 +819,14 @@ export default function AdminCoupons() {
             <div className="admin-coupons-modal__header">
               <div className="admin-coupons-modal__heading">
                 <div>
-                  <Plus size={21} />
+                  {editingId ? <Edit2 size={21} /> : <Plus size={21} />}
                 </div>
 
                 <div>
-                  <span>New Promotion</span>
-                  <h2>Create New Coupon</h2>
+                  <span>{editingId ? "Update Promotion" : "New Promotion"}</span>
+                  <h2>{editingId ? "Edit Coupon" : "Create New Coupon"}</h2>
                   <p>
-                    Add a discount coupon for your customers.
+                    {editingId ? "Update coupon details and rules." : "Add a discount coupon for your customers."}
                   </p>
                 </div>
               </div>
@@ -872,6 +958,88 @@ export default function AdminCoupons() {
                 </div>
               </div>
 
+              {/* Row 2: Minimum Order Amount & Expiry Date */}
+              <div className="admin-coupons-form__row">
+                <div className="admin-coupons-form__group">
+                  <label htmlFor="min-order-amount">
+                    Min Order Criteria (₹)
+                  </label>
+
+                  <div className="admin-coupons-form__input">
+                    <IndianRupee size={18} />
+
+                    <input
+                      id="min-order-amount"
+                      type="number"
+                      value={form.minOrderAmount}
+                      onChange={(event) => {
+                        setForm((previousForm) => ({
+                          ...previousForm,
+                          minOrderAmount: event.target.value,
+                        }));
+                        setFormError("");
+                      }}
+                      placeholder="e.g. 500 (0 for no limit)"
+                      min="0"
+                    />
+                  </div>
+                  <small>Minimum cart total required to apply coupon</small>
+                </div>
+
+                <div className="admin-coupons-form__group">
+                  <label htmlFor="expiry-date">
+                    Valid Till (End Date)
+                  </label>
+
+                  <div className="admin-coupons-form__input">
+                    <CalendarDays size={18} />
+
+                    <input
+                      id="expiry-date"
+                      type="date"
+                      value={form.expiryDate}
+                      onChange={(event) => {
+                        setForm((previousForm) => ({
+                          ...previousForm,
+                          expiryDate: event.target.value,
+                        }));
+                        setFormError("");
+                      }}
+                    />
+                  </div>
+                  <small>Leave blank for lifetime validity</small>
+                </div>
+              </div>
+
+              {/* Row 3: Per User Usage Limit */}
+              <div className="admin-coupons-form__row">
+                <div className="admin-coupons-form__group" style={{ gridColumn: "span 2" }}>
+                  <label htmlFor="per-user-limit">
+                    Usage Limit Per User
+                  </label>
+
+                  <div className="admin-coupons-form__input">
+                    <Tag size={18} />
+
+                    <input
+                      id="per-user-limit"
+                      type="number"
+                      value={form.perUserLimit}
+                      onChange={(event) => {
+                        setForm((previousForm) => ({
+                          ...previousForm,
+                          perUserLimit: event.target.value,
+                        }));
+                        setFormError("");
+                      }}
+                      placeholder="Default 1 use per user"
+                      min="1"
+                    />
+                  </div>
+                  <small>1 user can only use this coupon code 1 time</small>
+                </div>
+              </div>
+
               <div className="admin-coupons-active-option">
                 <div>
                   <div className="admin-coupons-active-option__icon">
@@ -958,12 +1126,12 @@ export default function AdminCoupons() {
                   {submitting ? (
                     <>
                       <span className="admin-coupons-submit-loader" />
-                      Creating Coupon...
+                      {editingId ? "Saving..." : "Creating Coupon..."}
                     </>
                   ) : (
                     <>
-                      <Plus size={18} />
-                      Create Coupon
+                      {editingId ? <Edit2 size={18} /> : <Plus size={18} />}
+                      {editingId ? "Update Coupon" : "Create Coupon"}
                     </>
                   )}
                 </button>

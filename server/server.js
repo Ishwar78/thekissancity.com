@@ -132,6 +132,11 @@ app.use(
 );
 
 app.use(
+  '/api/bulk-coupons',
+  require('./routes/bulkCouponRoutes')
+);
+
+app.use(
   '/api/returns',
   require('./routes/returnRoutes')
 );
