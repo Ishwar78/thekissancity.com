@@ -277,7 +277,7 @@ export default function AdminProducts() {
     try {
       const token = localStorage.getItem("adminToken");
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL || "https://thekissancity.com"}/api/products/${id}/toggle`,
+        `${import.meta.env.VITE_API_URL || "http://localhost:5005"}/api/products/${id}/toggle`,
         {
           method: "PATCH",
           headers: {
@@ -487,7 +487,7 @@ export default function AdminProducts() {
       });
 
       const token = localStorage.getItem("adminToken");
-      const baseUrl = import.meta.env.VITE_API_URL || "https://thekissancity.com";
+      const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5005";
       const url = editingId
         ? `${baseUrl}/api/products/${editingId}`
         : `${baseUrl}/api/products`;
@@ -698,7 +698,7 @@ export default function AdminProducts() {
               ) : (
                 filteredProducts.map((prod) => {
                   const imgUrl = prod.images?.length
-                    ? `${import.meta.env.VITE_API_URL || "https://thekissancity.com"}${prod.images[0]}`
+                    ? `${import.meta.env.VITE_API_URL || "http://localhost:5005"}${prod.images[0]}`
                     : null;
 
                   const visibleHealthRegions = (prod.healthRegions || []).slice(
@@ -2184,7 +2184,7 @@ export default function AdminProducts() {
                           item.type === "existing"
                             ? item.url?.startsWith("http")
                               ? item.url
-                              : `${import.meta.env.VITE_API_URL || "https://thekissancity.com"}${item.url}`
+                              : `${import.meta.env.VITE_API_URL || "http://localhost:5005"}${item.url}`
                             : item.preview;
 
                         return (
@@ -2796,7 +2796,7 @@ export default function AdminProducts() {
                       viewProduct.images && viewProduct.images.length > 0
                         ? viewProduct.images[0].startsWith("http")
                           ? viewProduct.images[0]
-                          : `https://thekissancity.com${viewProduct.images[0].startsWith("/") ? "" : "/"}${viewProduct.images[0]}`
+                          : `http://localhost:5005${viewProduct.images[0].startsWith("/") ? "" : "/"}${viewProduct.images[0]}`
                         : "/product_ghee.png"
                     }
                     alt={viewProduct.name}
@@ -2807,7 +2807,7 @@ export default function AdminProducts() {
                       {viewProduct.images.slice(1).map((img, i) => (
                         <img
                           key={i}
-                          src={img.startsWith("http") ? img : `https://thekissancity.com${img.startsWith("/") ? "" : "/"}${img}`}
+                          src={img.startsWith("http") ? img : `http://localhost:5005${img.startsWith("/") ? "" : "/"}${img}`}
                           alt="thumbnail"
                           style={{ width: "36px", height: "36px", objectFit: "cover", borderRadius: "6px", border: "1px solid #e5e7eb" }}
                         />

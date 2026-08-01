@@ -61,7 +61,7 @@ export default function Testimonials() {
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const baseUrl = (import.meta.env.VITE_API_URL || "https://thekissancity.com").replace(/\/$/, "");
+        const baseUrl = (import.meta.env.VITE_API_URL || "http://localhost:5005").replace(/\/$/, "");
         const res = await fetch(`${baseUrl}/api/reviews/home`);
         const data = await res.json();
         if (data.success && data.reviews && data.reviews.length > 0) {

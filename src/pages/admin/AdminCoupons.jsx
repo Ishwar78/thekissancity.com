@@ -55,7 +55,7 @@ export default function AdminCoupons() {
 
   const getBaseUrl = () => {
     return (
-      import.meta.env.VITE_API_URL || "https://thekissancity.com"
+      import.meta.env.VITE_API_URL || "http://localhost:5005"
     ).replace(/\/$/, "");
   };
 

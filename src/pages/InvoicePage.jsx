@@ -21,7 +21,7 @@ import "./InvoicePage.css";
 const LOGO_PATH = "/kissancitylogo.jpg";
 
 const API_BASE_URL = (
-  import.meta.env.VITE_API_URL || "https://thekissancity.com"
+  import.meta.env.VITE_API_URL || "http://localhost:5005"
 ).replace(/\/$/, "");
 
 export default function InvoicePage() {

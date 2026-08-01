@@ -11,6 +11,12 @@ const orderSchema = new mongoose.Schema({
     ref: 'User',
     required: false // user can be guest, though currently we have user context
   },
+  couponCode: {
+    type: String,
+    uppercase: true,
+    trim: true,
+    default: null
+  },
   shippingAddress: {
     name: String,
     phone: String,

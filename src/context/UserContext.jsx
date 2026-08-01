@@ -15,7 +15,7 @@ export function UserProvider({ children }) {
         return;
       }
       try {
-        const baseUrl = (import.meta.env.VITE_API_URL || 'https://thekissancity.com').replace(/\/$/, '');
+        const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5005').replace(/\/$/, '');
         const res = await fetch(`${baseUrl}/api/user/me`, {
           headers: { Authorization: `Bearer ${token}` }
         });

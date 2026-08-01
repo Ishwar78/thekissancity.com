@@ -45,6 +45,7 @@ router.post('/', authenticate, async (req, res) => {
     const newOrder = new Order({
       orderId: orderId || `KC${String(Date.now()).slice(-8)}`,
       user: userId,
+      couponCode: couponCode ? couponCode.trim().toUpperCase() : null,
       shippingAddress,
       items,
       paymentMethod,

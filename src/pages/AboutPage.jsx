@@ -24,7 +24,7 @@ import Footer from "../components/Footer";
 import "./AboutPage.css";
 
 const API_BASE_URL = (
-  import.meta.env.VITE_API_URL || "https://thekissancity.com"
+  import.meta.env.VITE_API_URL || "http://localhost:5005"
 ).replace(/\/$/, "");
 
 const HERO_CONTENT = {

@@ -48,7 +48,7 @@ export default function Navbar() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const baseUrl = (import.meta.env.VITE_API_URL || "https://thekissancity.com").replace(/\/$/, "");
+        const baseUrl = (import.meta.env.VITE_API_URL || "http://localhost:5005").replace(/\/$/, "");
         const res = await fetch(`${baseUrl}/api/categories`);
         const data = await res.json();
         if (data.success && data.categories) {
@@ -66,7 +66,7 @@ export default function Navbar() {
   useEffect(() => {
     const fetchTickers = async () => {
       try {
-        const baseUrl = (import.meta.env.VITE_API_URL || "https://thekissancity.com").replace(/\/$/, "");
+        const baseUrl = (import.meta.env.VITE_API_URL || "http://localhost:5005").replace(/\/$/, "");
         const res = await fetch(`${baseUrl}/api/tickers`);
         const data = await res.json();
         if (data.success && data.tickers && data.tickers.length > 0) {

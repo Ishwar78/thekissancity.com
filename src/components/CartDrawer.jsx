@@ -18,7 +18,7 @@ export default function CartDrawer({ open, onClose }) {
     const img = item.image || item.img || (item.imgs && item.imgs[0]);
     if (!img) return '/product_ghee.png';
     if (img.startsWith('http')) return img;
-    const baseUrl = (import.meta.env.VITE_API_URL || 'https://thekissancity.com').replace(/\/$/, '');
+    const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5005').replace(/\/$/, '');
     return `${baseUrl}${img.startsWith('/') ? '' : '/'}${img}`;
   };
 

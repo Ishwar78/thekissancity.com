@@ -47,7 +47,7 @@ export default function AdminSolarInquiries() {
   const [error, setError] = useState("");
 
   const baseUrl = (
-    import.meta.env.VITE_API_URL || "https://thekissancity.com"
+    import.meta.env.VITE_API_URL || "http://localhost:5005"
   ).replace(/\/$/, "");
 
   const fetchInquiries = async () => {

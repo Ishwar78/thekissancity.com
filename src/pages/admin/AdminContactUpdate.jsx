@@ -38,7 +38,7 @@ export default function AdminContactUpdate() {
   });
 
   const getBaseUrl = () => {
-    return (import.meta.env.VITE_API_URL || "https://thekissancity.com").replace(/\/$/, "");
+    return (import.meta.env.VITE_API_URL || "http://localhost:5005").replace(/\/$/, "");
   };
 
   const fetchContactInfo = async () => {

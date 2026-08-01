@@ -15,7 +15,7 @@ export function WishlistProvider({ children }) {
   });
 
   const getBaseUrl = () => {
-    return (import.meta.env.VITE_API_URL || "https://thekissancity.com").replace(/\/$/, "");
+    return (import.meta.env.VITE_API_URL || "http://localhost:5005").replace(/\/$/, "");
   };
 
   // Sync to localStorage whenever items change

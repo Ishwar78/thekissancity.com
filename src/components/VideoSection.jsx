@@ -15,7 +15,7 @@ function VideoCard({ video, isCenter, isSectionInView }) {
   const [muted, setMuted] = useState(true);
   const videoRef = useRef(null);
 
-  const API_URL = (import.meta.env.VITE_API_URL || 'https://thekissancity.com').replace(/\/$/, '');
+  const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5005').replace(/\/$/, '');
 
   const videoSrc = video.videoUrl?.startsWith('http')
     ? video.videoUrl

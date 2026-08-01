@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const BulkCoupon = require('../models/BulkCoupon');
 const Coupon = require('../models/Coupon');
+const Order = require('../models/Order');
 
 // Helper to generate random coupon code suffix
 const generateRandomSuffix = (length = 5) => {
@@ -21,6 +22,100 @@ router.get('/', async (req, res) => {
   } catch (error) {
     console.error('Error fetching bulk coupons:', error);
     res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// GET orders for a specific bulk coupon (Admin)
+router.get('/:id/orders', async (req, res) => {
+  try {
+    const coupon = await BulkCoupon.findById(req.params.id);
+    if (!coupon) {
+      return res.status(404).json({ success: false, message: 'Bulk coupon not found' });
+    }
+
+    const couponCode = coupon.code.trim().toUpperCase();
+
+    // 1. Direct match by couponCode stored in Order schema
+    const directCodeOrders = await Order.find({
+      couponCode: { $regex: new RegExp(`^${couponCode}$`, 'i') }
+    })
+      .populate('user', 'name email mobile phone')
+      .sort({ createdAt: -1 });
+
+    const matchedOrderIds = new Set(directCodeOrders.map(o => o._id.toString()));
+    const finalOrders = [...directCodeOrders];
+
+    // 2. Legacy fallback for orders placed before couponCode was added to Order schema
+    if (coupon.usedByUsers && coupon.usedByUsers.length > 0) {
+      for (const usage of coupon.usedByUsers) {
+        const uId = usage.userId;
+        const uIdent = usage.userIdentifier;
+        const usedAt = usage.usedAt ? new Date(usage.usedAt) : null;
+
+        let legacyQuery = {
+          discountAmount: { $gt: 0 },
+          $or: [
+            { couponCode: null },
+            { couponCode: "" },
+            { couponCode: { $exists: false } }
+          ]
+        };
+
+        const userOrConditions = [];
+        if (uId) userOrConditions.push({ user: uId });
+        if (uIdent) {
+          userOrConditions.push({ 'shippingAddress.email': uIdent });
+          userOrConditions.push({ 'shippingAddress.phone': uIdent });
+        }
+
+        if (userOrConditions.length > 0) {
+          legacyQuery.$and = [{ $or: userOrConditions }];
+          if (usedAt) {
+            const windowStart = new Date(usedAt.getTime() - 10 * 60 * 1000);
+            const windowEnd = new Date(usedAt.getTime() + 10 * 60 * 1000);
+            legacyQuery.createdAt = { $gte: windowStart, $lte: windowEnd };
+          }
+
+          const legacyOrders = await Order.find(legacyQuery).populate('user', 'name email mobile phone');
+          for (const legOrd of legacyOrders) {
+            if (!matchedOrderIds.has(legOrd._id.toString())) {
+              matchedOrderIds.add(legOrd._id.toString());
+              finalOrders.push(legOrd);
+            }
+          }
+        }
+      }
+    }
+
+    finalOrders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    const totalOrders = finalOrders.length;
+    const totalDiscountGiven = finalOrders.reduce((sum, ord) => sum + (Number(ord.discountAmount) || 0), 0);
+    const totalRevenueGenerated = finalOrders.reduce((sum, ord) => sum + (Number(ord.totalAmount) || 0), 0);
+
+    res.json({
+      success: true,
+      coupon: {
+        _id: coupon._id,
+        code: coupon.code,
+        discountType: coupon.discountType,
+        discountValue: coupon.discountValue,
+        minOrderAmount: coupon.minOrderAmount,
+        expiryDate: coupon.expiryDate,
+        perUserLimit: coupon.perUserLimit,
+        usedCount: coupon.usedByUsers ? coupon.usedByUsers.length : 0,
+        createdAt: coupon.createdAt
+      },
+      summary: {
+        totalOrders,
+        totalDiscountGiven,
+        totalRevenueGenerated
+      },
+      orders: finalOrders
+    });
+  } catch (error) {
+    console.error('Error fetching coupon orders:', error);
+    res.status(500).json({ success: false, message: 'Server error fetching coupon orders' });
   }
 });
 

@@ -115,7 +115,7 @@ export default function AdminPolicies() {
   const [showPreview, setShowPreview] = useState(true);
 
   const getBaseUrl = () =>
-    (import.meta.env.VITE_API_URL || "https://thekissancity.com").replace(
+    (import.meta.env.VITE_API_URL || "http://localhost:5005").replace(
       /\/$/,
       "",
     );

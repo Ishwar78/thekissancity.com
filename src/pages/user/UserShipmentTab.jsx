@@ -109,7 +109,7 @@ export default function UserShipmentTab() {
       setOrder(null);
 
       const baseUrl = (
-        import.meta.env.VITE_API_URL || "https://thekissancity.com"
+        import.meta.env.VITE_API_URL || "http://localhost:5005"
       ).replace(/\/$/, "");
 
       const response = await fetch(

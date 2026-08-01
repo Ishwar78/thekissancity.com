@@ -31,7 +31,7 @@ export default function DeleteAccountPage() {
     setError('');
 
     try {
-      const baseUrl = (import.meta.env.VITE_API_URL || 'https://thekissancity.com').replace(/\/$/, '');
+      const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5005').replace(/\/$/, '');
       const userId = user?.id || user?._id || 'me';
 
       const res = await fetch(`${baseUrl}/api/user/${userId}`, {
