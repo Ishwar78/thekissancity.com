@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   Calendar,
   Check,
-  CheckCircle,
   Copy,
   Download,
   Eye,
@@ -61,7 +61,7 @@ export default function AdminBulkCoupons() {
       return "http://localhost:5005";
     }
     return (
-      import.meta.env.VITE_API_URL || "https://thekissancity.com"
+      import.meta.env.VITE_API_URL || "http://localhost:5005"
     ).replace(/\/$/, "");
   };
 
@@ -87,6 +87,26 @@ export default function AdminBulkCoupons() {
   useEffect(() => {
     fetchBulkCoupons();
   }, []);
+
+  useEffect(() => {
+    if (!selectedCouponForOrders || typeof document === "undefined") return undefined;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const handleEscape = (event) => {
+      if (event.key === "Escape") {
+        setSelectedCouponForOrders(null);
+      }
+    };
+
+    window.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleEscape);
+    };
+  }, [selectedCouponForOrders]);
 
   const handleGenerate = async (e) => {
     e.preventDefault();
@@ -122,7 +142,7 @@ export default function AdminBulkCoupons() {
       } else {
         const text = await res.text();
         throw new Error(
-          `Server returned HTML/non-JSON response (${res.status}). Please check backend API server running on ${baseUrl}.`
+          `Server returned HTML/non-JSON response (${res.status}). ${text.slice(0, 120)}`
         );
       }
 
@@ -387,7 +407,7 @@ export default function AdminBulkCoupons() {
 
               <button
                 type="submit"
-                className="admin-bulk-btn-primary"
+                className="admin-bulk-submit-btn"
                 disabled={generating}
               >
                 {generating ? (
@@ -433,7 +453,7 @@ export default function AdminBulkCoupons() {
           </div>
 
           <div className="admin-bulk-card-body" style={{ padding: 0 }}>
-            <div style={{ padding: "16px 20px", borderBottom: "1px solid #f1f5f9" }}>
+            <div className="admin-bulk-search-box">
               <div className="admin-bulk-input-wrap">
                 <Search size={16} />
                 <input
@@ -520,17 +540,10 @@ export default function AdminBulkCoupons() {
                             </button>
                           </td>
                           <td>
-                            <div style={{ display: "flex", gap: "6px" }}>
+                            <div className="admin-bulk-row-actions">
                               <button
                                 type="button"
-                                style={{
-                                  border: "none",
-                                  background: "#e0f2fe",
-                                  color: "#0284c7",
-                                  padding: "6px",
-                                  borderRadius: "6px",
-                                  cursor: "pointer",
-                                }}
+                                className="admin-bulk-icon-btn admin-bulk-icon-btn--view"
                                 onClick={() => handleOpenOrdersModal(coupon)}
                                 title="View Coupon Orders"
                               >
@@ -539,13 +552,7 @@ export default function AdminBulkCoupons() {
 
                               <button
                                 type="button"
-                                style={{
-                                  border: "none",
-                                  background: "#f1f5f9",
-                                  padding: "6px",
-                                  borderRadius: "6px",
-                                  cursor: "pointer",
-                                }}
+                                className="admin-bulk-icon-btn admin-bulk-icon-btn--copy"
                                 onClick={() => handleCopyCode(coupon._id, coupon.code)}
                                 title="Copy Coupon Code"
                               >
@@ -558,14 +565,7 @@ export default function AdminBulkCoupons() {
 
                               <button
                                 type="button"
-                                style={{
-                                  border: "none",
-                                  background: "#fef2f2",
-                                  color: "#dc2626",
-                                  padding: "6px",
-                                  borderRadius: "6px",
-                                  cursor: "pointer",
-                                }}
+                                className="admin-bulk-icon-btn admin-bulk-icon-btn--delete"
                                 onClick={() => handleDelete(coupon._id)}
                                 title="Delete Coupon"
                               >
@@ -585,8 +585,10 @@ export default function AdminBulkCoupons() {
       </div>
 
       {/* ── COUPON ORDERS MODAL ── */}
-      {selectedCouponForOrders && (
-        <div className="admin-coupon-orders-backdrop" onClick={() => setSelectedCouponForOrders(null)}>
+      {selectedCouponForOrders &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div className="admin-coupon-orders-backdrop" onClick={() => setSelectedCouponForOrders(null)}>
           <div className="admin-coupon-orders-modal" onClick={(e) => e.stopPropagation()}>
             <div className="admin-coupon-orders-header">
               <div>
@@ -644,7 +646,7 @@ export default function AdminBulkCoupons() {
 
             {/* Controls Bar */}
             <div className="admin-coupon-orders-controls">
-              <div className="admin-bulk-input-wrap" style={{ maxWidth: "340px", flex: 1 }}>
+              <div className="admin-bulk-input-wrap admin-coupon-orders-search">
                 <Search size={16} />
                 <input
                   type="text"
@@ -772,8 +774,9 @@ export default function AdminBulkCoupons() {
               )}
             </div>
           </div>
-        </div>
-      )}
+        </div>,
+          document.body
+        )}
     </div>
   );
 }

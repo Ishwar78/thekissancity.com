@@ -1259,3 +1259,445 @@
     grid-template-columns: 1fr;
   }
 }
+/* =========================================================
+   FINAL LAYOUT + MODAL FIX OVERRIDES
+   Keep this section at the end of the file.
+========================================================= */
+
+/* The modal is rendered through React Portal, therefore it is no longer
+   inside .admin-bulk-coupons-page. Give it its own box-sizing reset. */
+.admin-coupon-orders-backdrop,
+.admin-coupon-orders-backdrop * {
+  box-sizing: border-box;
+}
+
+/* Prevent the right table card from forcing the full admin layout wider. */
+.admin-bulk-grid,
+.admin-bulk-card,
+.admin-bulk-card-header,
+.admin-bulk-card-body {
+  min-width: 0;
+}
+
+.admin-bulk-card:nth-child(2) {
+  width: 100%;
+}
+
+/* Apply the same premium input styling to fields that are not icon-wrapped. */
+.admin-bulk-form-group > input,
+.admin-bulk-form-group > select {
+  width: 100%;
+  height: 46px;
+  padding: 10px 13px;
+  border: 1px solid #cfe2d5;
+  border-radius: 11px;
+  outline: none;
+  background: #f8fcf9;
+  color: #163320;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 500;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.admin-bulk-form-group > select {
+  cursor: pointer;
+}
+
+.admin-bulk-form-group > input::placeholder {
+  color: #9aaba1;
+  font-weight: 400;
+}
+
+.admin-bulk-form-group > input:hover,
+.admin-bulk-form-group > select:hover {
+  border-color: #86c99d;
+  background: #ffffff;
+}
+
+.admin-bulk-form-group > input:focus,
+.admin-bulk-form-group > select:focus {
+  border-color: #22c55e;
+  background: #ffffff;
+  box-shadow:
+    0 0 0 4px rgba(34, 197, 94, 0.12),
+    0 4px 12px rgba(22, 101, 52, 0.05);
+}
+
+.admin-bulk-form-group > input[type="date"] {
+  color-scheme: light;
+}
+
+/* Keep both names supported in case an older JSX file is still cached. */
+.admin-bulk-btn-primary,
+.admin-bulk-submit-btn {
+  width: 100%;
+  min-height: 49px;
+  margin-top: 4px;
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border: none;
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #14532d 0%, #16a34a 52%, #059669 100%);
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 0.91rem;
+  font-weight: 800;
+  letter-spacing: 0.1px;
+  cursor: pointer;
+  box-shadow:
+    0 11px 22px rgba(22, 163, 74, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    filter 0.2s ease;
+}
+
+.admin-bulk-btn-primary:hover:not(:disabled),
+.admin-bulk-submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  filter: saturate(1.08);
+  box-shadow:
+    0 15px 28px rgba(22, 163, 74, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+.admin-bulk-btn-primary:disabled,
+.admin-bulk-submit-btn:disabled {
+  opacity: 0.62;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.admin-bulk-search-box {
+  padding: 15px 20px;
+  border-bottom: 1px solid #e8f3eb;
+  background: linear-gradient(180deg, #fbfefc 0%, #f8fcf9 100%);
+}
+
+.admin-bulk-search-box .admin-bulk-input-wrap {
+  max-width: 460px;
+}
+
+.admin-bulk-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 116px;
+}
+
+.admin-bulk-icon-btn--view {
+  border-color: #bae6fd;
+  background: #f0f9ff;
+  color: #0284c7;
+}
+
+.admin-bulk-icon-btn--view:hover {
+  border-color: #7dd3fc;
+  background: #e0f2fe;
+  box-shadow: 0 4px 10px rgba(2, 132, 199, 0.12);
+}
+
+/* The portal removes dependency on sidebar width, transformed admin wrappers,
+   overflow-hidden parents and left margins. */
+.admin-coupon-orders-backdrop {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  margin: 0 !important;
+  padding: clamp(12px, 2vw, 24px) !important;
+  z-index: 2147483000 !important;
+  display: grid !important;
+  place-items: center !important;
+  overflow: hidden !important;
+  background: rgba(6, 18, 12, 0.72) !important;
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+}
+
+.admin-coupon-orders-modal {
+  position: relative;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: auto !important;
+  transform: none;
+  width: min(1180px, calc(100vw - 48px));
+  max-width: 1180px;
+  min-width: 0;
+  max-height: min(90dvh, 860px);
+  margin: auto !important;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid rgba(134, 239, 172, 0.35);
+  border-radius: 22px;
+  background: #ffffff;
+  box-shadow:
+    0 34px 90px rgba(0, 0, 0, 0.34),
+    0 0 0 1px rgba(255, 255, 255, 0.08);
+  animation: adminCouponModalIn 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes adminCouponModalIn {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.admin-coupon-orders-header {
+  flex: 0 0 auto;
+  padding: 22px 26px;
+  background:
+    radial-gradient(circle at 88% 0%, rgba(134, 239, 172, 0.2), transparent 240px),
+    linear-gradient(135deg, #0f3d23 0%, #166534 55%, #15803d 100%);
+}
+
+.admin-coupon-orders-header > div:first-child {
+  min-width: 0;
+}
+
+.admin-coupon-orders-header h2 {
+  overflow-wrap: anywhere;
+}
+
+.admin-coupon-orders-close-btn {
+  flex: 0 0 38px;
+  width: 38px;
+  height: 38px;
+}
+
+.admin-coupon-orders-stats {
+  flex: 0 0 auto;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  padding: 16px 22px;
+  background: #f4faf6;
+  border-bottom: 1px solid #deeee3;
+}
+
+.admin-coupon-stat-card {
+  min-width: 0;
+  padding: 13px 15px;
+  border-color: #dbece0;
+  box-shadow: 0 5px 15px rgba(20, 83, 45, 0.05);
+}
+
+.admin-coupon-stat-card > div {
+  min-width: 0;
+}
+
+.admin-coupon-stat-card span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-coupon-orders-controls {
+  flex: 0 0 auto;
+  padding: 13px 22px;
+  background: #ffffff;
+}
+
+.admin-coupon-orders-search {
+  flex: 1 1 360px;
+  max-width: 430px;
+  min-width: 220px;
+}
+
+.admin-coupon-orders-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #9fceb0 #eff8f2;
+}
+
+.admin-coupon-orders-table-wrap {
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.admin-coupon-orders-table {
+  min-width: 1040px;
+}
+
+.admin-coupon-orders-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #edf8f0;
+  color: #365c43;
+  border-bottom-color: #d8eadc;
+}
+
+.admin-coupon-orders-table tbody tr:hover td {
+  background: #f9fdf9;
+}
+
+.admin-coupon-orders-table td {
+  color: #33473a;
+}
+
+.admin-coupon-orders-body .admin-bulk-empty {
+  min-height: 310px;
+}
+
+@media (max-width: 1200px) {
+  .admin-bulk-grid {
+    grid-template-columns: minmax(330px, 390px) minmax(0, 1fr);
+  }
+
+  .admin-coupon-orders-modal {
+    width: min(1080px, calc(100vw - 36px));
+  }
+}
+
+@media (max-width: 1024px) {
+  .admin-bulk-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-bulk-card-header {
+    align-items: center;
+    flex-direction: row;
+  }
+
+  .admin-bulk-table-actions {
+    width: auto;
+    justify-content: flex-end;
+  }
+
+  .admin-coupon-orders-stats {
+    grid-template-columns: repeat(3, minmax(190px, 1fr));
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-coupon-orders-backdrop {
+    padding: 10px !important;
+    align-items: end !important;
+  }
+
+  .admin-coupon-orders-modal {
+    width: 100%;
+    max-width: none;
+    max-height: calc(100dvh - 10px);
+    margin: 0 !important;
+    border-radius: 20px 20px 0 0;
+  }
+
+  .admin-coupon-orders-header {
+    padding: 17px 18px;
+  }
+
+  .admin-coupon-orders-header h2 {
+    font-size: 1.08rem;
+  }
+
+  .admin-coupon-orders-header p {
+    font-size: 0.78rem;
+    line-height: 1.45;
+  }
+
+  .admin-coupon-orders-stats {
+    display: flex;
+    gap: 10px;
+    padding: 12px 14px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+  }
+
+  .admin-coupon-stat-card {
+    min-width: 225px;
+    scroll-snap-align: start;
+  }
+
+  .admin-coupon-orders-controls {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px 14px;
+  }
+
+  .admin-coupon-orders-search {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    flex-basis: auto;
+  }
+
+  .admin-coupon-orders-controls .admin-bulk-btn-secondary {
+    width: 100%;
+  }
+
+  .admin-coupon-orders-table {
+    min-width: 940px;
+  }
+}
+
+@media (max-width: 700px) {
+  .admin-bulk-card-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-bulk-table-actions {
+    width: 100%;
+  }
+
+  .admin-bulk-search-box {
+    padding: 13px 15px;
+  }
+
+  .admin-bulk-search-box .admin-bulk-input-wrap {
+    max-width: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-coupon-orders-backdrop {
+    padding: 0 !important;
+  }
+
+  .admin-coupon-orders-modal {
+    max-height: 100dvh;
+    min-height: 100dvh;
+    border: none;
+    border-radius: 0;
+  }
+
+  .admin-coupon-modal-badge {
+    font-size: 0.64rem;
+  }
+
+  .admin-coupon-orders-header h2 {
+    font-size: 1rem;
+  }
+
+  .admin-coupon-orders-close-btn {
+    flex-basis: 34px;
+    width: 34px;
+    height: 34px;
+  }
+}
