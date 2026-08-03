@@ -203,7 +203,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     const checkNewOrders = async () => {
       try {
-        const baseUrl = (import.meta.env.VITE_API_URL || "http://localhost:5005").replace(/\/$/, "");
+        const baseUrl = (import.meta.env.VITE_API_URL || "https://thekissancity.com").replace(/\/$/, "");
         const res = await fetch(`${baseUrl}/api/orders`);
         const data = await res.json().catch(() => ({}));
         if (data.success && Array.isArray(data.orders)) {

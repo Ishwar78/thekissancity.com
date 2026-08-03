@@ -9,7 +9,7 @@ export default function AdminReviews() {
   const [error, setError] = useState('');
 
   const getBaseUrl = () => {
-    return (import.meta.env.VITE_API_URL || 'http://localhost:5005').replace(/\/$/, '');
+    return (import.meta.env.VITE_API_URL || 'https://thekissancity.com').replace(/\/$/, '');
   };
 
   const fetchReviews = async () => {

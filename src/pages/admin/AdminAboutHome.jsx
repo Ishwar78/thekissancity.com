@@ -24,7 +24,7 @@ import './AdminAboutHome.css';
 
 const API_BASE_URL = (
   import.meta.env.VITE_API_URL ||
-  'http://localhost:5005'
+  'https://thekissancity.com'
 ).replace(/\/$/, '');
 
 const defaultForm = {

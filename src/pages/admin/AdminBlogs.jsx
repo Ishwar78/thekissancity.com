@@ -92,7 +92,7 @@ export default function AdminBlogs() {
   const [deletingId, setDeletingId] = useState("");
   const fileInputRef = useRef(null);
 
-  const baseUrl = (import.meta.env.VITE_API_URL || "http://localhost:5005").replace(/\/$/, "");
+  const baseUrl = (import.meta.env.VITE_API_URL || "https://thekissancity.com").replace(/\/$/, "");
 
   useEffect(() => {
     fetchBlogs();

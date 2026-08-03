@@ -80,7 +80,7 @@ export default function CategoryPage() {
           setAllStoreProducts(databaseProducts || []);
         }
 
-        const baseUrl = (import.meta.env.VITE_API_URL || "http://localhost:5005").replace(/\/$/, "");
+        const baseUrl = (import.meta.env.VITE_API_URL || "https://thekissancity.com").replace(/\/$/, "");
         const catRes = await fetch(`${baseUrl}/api/categories`);
         const catData = await catRes.json();
         if (isMounted && catData.success && Array.isArray(catData.categories)) {

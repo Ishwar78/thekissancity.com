@@ -114,7 +114,7 @@ export default function UserOrdersTab({ onSelectTab }) {
       setError("");
 
       const baseUrl = (
-        import.meta.env.VITE_API_URL || "http://localhost:5005"
+        import.meta.env.VITE_API_URL || "https://thekissancity.com"
       ).replace(/\/$/, "");
 
       const authToken =
@@ -337,7 +337,7 @@ export default function UserOrdersTab({ onSelectTab }) {
     setReviewMsg({ type: "", text: "" });
 
     try {
-      const baseUrl = (import.meta.env.VITE_API_URL || "http://localhost:5005").replace(/\/$/, "");
+      const baseUrl = (import.meta.env.VITE_API_URL || "https://thekissancity.com").replace(/\/$/, "");
       const formData = new FormData();
       const productId = item.product || item.productId || item._id;
 

@@ -1,4 +1,4 @@
-const BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5005').replace(/\/$/, '');
+const BASE_URL = (import.meta.env.VITE_API_URL || 'https://thekissancity.com').replace(/\/$/, '');
 
 export const formatProduct = (prod) => {
   if (!prod) return null;

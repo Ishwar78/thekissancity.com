@@ -50,7 +50,7 @@ export default function UserSupportTab() {
   const [expandedTicket, setExpandedTicket] = useState(null);
 
   const getBaseUrl = () =>
-    (import.meta.env.VITE_API_URL || "http://localhost:5005").replace(
+    (import.meta.env.VITE_API_URL || "https://thekissancity.com").replace(
       /\/$/,
       ""
     );

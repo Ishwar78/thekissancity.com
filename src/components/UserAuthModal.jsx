@@ -51,7 +51,7 @@ export default function UserAuthModal({ open, onClose, defaultTab = 'login' }) {
 
     setLoading(true);
     try {
-      const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5005').replace(/\/$/, '');
+      const baseUrl = (import.meta.env.VITE_API_URL || 'https://thekissancity.com').replace(/\/$/, '');
       const res = await fetch(`${baseUrl}/api/user/send-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -90,7 +90,7 @@ export default function UserAuthModal({ open, onClose, defaultTab = 'login' }) {
     setLoading(true);
     setError('');
     try {
-      const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5005').replace(/\/$/, '');
+      const baseUrl = (import.meta.env.VITE_API_URL || 'https://thekissancity.com').replace(/\/$/, '');
       const res = await fetch(`${baseUrl}/api/user/verify-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

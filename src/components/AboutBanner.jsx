@@ -13,7 +13,7 @@ import './AboutBanner.css';
 
 const API_BASE_URL = (
   import.meta.env.VITE_API_URL ||
-  'http://localhost:5005'
+  'https://thekissancity.com'
 ).replace(/\/$/, '');
 
 const fallbackAbout = {
@@ -66,7 +66,7 @@ const fallbackAbout = {
   /uploads/image.png
   uploads/image.png
   image.png
-  http://localhost:5005/uploads/image.png
+  https://thekissancity.com/uploads/image.png
 */
 const makeImageUrl = (url) => {
   if (!url) {

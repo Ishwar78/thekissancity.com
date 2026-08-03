@@ -4,9 +4,9 @@ const getBaseUrl = () => {
     (window.location.hostname === 'localhost' ||
       window.location.hostname === '127.0.0.1')
   ) {
-    return 'http://localhost:5005';
+    return 'https://thekissancity.com';
   }
-  return (import.meta.env.VITE_API_URL || 'http://localhost:5005').replace(/\/$/, '');
+  return (import.meta.env.VITE_API_URL || 'https://thekissancity.com').replace(/\/$/, '');
 };
 
 export const getApiUrl = getBaseUrl;

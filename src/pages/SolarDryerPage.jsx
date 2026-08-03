@@ -31,7 +31,7 @@ export default function SolarDryerPage() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5005').replace(/\/$/, '');
+      const baseUrl = (import.meta.env.VITE_API_URL || 'https://thekissancity.com').replace(/\/$/, '');
       const res = await fetch(`${baseUrl}/api/solar-inquiries`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

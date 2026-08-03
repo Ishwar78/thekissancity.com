@@ -26,7 +26,7 @@ export default function AdminCategories() {
   const fileInputRef = useRef(null);
   const formCardRef = useRef(null);
 
-  const baseUrl = (import.meta.env.VITE_API_URL || "http://localhost:5005").replace(
+  const baseUrl = (import.meta.env.VITE_API_URL || "https://thekissancity.com").replace(
     /\/$/,
     ""
   );

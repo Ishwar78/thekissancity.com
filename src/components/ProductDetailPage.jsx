@@ -232,7 +232,7 @@ export default function ProductDetailPage() {
 
     const fetchProduct = async () => {
       try {
-        const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5005";
+        const baseUrl = import.meta.env.VITE_API_URL || "https://thekissancity.com";
         const response = await fetch(`${baseUrl}/api/products/${slug}`);
         const data = await response.json();
 
@@ -647,7 +647,7 @@ export default function ProductDetailPage() {
     }
 
     try {
-      const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5005";
+      const baseUrl = import.meta.env.VITE_API_URL || "https://thekissancity.com";
       
       const formData = new FormData();
       formData.append('productId', product.id || product._id);
@@ -1558,7 +1558,7 @@ export default function ProductDetailPage() {
                                     ? String(review.image)
                                     : `${(
                                         import.meta.env.VITE_API_URL ||
-                                        "http://localhost:5005"
+                                        "https://thekissancity.com"
                                       ).replace(/\/$/, "")}${
                                         String(review.image).startsWith("/")
                                           ? ""

@@ -40,7 +40,7 @@ export default function AdminTickets() {
 
   const getBaseUrl = () => {
     return (
-      import.meta.env.VITE_API_URL || "http://localhost:5005"
+      import.meta.env.VITE_API_URL || "https://thekissancity.com"
     ).replace(/\/$/, "");
   };
 

@@ -128,7 +128,7 @@ export default function Footer() {
   React.useEffect(() => {
     const fetchInfo = async () => {
       try {
-        const baseUrl = (import.meta.env.VITE_API_URL || "http://localhost:5005").replace(/\/$/, "");
+        const baseUrl = (import.meta.env.VITE_API_URL || "https://thekissancity.com").replace(/\/$/, "");
         const res = await fetch(`${baseUrl}/api/contact-info`);
         const data = await res.json().catch(() => ({}));
         if (data.success && data.contactInfo) {

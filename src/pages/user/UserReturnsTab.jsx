@@ -33,7 +33,7 @@ export default function UserReturnsTab() {
 
   const fetchReturns = async () => {
     try {
-      const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5005";
+      const baseUrl = import.meta.env.VITE_API_URL || "https://thekissancity.com";
       const res = await fetch(`${baseUrl}/api/returns/my-returns/${user.id || user._id}`);
       const data = await res.json();
       if (data.success) {
@@ -48,7 +48,7 @@ export default function UserReturnsTab() {
 
   const fetchDeliveredOrders = async () => {
     try {
-      const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5005";
+      const baseUrl = import.meta.env.VITE_API_URL || "https://thekissancity.com";
       const token = localStorage.getItem('kissanUserToken');
       const res = await fetch(`${baseUrl}/api/orders/myorders`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -93,7 +93,7 @@ export default function UserReturnsTab() {
 
     setSubmitting(true);
     try {
-      const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5005";
+      const baseUrl = import.meta.env.VITE_API_URL || "https://thekissancity.com";
       const formData = new FormData();
       formData.append('orderId', form.orderId);
       formData.append('userId', user.id || user._id);

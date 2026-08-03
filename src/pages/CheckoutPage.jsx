@@ -44,6 +44,7 @@ const STATES = [
   "Assam",
   "Bihar",
   "Chhattisgarh",
+  "Chandigarh",
   "Delhi",
   "Goa",
   "Gujarat",
@@ -359,6 +360,68 @@ export default function CheckoutPage() {
     setResendTimer(0);
   };
 
+  const [fetchingPincode, setFetchingPincode] = useState(false);
+
+  const fetchPincodeDetails = async (pincodeVal) => {
+    if (!/^\d{6}$/.test(pincodeVal)) return;
+
+    setFetchingPincode(true);
+    try {
+      const res = await fetch(`https://api.postalpincode.in/pincode/${pincodeVal}`);
+      const data = await res.json();
+
+      let district = "";
+      let stateName = "";
+
+      if (Array.isArray(data) && data[0]?.Status === "Success" && data[0]?.PostOffice?.length > 0) {
+        const postOffice = data[0].PostOffice[0];
+        district = postOffice.District || postOffice.Block || postOffice.Name || "";
+        stateName = postOffice.State || "";
+      } else {
+        // Fallback to Zippopotam API
+        const resZip = await fetch(`https://api.zippopotam.us/in/${pincodeVal}`);
+        if (resZip.ok) {
+          const zipData = await resZip.json();
+          if (zipData.places && zipData.places.length > 0) {
+            district = zipData.places[0]["place name"] || "";
+            stateName = zipData.places[0]["state"] || "";
+          }
+        }
+      }
+
+      if (district || stateName) {
+        let matchedState = STATES.find(
+          (s) => s.toLowerCase() === stateName.toLowerCase()
+        );
+
+        if (!matchedState && stateName) {
+          matchedState = STATES.find(
+            (s) =>
+              s.toLowerCase().includes(stateName.toLowerCase()) ||
+              stateName.toLowerCase().includes(s.toLowerCase())
+          ) || stateName;
+        }
+
+        setForm((current) => ({
+          ...current,
+          city: district || current.city,
+          state: matchedState || current.state,
+        }));
+
+        setErrors((current) => ({
+          ...current,
+          pincode: "",
+          city: "",
+          state: "",
+        }));
+      }
+    } catch (err) {
+      console.error("Error fetching pincode details:", err);
+    } finally {
+      setFetchingPincode(false);
+    }
+  };
+
   const handleInput = (event) => {
     const { name, value } = event.target;
     let nextValue = value;
@@ -368,6 +431,10 @@ export default function CheckoutPage() {
 
     setForm((current) => ({ ...current, [name]: nextValue }));
     setErrors((current) => ({ ...current, [name]: "" }));
+
+    if (name === "pincode" && nextValue.length === 6) {
+      fetchPincodeDetails(nextValue);
+    }
   };
 
   const validateAddress = (address) => {
@@ -1099,6 +1166,11 @@ export default function CheckoutPage() {
                         inputMode="numeric"
                         autoComplete="postal-code"
                       />
+                      {fetchingPincode && (
+                        <small style={{ color: "#16a34a", fontSize: "0.76rem", marginTop: "5px", display: "flex", alignItems: "center", gap: "5px", fontWeight: 600 }}>
+                          <LoaderCircle size={13} className="spin" /> Auto-detecting city & state...
+                        </small>
+                      )}
                     </CheckoutField>
 
                     <CheckoutField
